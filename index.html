@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Кошелёк</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --hint: #8e8e93;
+            --button: #007aff;
+            --button-text: #ffffff;
+            --secondary-bg: #f2f2f7;
+            --border: #e5e5ea;
+            --safe-top: 60px;
+        }
+        .dark-theme {
+            --bg: #1c1c1e;
+            --text: #ffffff;
+            --hint: #8e8e93;
+            --button: #0a84ff;
+            --button-text: #ffffff;
+            --secondary-bg: #2c2c2e;
+            --border: #3a3a3c;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 16px;
+            padding-top: var(--safe-top);
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--button); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 500;
+        }
+        .greeting { font-size: 14px; color: var(--hint); }
+        .name { font-size: 18px; font-weight: 600; }
+        .level-badge { color: black; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; display: none; font-weight: bold; }
+        .level-badge.pro { background: gold; display: inline-block; }
+        .level-badge.platinum { background: linear-gradient(135deg, #e0e0e0, #f5f5f5, #b0b0b0); color: #333; display: inline-block; }
+        .level-badge.trial { background: #34c759; color: white; display: inline-block; }
+        .balance-card {
+            background: linear-gradient(135deg, #007aff, #5856d6);
+            border-radius: 20px; padding: 24px; color: white;
+            margin-bottom: 12px; box-shadow: 0 8px 24px rgba(0,122,255,0.2);
+        }
+        .balance-label { font-size: 14px; opacity: 0.9; }
+        .balance-amount { font-size: 36px; font-weight: bold; margin-top: 6px; }
+        .daily-limit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 14px; opacity: 0.9; }
+        .timer-box {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+        .timer-box.active { display: block; }
+        .timer-box.trial { background: #34c759; color: white; }
+        .timer-box.pro { background: gold; color: black; }
+        .timer-box.platinum { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #333; }
+        .actions { display: flex; gap: 12px; margin-bottom: 8px; }
+        .btn {
+            flex: 1; padding: 14px 10px; border: none; border-radius: 14px;
+            font-size: 14px; font-weight: 500; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: var(--secondary-bg); color: var(--text);
+            transition: opacity 0.2s;
+        }
+        .btn:active { opacity: 0.7; }
+        .btn-primary { background: var(--button); color: var(--button-text); }
+        .btn-danger { background: transparent; color: #ff3b30; border: 1px solid #ff3b30; margin-top: 8px; width: 100%; }
+        .section-title { font-size: 18px; font-weight: 600; margin: 20px 0 12px; display: flex; justify-content: space-between; align-items: center; }
+        .section-link { font-size: 14px; color: var(--button); cursor: pointer; }
+        .transaction-list { list-style: none; }
+        .transaction-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 0; border-bottom: 1px solid var(--border);
+        }
+        .transaction-left { display: flex; align-items: center; gap: 14px; }
+        .transaction-emoji { font-size: 28px; width: 40px; text-align: center; }
+        .transaction-category { font-size: 16px; font-weight: 500; }
+        .transaction-date { font-size: 13px; color: var(--hint); }
+        .transaction-amount { font-weight: 600; font-size: 16px; }
+        .income { color: #34c759; } .expense { color: #ff3b30; }
+        .empty-state { text-align: center; color: var(--hint); padding: 40px 20px; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 999; align-items: flex-end; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--bg); width: 100%; max-width: 400px;
+            border-radius: 20px 20px 0 0; padding: 24px 20px 30px;
+            animation: slideUp 0.3s ease; color: var(--text);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; text-align: center; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { font-size: 14px; color: var(--hint); margin-bottom: 6px; }
+        .amount-input {
+            width: 100%; padding: 14px; font-size: 24px; font-weight: 500;
+            border: 2px solid var(--border); border-radius: 14px;
+            background: var(--secondary-bg); color: var(--text); text-align: center; outline: none;
+        }
+        .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .category-item {
+            padding: 12px 6px; border-radius: 12px; background: var(--secondary-bg);
+            text-align: center; font-size: 24px; cursor: pointer; transition: 0.2s;
+            border: 2px solid transparent; color: var(--text);
+        }
+        .category-item.selected { border-color: var(--button); background: rgba(0,122,255,0.1); }
+        .category-label { font-size: 12px; margin-top: 4px; }
+        .submit-btn {
+            width: 100%; padding: 16px; background: var(--button); color: var(--button-text);
+            border: none; border-radius: 14px; font-size: 18px; font-weight: 600;
+            margin-top: 20px; cursor: pointer;
+        }
+        .cancel-btn {
+            width: 100%; padding: 12px; background: transparent; color: var(--hint);
+            border: none; font-size: 16px; margin-top: 8px; cursor: pointer;
+        }
+
+        .theme-toggle { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-top: 1px solid var(--border); margin-top: 16px; }
+        .toggle-switch { position: relative; width: 52px; height: 28px; }
+        .toggle-switch input { display: none; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--secondary-bg); border-radius: 28px; transition: 0.2s; border: 1px solid var(--border);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 24px; width: 24px; left: 2px; bottom: 2px;
+            background: var(--button); border-radius: 50%; transition: 0.2s;
+        }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .chart-container { margin: 20px 0; display: flex; justify-content: center; }
+        canvas { max-width: 100%; }
+        .stats-row { display: flex; justify-content: space-around; margin: 12px 0 20px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 20px; font-weight: 600; }
+        .stat-label { font-size: 13px; color: var(--hint); }
+        .section-title-row { display: flex; justify-content: space-between; align-items: center; }
+        .buy-btn { font-weight: bold; border: none; border-radius: 12px; padding: 10px 16px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 6px; }
+        .buy-pro { background: gold; color: black; }
+        .buy-platinum { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #333; border: 1px solid #999; }
+        .trial-btn { background: #34c759; color: white; font-weight: bold; border: none; border-radius: 12px; padding: 10px 16px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 6px; }
+
+        .tabs { display: flex; gap: 4px; margin-bottom: 16px; overflow-x: auto; }
+        .tab {
+            padding: 8px 14px;
+            background: var(--secondary-bg);
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .tab.active { background: var(--button); color: var(--button-text); }
+        .achievement-card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .achievement-icon { font-size: 32px; }
+        .achievement-info { flex: 1; }
+        .achievement-name { font-weight: 600; }
+        .achievement-desc { font-size: 13px; color: var(--hint); }
+        .achievement-progress {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-top: 4px;
+        }
+        .achievement-progress-bar {
+            height: 100%;
+            border-radius: 2px;
+            background: gold;
+        }
+        .piggy-card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .piggy-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .piggy-icon { font-size: 36px; }
+        .piggy-name { font-weight: 600; }
+        .piggy-target { font-size: 13px; color: var(--hint); }
+        .piggy-progress {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+        }
+        .piggy-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: #34c759;
+        }
+        .challenge-card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .debt-card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .debt-amount { font-weight: 600; }
+        .debt-paid { color: #34c759; }
+        .debt-owed { color: #ff3b30; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <div class="user-info">
+                <div class="avatar" id="userAvatar">👤</div>
+                <div>
+                    <div class="greeting">Привет,</div>
+                    <div class="name" id="userName">...</div>
+                </div>
+                <span class="level-badge" id="levelBadge"></span>
+            </div>
+            <div style="font-size:24px; cursor:pointer;" id="openSettings">⚙️</div>
+        </div>
+
+        <div class="balance-card">
+            <div class="balance-label">Остаток на месяц</div>
+            <div class="balance-amount" id="balanceDisplay">0 ₽</div>
+            <div class="daily-limit-row">
+                <span id="limitText">Дневной лимит: не задан</span>
+                <span id="limitStatus" style="display:none;">⚠️ Превышен</span>
+            </div>
+        </div>
+
+        <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="openExpenseModal">➖ Расход</button>
+            <button class="btn" id="openIncomeModal">➕ Доход</button>
+        </div>
+        <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
+
+        <div style="margin:12px 0;" id="subscribeBlock">
+            <button class="trial-btn" id="trialBtn">🎁 Пробный PRO на 3 дня</button>
+            <button class="buy-btn buy-pro" id="buyProBtn">⭐ PRO — 99 ₽</button>
+            <button class="buy-btn buy-platinum" id="buyPlatinumBtn">💎 Platinum — 199 ₽</button>
+        </div>
+
+        <div class="section-title-row">
+            <div class="section-title">Операции</div>
+            <span class="section-link" id="viewAllBtn">Все</span>
+        </div>
+        <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
+
+        <!-- PRO/Platinum функции -->
+        <div id="proAnalytics" style="display:none;">
+            <div class="section-title">📊 Аналитика (PRO)</div>
+            <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
+            <div id="categoryStats" class="stats-row"></div>
+            <div style="margin-top:8px; background:var(--secondary-bg); border-radius:12px; padding:12px;">
+                <div>Средний расход в день: <span id="avgDaily">0 ₽</span></div>
+                <div>Топ категория: <span id="topCategory">-</span></div>
+            </div>
+        </div>
+
+        <div id="platinumFeatures" style="display:none;">
+            <!-- Табы для Platinum функций -->
+            <div class="tabs" style="margin-top:16px;">
+                <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
+                <button class="tab" data-tab="tab-achievements">🏆 Достижения</button>
+                <button class="tab" data-tab="tab-challenges">🎯 Челленджи</button>
+                <button class="tab" data-tab="tab-debts">💸 Долги</button>
+                <button class="tab" data-tab="tab-tools">🧮 Инструменты</button>
+            </div>
+
+            <!-- Копилки -->
+            <div id="tab-piggy" class="tab-content">
+                <div id="piggyList"></div>
+                <button class="btn btn-primary" id="addPiggyBtn" style="width:100%; margin-top:8px;">+ Создать копилку</button>
+            </div>
+
+            <!-- Достижения -->
+            <div id="tab-achievements" class="tab-content" style="display:none;">
+                <div id="achievementsList"></div>
+            </div>
+
+            <!-- Челленджи -->
+            <div id="tab-challenges" class="tab-content" style="display:none;">
+                <div id="challengesList"></div>
+                <button class="btn btn-primary" id="addChallengeBtn" style="width:100%; margin-top:8px;">+ Создать челлендж</button>
+            </div>
+
+            <!-- Долги -->
+            <div id="tab-debts" class="tab-content" style="display:none;">
+                <div id="debtsList"></div>
+                <button class="btn btn-primary" id="addDebtBtn" style="width:100%; margin-top:8px;">+ Добавить долг</button>
+            </div>
+
+            <!-- Инструменты -->
+            <div id="tab-tools" class="tab-content" style="display:none;">
+                <button class="btn btn-primary" id="exportCsvBtn" style="width:100%; margin-bottom:8px;">📥 Экспорт в CSV</button>
+                <button class="btn btn-primary" id="calcCreditBtn" style="width:100%; margin-bottom:8px;">🧮 Кредитный калькулятор</button>
+                <button class="btn btn-primary" id="yearReportBtn" style="width:100%; margin-bottom:8px;">📆 Итоги года</button>
+                <button class="btn btn-primary" id="forecastBtn" style="width:100%; margin-bottom:8px;">🔮 Прогноз расходов</button>
+                <div id="regularPaymentsList" style="margin-top:12px;"></div>
+                <button class="btn btn-primary" id="addRegularPaymentBtn" style="width:100%; margin-top:8px;">+ Регулярный платёж</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна (базовые) -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">Расход</div>
+            <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div>
+            <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div>
+            <button class="submit-btn" id="submitTransaction">Добавить</button>
+            <button class="cancel-btn" id="closeModal">Отмена</button>
+        </div>
+    </div>
+    <div class="modal" id="allTransactionsModal">
+        <div class="modal-content">
+            <div class="modal-title">Все операции</div>
+            <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul>
+            <button class="cancel-btn" id="closeAllModal">Закрыть</button>
+        </div>
+    </div>
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-title">Настройки</div>
+            <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div>
+            <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div>
+            <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div>
+            <button class="submit-btn" id="saveSettings">Сохранить</button>
+            <button class="cancel-btn" id="closeSettings">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модалка для копилки -->
+    <div class="modal" id="piggyModal">
+        <div class="modal-content">
+            <div class="modal-title">Новая копилка</div>
+            <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="piggyName" placeholder="На отпуск" style="font-size:18px;"></div>
+            <div class="form-group"><div class="form-label">Цель (₽)</div><input type="number" class="amount-input" id="piggyTarget" placeholder="50000" style="font-size:18px;"></div>
+            <div class="form-group"><div class="form-label">Эмодзи</div><input type="text" class="amount-input" id="piggyEmoji" placeholder="✈️" style="font-size:18px;" maxlength="2"></div>
+            <button class="submit-btn" id="savePiggyBtn">Создать</button>
+            <button class="cancel-btn" id="closePiggyModal">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модалка для челленджа -->
+    <div class="modal" id="challengeModal">
+        <div class="modal-content">
+            <div class="modal-title">Новый челлендж</div>
+            <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="challengeName" placeholder="Неделя без доставки" style="font-size:18px;"></div>
+            <div class="form-group"><div class="form-label">Цель (дней)</div><input type="number" class="amount-input" id="challengeDays" placeholder="7" style="font-size:18px;"></div>
+            <button class="submit-btn" id="saveChallengeBtn">Создать</button>
+            <button class="cancel-btn" id="closeChallengeModal">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модалка для долга -->
+    <div class="modal" id="debtModal">
+        <div class="modal-content">
+            <div class="modal-title">Добавить долг</div>
+            <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div>
+            <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div>
+            <div class="form-group">
+                <div class="form-label">Тип</div>
+                <select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);">
+                    <option value="owed">Мне должны</option>
+                    <option value="paid">Я должен</option>
+                </select>
+            </div>
+            <button class="submit-btn" id="saveDebtBtn">Добавить</button>
+            <button class="cancel-btn" id="closeDebtModal">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модалка для регулярного платежа -->
+    <div class="modal" id="regularModal">
+        <div class="modal-content">
+            <div class="modal-title">Регулярный платёж</div>
+            <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div>
+            <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div>
+            <div class="form-group">
+                <div class="form-label">Период</div>
+                <select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);">
+                    <option value="weekly">Раз в неделю</option>
+                    <option value="monthly">Раз в месяц</option>
+                </select>
+            </div>
+            <button class="submit-btn" id="saveRegularBtn">Добавить</button>
+            <button class="cancel-btn" id="closeRegularModal">Отмена</button>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
+        document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
+
+        // ========== КЛЮЧИ ==========
+        const KEY_BALANCE = 'wallet_balance';
+        const KEY_TRANSACTIONS = 'wallet_transactions';
+        const KEY_LIMIT = 'wallet_daily_limit';
+        const KEY_DARK = 'wallet_dark';
+        const KEY_SUB_LEVEL = 'wallet_sub_level';
+        const KEY_SUB_EXPIRY = 'wallet_sub_expiry';
+        const KEY_TRIAL_USED = 'wallet_trial_used';
+        const KEY_PIGGY = 'wallet_piggy';
+        const KEY_ACHIEVEMENTS = 'wallet_achievements';
+        const KEY_CHALLENGES = 'wallet_challenges';
+        const KEY_DEBTS = 'wallet_debts';
+        const KEY_REGULAR = 'wallet_regular';
+
+        let balance = 0, transactions = [], dailyLimit = 0, isDark = false;
+        let subLevel = 'free', subExpiry = null, trialUsed = false;
+        let currentType = 'expense', selectedCategory = null;
+        let timerInterval = null;
+        let piggyBanks = [], achievements = [], challenges = [], debts = [], regularPayments = [];
+        let activeTab = 'tab-piggy';
+
+        const baseExpenseCats = [
+            {emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},
+            {emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}
+        ];
+        const proExpenseCats = [
+            {emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},
+            {emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}
+        ];
+        const platinumExpenseCats = [
+            {emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}
+        ];
+        const incomeCats = [
+            {emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},
+            {emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}
+        ];
+
+        function getExpenseCategories() {
+            if (subLevel === 'platinum') return [...baseExpenseCats, ...proExpenseCats, ...platinumExpenseCats];
+            if (subLevel === 'pro' || subLevel === 'trial') return [...baseExpenseCats, ...proExpenseCats];
+            return baseExpenseCats;
+        }
+
+        // CloudStorage
+        function cloudGet(key) { return new Promise(resolve => tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : val))); }
+        function cloudSet(key, value) { return new Promise(resolve => tg.CloudStorage.setItem(key, String(value), (err, ok) => resolve(ok))); }
+
+        // ========== ЗАГРУЗКА ==========
+        async function loadFinanceData() {
+            const [b, tx, limit, dark] = await Promise.all([
+                cloudGet(KEY_BALANCE), cloudGet(KEY_TRANSACTIONS),
+                cloudGet(KEY_LIMIT), cloudGet(KEY_DARK)
+            ]);
+            balance = b ? Number(b) : 0;
+            transactions = tx ? JSON.parse(tx) : [];
+            dailyLimit = limit ? Number(limit) : 0;
+            isDark = dark === 'true';
+            document.getElementById('dailyLimitInput').value = dailyLimit || '';
+            applyTheme();
+        }
+
+        async function loadSubscriptionData() {
+            const [level, expiry, trial] = await Promise.all([
+                cloudGet(KEY_SUB_LEVEL), cloudGet(KEY_SUB_EXPIRY), cloudGet(KEY_TRIAL_USED)
+            ]);
+            trialUsed = trial === 'true';
+            if (level && expiry) {
+                const exp = Number(expiry);
+                if (Date.now() < exp) { subLevel = level; subExpiry = exp; }
+                else { subLevel = 'free'; subExpiry = null; }
+            }
+        }
+
+        async function loadPlatinumData() {
+            const [piggy, ach, chal, debt, reg] = await Promise.all([
+                cloudGet(KEY_PIGGY), cloudGet(KEY_ACHIEVEMENTS),
+                cloudGet(KEY_CHALLENGES), cloudGet(KEY_DEBTS), cloudGet(KEY_REGULAR)
+            ]);
+            piggyBanks = piggy ? JSON.parse(piggy) : [];
+            achievements = ach ? JSON.parse(ach) : [];
+            challenges = chal ? JSON.parse(chal) : [];
+            debts = debt ? JSON.parse(debt) : [];
+            regularPayments = reg ? JSON.parse(reg) : [];
+            checkAchievements();
+        }
+
+        async function loadAllData() {
+            await Promise.all([loadFinanceData(), loadSubscriptionData(), loadPlatinumData()]);
+            updateUI();
+            renderAll();
+            if (subLevel !== 'free') updateTimer();
+            if (subLevel === 'platinum') renderPlatinumTabs();
+        }
+
+        // ========== СОХРАНЕНИЕ ==========
+        async function saveFinanceData() {
+            await Promise.all([
+                cloudSet(KEY_BALANCE, balance), cloudSet(KEY_TRANSACTIONS, JSON.stringify(transactions)),
+                cloudSet(KEY_LIMIT, dailyLimit), cloudSet(KEY_DARK, isDark)
+            ]);
+        }
+
+        async function saveSubscriptionData() {
+            await Promise.all([
+                cloudSet(KEY_SUB_LEVEL, subLevel), cloudSet(KEY_SUB_EXPIRY, subExpiry || 0),
+                cloudSet(KEY_TRIAL_USED, trialUsed)
+            ]);
+        }
+
+        async function savePlatinumData() {
+            await Promise.all([
+                cloudSet(KEY_PIGGY, JSON.stringify(piggyBanks)),
+                cloudSet(KEY_ACHIEVEMENTS, JSON.stringify(achievements)),
+                cloudSet(KEY_CHALLENGES, JSON.stringify(challenges)),
+                cloudSet(KEY_DEBTS, JSON.stringify(debts)),
+                cloudSet(KEY_REGULAR, JSON.stringify(regularPayments))
+            ]);
+        }
+
+        // ========== ДОСТИЖЕНИЯ ==========
+        function checkAchievements() {
+            const newAch = [...achievements];
+            
+            // Ачивка: 10 транзакций
+            if (!newAch.find(a => a.id === 'tx10') && transactions.length >= 10) {
+                newAch.push({id:'tx10', name:'Бухгалтер', desc:'Добавлено 10 операций', icon:'📊', date:Date.now()});
+                tg.showAlert('🏆 Получено достижение: Бухгалтер!');
+            }
+            // Ачивка: баланс > 10000
+            if (!newAch.find(a => a.id === 'bal10k') && balance >= 10000) {
+                newAch.push({id:'bal10k', name:'Капиталист', desc:'Баланс превысил 10 000 ₽', icon:'💰', date:Date.now()});
+                tg.showAlert('🏆 Получено достижение: Капиталист!');
+            }
+            // Ачивка: 5 дней подряд с транзакциями
+            const days = [...new Set(transactions.map(tx => tx.date))].sort().reverse();
+            if (!newAch.find(a => a.id === 'streak5') && days.length >= 5) {
+                newAch.push({id:'streak5', name:'Регулярный', desc:'5 дней подряд с операциями', icon:'🔥', date:Date.now()});
+                tg.showAlert('🏆 Получено достижение: Регулярный!');
+            }
+            
+            if (JSON.stringify(newAch) !== JSON.stringify(achievements)) {
+                achievements = newAch;
+                savePlatinumData();
+                if (activeTab === 'tab-achievements') renderAchievements();
+            }
+        }
+
+        function renderAchievements() {
+            const container = document.getElementById('achievementsList');
+            container.innerHTML = achievements.length ? '' : '<p style="color:var(--hint);">Пока нет достижений. Продолжайте пользоваться кошельком!</p>';
+            achievements.forEach(a => {
+                container.innerHTML += `
+                    <div class="achievement-card">
+                        <div class="achievement-icon">${a.icon}</div>
+                        <div class="achievement-info">
+                            <div class="achievement-name">${a.name}</div>
+                            <div class="achievement-desc">${a.desc}</div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // ========== КОПИЛКИ ==========
+        function renderPiggyBanks() {
+            const container = document.getElementById('piggyList');
+            container.innerHTML = piggyBanks.length ? '' : '<p style="color:var(--hint);">Нет копилок. Создайте первую!</p>';
+            piggyBanks.forEach((p, i) => {
+                const pct = Math.min(100, Math.round((p.saved / p.target) * 100));
+                container.innerHTML += `
+                    <div class="piggy-card">
+                        <div class="piggy-header">
+                            <span class="piggy-icon">${p.emoji}</span>
+                            <div>
+                                <div class="piggy-name">${p.name}</div>
+                                <div class="piggy-target">${p.saved} / ${p.target} ₽ (${pct}%)</div>
+                            </div>
+                        </div>
+                        <div class="piggy-progress"><div class="piggy-bar" style="width:${pct}%"></div></div>
+                        <div style="display:flex; gap:8px; margin-top:8px;">
+                            <input type="number" id="piggyAdd_${i}" placeholder="Сумма" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--secondary-bg); color:var(--text);">
+                            <button class="btn btn-primary" onclick="addToPiggy(${i})" style="flex:0;">+</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        window.addToPiggy = async function(index) {
+            const input = document.getElementById('piggyAdd_' + index);
+            const amount = parseFloat(input.value);
+            if (!amount || amount <= 0) return;
+            if (balance < amount) return tg.showAlert('Недостаточно средств');
+            piggyBanks[index].saved += amount;
+            balance -= amount;
+            transactions.unshift({type:'expense', category:'🐷 Копилка', emoji:piggyBanks[index].emoji, amount, date:new Date().toISOString().split('T')[0]});
+            await saveFinanceData();
+            await savePlatinumData();
+            renderAll();
+            renderPiggyBanks();
+            input.value = '';
+        };
+
+        // ========== ЧЕЛЛЕНДЖИ ==========
+        function renderChallenges() {
+            const container = document.getElementById('challengesList');
+            container.innerHTML = challenges.length ? '' : '<p style="color:var(--hint);">Нет активных челленджей</p>';
+            challenges.forEach((c, i) => {
+                const daysLeft = c.days - c.progress;
+                container.innerHTML += `
+                    <div class="challenge-card">
+                        <div>🎯 <b>${c.name}</b></div>
+                        <div style="font-size:13px; color:var(--hint);">День ${c.progress}/${c.days} ${daysLeft > 0 ? '(' + daysLeft + ' осталось)' : '✅ Завершён!'}</div>
+                        <div class="achievement-progress" style="margin-top:6px;"><div class="achievement-progress-bar" style="width:${(c.progress/c.days)*100}%"></div></div>
+                        ${daysLeft > 0 ? `<button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="progressChallenge(${i})">Отметить день</button>` : ''}
+                    </div>`;
+            });
+        }
+
+        window.progressChallenge = async function(index) {
+            if (challenges[index].progress < challenges[index].days) {
+                challenges[index].progress++;
+                await savePlatinumData();
+                renderChallenges();
+            }
+        };
+
+        // ========== ДОЛГИ ==========
+        function renderDebts() {
+            const container = document.getElementById('debtsList');
+            container.innerHTML = debts.length ? '' : '<p style="color:var(--hint);">Нет долгов</p>';
+            debts.forEach((d, i) => {
+                container.innerHTML += `
+                    <div class="debt-card">
+                        <div>
+                            <div>${d.person}</div>
+                            <div class="debt-amount ${d.type==='owed'?'debt-owed':'debt-paid'}">${d.type==='owed'?'+':'-'}${d.amount} ₽</div>
+                        </div>
+                        <button class="btn btn-danger" style="flex:0; padding:8px 12px; font-size:12px;" onclick="deleteDebt(${i})">✕</button>
+                    </div>`;
+            });
+        }
+
+        window.deleteDebt = async function(index) {
+            debts.splice(index, 1);
+            await savePlatinumData();
+            renderDebts();
+        };
+
+        // ========== РЕГУЛЯРНЫЕ ПЛАТЕЖИ ==========
+        function renderRegularPayments() {
+            const container = document.getElementById('regularPaymentsList');
+            container.innerHTML = regularPayments.length ? '<div class="section-title">Регулярные платежи</div>' : '';
+            regularPayments.forEach((p, i) => {
+                container.innerHTML += `
+                    <div style="background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between;">
+                        <div>
+                            <div>${p.name}</div>
+                            <div style="font-size:13px; color:var(--hint);">${p.amount} ₽ • ${p.period==='weekly'?'Раз в неделю':'Раз в месяц'}</div>
+                        </div>
+                        <button class="btn btn-danger" style="flex:0; padding:6px 10px; font-size:12px;" onclick="deleteRegular(${i})">✕</button>
+                    </div>`;
+            });
+        }
+
+        window.deleteRegular = async function(index) {
+            regularPayments.splice(index, 1);
+            await savePlatinumData();
+            renderRegularPayments();
+        };
+
+        // ========== ИНСТРУМЕНТЫ ==========
+        function showCreditCalculator() {
+            const amount = prompt('Сумма кредита (₽):', '100000');
+            const rate = prompt('Процентная ставка (%):', '15');
+            const months = prompt('Срок (месяцев):', '12');
+            if (amount && rate && months) {
+                const P = parseFloat(amount);
+                const r = parseFloat(rate) / 100 / 12;
+                const n = parseInt(months);
+                const payment = (P * r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
+                const total = payment * n;
+                tg.showAlert(`Ежемесячный платёж: ${Math.round(payment)} ₽\nПереплата: ${Math.round(total - P)} ₽\nОбщая сумма: ${Math.round(total)} ₽`);
+            }
+        }
+
+        function showYearReport() {
+            const now = new Date();
+            const yearAgo = new Date(now.getFullYear()-1, now.getMonth(), now.getDate()).toISOString().split('T')[0];
+            const yearTx = transactions.filter(tx => tx.date >= yearAgo);
+            const income = yearTx.filter(tx => tx.type==='income').reduce((s,tx)=>s+tx.amount,0);
+            const expense = yearTx.filter(tx => tx.type==='expense').reduce((s,tx)=>s+tx.amount,0);
+            tg.showAlert(`📆 Итоги года\n\nДоходы: +${income.toLocaleString()} ₽\nРасходы: -${expense.toLocaleString()} ₽\nБаланс: ${(income-expense).toLocaleString()} ₽`);
+        }
+
+        function showForecast() {
+            if (transactions.length < 5) return tg.showAlert('Нужно больше операций для прогноза');
+            const expenses = transactions.filter(tx => tx.type==='expense');
+            const avg = expenses.reduce((s,tx)=>s+tx.amount,0) / expenses.length;
+            const days = Math.max(1, Math.ceil((Date.now() - new Date(expenses[expenses.length-1].date).getTime()) / 86400000));
+            const dailyAvg = expenses.reduce((s,tx)=>s+tx.amount,0) / days;
+            const forecast = Math.round(dailyAvg * 30);
+            tg.showAlert(`🔮 Прогноз на следующий месяц\n\nПримерно: -${forecast.toLocaleString()} ₽\nСредний чек: ${Math.round(avg)} ₽\nВ день: ${Math.round(dailyAvg)} ₽`);
+        }
+
+        // ========== UI ==========
+        function applyTheme() {
+            if (isDark) document.body.classList.add('dark-theme');
+            else document.body.classList.remove('dark-theme');
+            document.getElementById('themeToggle').checked = isDark;
+        }
+
+        async function setSubscription(level, durationMs) {
+            subLevel = level;
+            subExpiry = Date.now() + durationMs;
+            if (level === 'trial') trialUsed = true;
+            await saveSubscriptionData();
+            updateUI();
+            renderAll();
+            updateTimer();
+            if (subLevel === 'platinum') renderPlatinumTabs();
+        }
+
+        function formatTime(ms) {
+            if (ms <= 0) return 'Истекла';
+            const d = Math.floor(ms / 86400000);
+            const h = Math.floor((ms % 86400000) / 3600000);
+            const m = Math.floor((ms % 3600000) / 60000);
+            const s = Math.floor((ms % 60000) / 1000);
+            let r = '';
+            if (d > 0) r += d + 'д ';
+            if (h > 0 || d > 0) r += h + 'ч ';
+            r += m + 'м ' + s + 'с';
+            return r;
+        }
+
+        function updateTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            const box = document.getElementById('timerBox');
+            const label = document.getElementById('timerLabel');
+            const value = document.getElementById('timerValue');
+            box.className = 'timer-box';
+            if (subLevel === 'trial') { box.classList.add('trial', 'active'); label.textContent = 'Пробный период'; }
+            else if (subLevel === 'pro') { box.classList.add('pro', 'active'); label.textContent = 'PRO подписка'; }
+            else if (subLevel === 'platinum') { box.classList.add('platinum', 'active'); label.textContent = 'Platinum подписка'; }
+            else { box.classList.remove('active'); return; }
+            const tick = () => {
+                const rem = subExpiry - Date.now();
+                if (rem <= 0) {
+                    clearInterval(timerInterval);
+                    subLevel = 'free'; subExpiry = null;
+                    saveSubscriptionData();
+                    updateUI(); renderAll();
+                    tg.showAlert('⏰ Подписка истекла');
+                    return;
+                }
+                value.textContent = formatTime(rem);
+            };
+            tick();
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        function updateUI() {
+            const badge = document.getElementById('levelBadge');
+            const pro = document.getElementById('proAnalytics');
+            const plat = document.getElementById('platinumFeatures');
+            const sub = document.getElementById('subscribeBlock');
+            const trialBtn = document.getElementById('trialBtn');
+            badge.className = 'level-badge';
+            if (subLevel === 'pro') { badge.classList.add('pro'); badge.textContent = 'PRO'; }
+            else if (subLevel === 'platinum') { badge.classList.add('platinum'); badge.textContent = 'PLATINUM'; }
+            else if (subLevel === 'trial') { badge.classList.add('trial'); badge.textContent = 'ПРОБНЫЙ'; }
+            else badge.style.display = 'none';
+            pro.style.display = (subLevel !== 'free') ? 'block' : 'none';
+            plat.style.display = (subLevel === 'platinum') ? 'block' : 'none';
+            sub.style.display = (subLevel === 'free') ? 'block' : 'none';
+            if (subLevel === 'free') trialBtn.style.display = trialUsed ? 'none' : 'block';
+            const info = document.getElementById('subscriptionInfo');
+            if (subLevel === 'free') info.innerHTML = '❌ Нет подписки';
+            else if (subLevel === 'trial') info.innerHTML = '🟢 Пробный PRO (3 дня)';
+            else if (subLevel === 'pro') info.innerHTML = '⭐ PRO активно';
+            else if (subLevel === 'platinum') info.innerHTML = '💎 Platinum активно';
+        }
+
+        function renderPlatinumTabs() {
+            renderPiggyBanks();
+            renderAchievements();
+            renderChallenges();
+            renderDebts();
+            renderRegularPayments();
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.getElementById(activeTab).style.display = 'block';
+        }
+
+        // Переключение табов
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                activeTab = tab.dataset.tab;
+                renderPlatinumTabs();
+            });
+        });
+
+        function renderAll() {
+            document.getElementById('balanceDisplay').textContent = balance.toLocaleString() + ' ₽';
+            const today = new Date().toISOString().split('T')[0];
+            const todayExp = transactions.filter(tx => tx.type==='expense' && tx.date===today).reduce((s,tx)=>s+tx.amount,0);
+            document.getElementById('limitText').textContent = dailyLimit ? `Дневной лимит: ${dailyLimit} ₽` : 'Дневной лимит: не задан';
+            document.getElementById('limitStatus').style.display = (dailyLimit && todayExp > dailyLimit) ? 'inline' : 'none';
+            renderTransactions('transactionList', transactions.slice(0,5));
+            renderTransactions('allTransactionList', transactions);
+            if (subLevel !== 'free') {
+                drawExpenseChart();
+                updateCategoryStats();
+                updateAdvancedStats();
+            }
+            if (subLevel === 'platinum') renderPlatinumTabs();
+        }
+
+        function renderTransactions(listId, list) {
+            const ul = document.getElementById(listId);
+            if (!ul) return;
+            ul.innerHTML = '';
+            if (list.length === 0) { ul.innerHTML = '<li class="empty-state">Нет записей</li>'; return; }
+            list.forEach(tx => {
+                const li = document.createElement('li');
+                li.className = 'transaction-item';
+                li.innerHTML = `<div class="transaction-left"><span class="transaction-emoji">${tx.emoji}</span><div><div class="transaction-category">${tx.category}</div><div class="transaction-date">${tx.date}</div></div></div><span class="transaction-amount ${tx.type==='income'?'income':'expense'}">${tx.type==='income'?'+':'-'}${tx.amount} ₽</span>`;
+                ul.appendChild(li);
+            });
+        }
+
+        function drawExpenseChart() {
+            const canvas = document.getElementById('expenseChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const expenseTx = transactions.filter(tx => tx.type==='expense');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            if (expenseTx.length===0) {
+                ctx.font='14px sans-serif';
+                ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--hint');
+                ctx.textAlign='center';
+                ctx.fillText('Нет расходов',canvas.width/2,canvas.height/2);
+                return;
+            }
+            const totals = {};
+            expenseTx.forEach(tx => {
+                if (!totals[tx.category]) totals[tx.category] = {emoji:tx.emoji, total:0};
+                totals[tx.category].total += tx.amount;
+            });
+            const totalExp = Object.values(totals).reduce((s,c)=>s+c.total,0);
+            const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FF8C00','#A9A9A9'];
+            let startAngle = -Math.PI/2, ci = 0;
+            const cx = canvas.width/2, cy = canvas.height/2, r = Math.min(cx,cy)-10;
+            Object.values(totals).forEach(cat => {
+                const angle = (cat.total / totalExp) * 2 * Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, startAngle, startAngle+angle);
+                ctx.closePath();
+                ctx.fillStyle = colors[ci++ % colors.length];
+                ctx.fill();
+                startAngle += angle;
+            });
+        }
+
+        function updateCategoryStats() {
+            const container = document.getElementById('categoryStats');
+            if (!container) return;
+            const expenseTx = transactions.filter(tx => tx.type==='expense');
+            if (expenseTx.length===0) { container.innerHTML=''; return; }
+            const totals = {};
+            expenseTx.forEach(tx => {
+                if (!totals[tx.category]) totals[tx.category] = {emoji:tx.emoji, total:0};
+                totals[tx.category].total += tx.amount;
+            });
+            const total = Object.values(totals).reduce((s,c)=>s+c.total,0);
+            container.innerHTML = Object.entries(totals).map(([cat,data]) => {
+                const pct = Math.round((data.total/total)*100);
+                return `<div class="stat-item"><div class="stat-value">${data.emoji}</div><div class="stat-label">${pct}%</div></div>`;
+            }).join('');
+        }
+
+        function updateAdvancedStats() {
+            const expenseTx = transactions.filter(tx => tx.type==='expense');
+            if (expenseTx.length===0) {
+                document.getElementById('avgDaily').textContent = '0 ₽';
+                document.getElementById('topCategory').textContent = '-';
+                return;
+            }
+            const days = Math.max(1, Math.ceil((Date.now() - new Date(expenseTx[expenseTx.length-1].date).getTime()) / 86400000));
+            const avg = expenseTx.reduce((s,tx)=>s+tx.amount,0) / days;
+            document.getElementById('avgDaily').textContent = Math.round(avg) + ' ₽';
+            const catMap = {};
+            expenseTx.forEach(tx => catMap[tx.category] = (catMap[tx.category]||0)+tx.amount);
+            const top = Object.entries(catMap).sort((a,b)=>b[1]-a[1])[0];
+            document.getElementById('topCategory').textContent = top ? `${top[0]} (${top[1]} ₽)` : '-';
+        }
+
+        // ========== ОБРАБОТЧИКИ ==========
+        document.getElementById('trialBtn').addEventListener('click', async () => {
+            if (trialUsed) return tg.showAlert('Уже использован');
+            await setSubscription('trial', 3*24*60*60*1000);
+            tg.showAlert('✅ Пробный PRO на 3 дня!');
+        });
+        document.getElementById('buyProBtn').addEventListener('click', async () => {
+            await setSubscription('pro', 30*24*60*60*1000);
+            tg.showAlert('✅ PRO на 30 дней!');
+        });
+        document.getElementById('buyPlatinumBtn').addEventListener('click', async () => {
+            await setSubscription('platinum', 30*24*60*60*1000);
+            tg.showAlert('✅ Platinum на 30 дней!');
+        });
+
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            let csv = 'Тип,Категория,Сумма,Дата\n';
+            transactions.forEach(tx => csv += `${tx.type},${tx.category},${tx.amount},${tx.date}\n`);
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            tg.openLink(url);
+        });
+
+        document.getElementById('calcCreditBtn').addEventListener('click', showCreditCalculator);
+        document.getElementById('yearReportBtn').addEventListener('click', showYearReport);
+        document.getElementById('forecastBtn').addEventListener('click', showForecast);
+
+        document.getElementById('resetDataBtn').addEventListener('click', () => {
+            tg.showPopup({
+                title: 'Сброс',
+                message: 'Что сбросить?',
+                buttons: [
+                    {type: 'default', text: 'Только финансы', id: 'fin'},
+                    {type: 'destructive', text: 'Всё включая подписку', id: 'all'},
+                    {type: 'cancel', text: 'Отмена'}
+                ]
+            }, async (btnId) => {
+                if (btnId === 'fin') {
+                    balance = 0; transactions = []; dailyLimit = 0;
+                    await saveFinanceData();
+                    renderAll();
+                    tg.showAlert('Финансы сброшены. Подписка сохранена.');
+                } else if (btnId === 'all') {
+                    balance = 0; transactions = []; dailyLimit = 0;
+                    subLevel = 'free'; subExpiry = null; trialUsed = false;
+                    piggyBanks = []; achievements = []; challenges = []; debts = []; regularPayments = [];
+                    await Promise.all([saveFinanceData(), saveSubscriptionData(), savePlatinumData()]);
+                    updateUI(); renderAll();
+                    tg.showAlert('Всё сброшено.');
+                }
+            });
+        });
+
+        document.getElementById('openExpenseModal').addEventListener('click', ()=>openAddModal('expense'));
+        document.getElementById('openIncomeModal').addEventListener('click', ()=>openAddModal('income'));
+        document.getElementById('closeModal').addEventListener('click', ()=>document.getElementById('addModal').classList.remove('active'));
+        document.getElementById('submitTransaction').addEventListener('click', async ()=>{
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            if (!amount || amount<=0) return tg.showAlert('Введите сумму');
+            if (!selectedCategory) return tg.showAlert('Выберите категорию');
+            const tx = {type: currentType, category: selectedCategory.name, emoji: selectedCategory.emoji, amount, date: new Date().toISOString().split('T')[0]};
+            transactions.unshift(tx);
+            balance += currentType==='income' ? amount : -amount;
+            await saveFinanceData();
+            checkAchievements();
+            renderAll();
+            document.getElementById('addModal').classList.remove('active');
+        });
+
+        document.getElementById('viewAllBtn').addEventListener('click', ()=>{
+            renderTransactions('allTransactionList', transactions);
+            document.getElementById('allTransactionsModal').classList.add('active');
+        });
+        document.getElementById('closeAllModal').addEventListener('click', ()=>document.getElementById('allTransactionsModal').classList.remove('active'));
+
+        document.getElementById('openSettings').addEventListener('click', ()=>{
+            document.getElementById('dailyLimitInput').value = dailyLimit || '';
+            document.getElementById('settingsModal').classList.add('active');
+        });
+        document.getElementById('closeSettings').addEventListener('click', ()=>document.getElementById('settingsModal').classList.remove('active'));
+        document.getElementById('saveSettings').addEventListener('click', async ()=>{
+            dailyLimit = parseFloat(document.getElementById('dailyLimitInput').value) || 0;
+            isDark = document.getElementById('themeToggle').checked;
+            applyTheme();
+            await saveFinanceData();
+            document.getElementById('settingsModal').classList.remove('active');
+            renderAll();
+        });
+
+        // Модалки Platinum
+        document.getElementById('addPiggyBtn').addEventListener('click', ()=>document.getElementById('piggyModal').classList.add('active'));
+        document.getElementById('closePiggyModal').addEventListener('click', ()=>document.getElementById('piggyModal').classList.remove('active'));
+        document.getElementById('savePiggyBtn').addEventListener('click', async ()=>{
+            const name = document.getElementById('piggyName').value;
+            const target = parseFloat(document.getElementById('piggyTarget').value);
+            const emoji = document.getElementById('piggyEmoji').value || '🐷';
+            if (!name || !target) return tg.showAlert('Заполните все поля');
+            piggyBanks.push({name, target, saved:0, emoji});
+            await savePlatinumData();
+            renderPiggyBanks();
+            document.getElementById('piggyModal').classList.remove('active');
+        });
+
+        document.getElementById('addChallengeBtn').addEventListener('click', ()=>document.getElementById('challengeModal').classList.add('active'));
+        document.getElementById('closeChallengeModal').addEventListener('click', ()=>document.getElementById('challengeModal').classList.remove('active'));
+        document.getElementById('saveChallengeBtn').addEventListener('click', async ()=>{
+            const name = document.getElementById('challengeName').value;
+            const days = parseInt(document.getElementById('challengeDays').value);
+            if (!name || !days) return tg.showAlert('Заполните все поля');
+            challenges.push({name, days, progress:0});
+            await savePlatinumData();
+            renderChallenges();
+            document.getElementById('challengeModal').classList.remove('active');
+        });
+
+        document.getElementById('addDebtBtn').addEventListener('click', ()=>document.getElementById('debtModal').classList.add('active'));
+        document.getElementById('closeDebtModal').addEventListener('click', ()=>document.getElementById('debtModal').classList.remove('active'));
+        document.getElementById('saveDebtBtn').addEventListener('click', async ()=>{
+            const person = document.getElementById('debtPerson').value;
+            const amount = parseFloat(document.getElementById('debtAmount').value);
+            const type = document.getElementById('debtType').value;
+            if (!person || !amount) return tg.showAlert('Заполните все поля');
+            debts.push({person, amount, type});
+            await savePlatinumData();
+            renderDebts();
+            document.getElementById('debtModal').classList.remove('active');
+        });
+
+        document.getElementById('addRegularPaymentBtn').addEventListener('click', ()=>document.getElementById('regularModal').classList.add('active'));
+        document.getElementById('closeRegularModal').addEventListener('click', ()=>document.getElementById('regularModal').classList.remove('active'));
+        document.getElementById('saveRegularBtn').addEventListener('click', async ()=>{
+            const name = document.getElementById('regularName').value;
+            const amount = parseFloat(document.getElementById('regularAmount').value);
+            const period = document.getElementById('regularPeriod').value;
+            if (!name || !amount) return tg.showAlert('Заполните все поля');
+            regularPayments.push({name, amount, period});
+            await savePlatinumData();
+            renderRegularPayments();
+            document.getElementById('regularModal').classList.remove('active');
+        });
+
+        function openAddModal(type) {
+            currentType = type;
+            selectedCategory = null;
+            document.getElementById('modalTitle').textContent = type==='expense' ? 'Добавить расход' : 'Добавить доход';
+            document.getElementById('amountInput').value = '';
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+            const cats = type==='expense' ? getExpenseCategories() : incomeCats;
+            cats.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'category-item';
+                div.innerHTML = `${cat.emoji}<div class="category-label">${cat.name}</div>`;
+                div.onclick = ()=>{
+                    grid.querySelectorAll('.category-item').forEach(el=>el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    selectedCategory = cat;
+                };
+                grid.appendChild(div);
+            });
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        document.querySelectorAll('.modal').forEach(m=>{
+            m.addEventListener('click', function(e){ if (e.target===this) this.classList.remove('active'); });
+        });
+
+        document.getElementById('userAvatar').textContent = (tg.initDataUnsafe?.user?.first_name || 'Г')[0].toUpperCase();
+        document.getElementById('userName').textContent = tg.initDataUnsafe?.user?.first_name || 'Гость';
+        
+        loadAllData();
+    </script>
+</body>
+</html>
