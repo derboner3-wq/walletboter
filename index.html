@@ -176,6 +176,12 @@
         .chat-input-row input[type="text"] { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--secondary-bg); color: var(--text); }
         .chat-input-row input[type="file"] { display: none; }
         .chat-input-row label { padding: 10px; background: var(--secondary-bg); border-radius: 10px; cursor: pointer; }
+        .admin-fullscreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 1000; overflow-y: auto;
+            padding: 20px; display: none;
+        }
+        .admin-fullscreen.active { display: block; }
     </style>
 </head>
 <body>
@@ -260,6 +266,31 @@
         </div>
     </div>
 
+    <!-- Полноэкранная админ-панель -->
+    <div id="adminFullscreen" class="admin-fullscreen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2>🛡 Админ-панель</h2>
+            <button class="btn btn-danger" id="closeAdminFullscreen" style="flex:0; padding:10px 16px;">Закрыть</button>
+        </div>
+        <div class="tabs">
+            <button class="tab active" data-atab="users">Пользователи</button>
+            <button class="tab" data-atab="shop">Магазин</button>
+            <button class="tab" data-atab="tickets">Тикеты</button>
+            <button class="tab" data-atab="stats">Статистика</button>
+        </div>
+        <div id="admin-users" class="admin-section"></div>
+        <div id="admin-shop" class="admin-section" style="display:none;">
+            <div id="adminShopList"></div>
+            <button class="btn btn-primary" id="addShopItemBtn">Добавить товар</button>
+        </div>
+        <div id="admin-tickets" class="admin-section" style="display:none;">
+            <div id="adminTicketsList"></div>
+        </div>
+        <div id="admin-stats" class="admin-section" style="display:none;">
+            <div id="adminStatsData"></div>
+        </div>
+    </div>
+
     <!-- Модальные окна -->
     <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
     <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
@@ -269,16 +300,18 @@
     <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="adminModal"> <div class="modal-content"> <div class="modal-title">🛡 Админ-панель</div> <div class="tabs"> <button class="tab active" data-atab="users">Пользователи</button> <button class="tab" data-atab="shop">Магазин</button> <button class="tab" data-atab="tickets">Тикеты</button> <button class="tab" data-atab="stats">Статистика</button> </div> <div id="admin-users" class="admin-section"></div> <div id="admin-shop" class="admin-section" style="display:none;"><div id="adminShopList"></div><button class="btn btn-primary" id="addShopItemBtn">Добавить товар</button></div> <div id="admin-tickets" class="admin-section" style="display:none;"><div id="adminTicketsList"></div></div> <div id="admin-stats" class="admin-section" style="display:none;"><div id="adminStatsData"></div></div> <button class="cancel-btn" id="closeAdminModal">Закрыть</button> </div> </div>
     <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
     <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
     <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="pro_forever">PRO навсегда</option><option value="platinum_forever">Platinum навсегда</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+        // ==================== КОНФИГУРАЦИЯ ====================
         const ADMIN_USERNAMES = ['ok00112'];
         const DA_TOKEN = 'qlees6PnNamPz8cFOWW7s1yJJZEaafQ6wCmZelMW';
         const DA_LINK = 'https://dalink.to/hypercore';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXsMArGxnOaZlmYI0q3_wmcjiIPqCDDYa9rns-yFrejyQC3nlavQFK_9uU2l80nYEx/exec';
+        // =====================================================================
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -286,6 +319,7 @@
         const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
         document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
 
+        // Ключи CloudStorage
         const KEY_BAL = 'bal', KEY_TX = 'tx', KEY_LIM = 'lim', KEY_DARK = 'dark';
         const KEY_SUB_LVL = 'sub_lvl', KEY_SUB_EXP = 'sub_exp', KEY_TRIAL = 'trial';
         const KEY_PIG = 'pig', KEY_ACH = 'ach', KEY_CHAL = 'chal', KEY_DEBT = 'debt', KEY_REG = 'reg';
@@ -326,6 +360,15 @@
             ];
         }
 
+        // ========== СИНХРОНИЗАЦИЯ С GOOGLE SHEETS ==========
+        async function syncUserWithSheet() {
+            const uid = tg.initDataUnsafe.user.id;
+            const name = tg.initDataUnsafe.user.first_name || 'User';
+            try {
+                await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=${encodeURIComponent(name)}&sub=${subLevel}&coins=${coins}&balance=${balance}`);
+            } catch(e) {}
+        }
+
         async function saveUsers() { await cSet(KEY_USERS, JSON.stringify(users)); }
         async function saveTickets() { await cSet(KEY_TICKETS, JSON.stringify(tickets)); }
         async function saveShop() { await cSet(KEY_SHOP, JSON.stringify(shopItems)); }
@@ -361,6 +404,7 @@
                 coins = users[uid].coins;
             }
             await saveUsers();
+            await syncUserWithSheet(); // ← синхронизация с Google Sheets
 
             document.getElementById('dailyLimitInput').value = dailyLimit||'';
             applyTheme(); updateUI(); renderAll();
@@ -374,8 +418,8 @@
         async function savePlat() { await Promise.all([cSet(KEY_PIG,JSON.stringify(piggyBanks)),cSet(KEY_ACH,JSON.stringify(achievements)),cSet(KEY_CHAL,JSON.stringify(challenges)),cSet(KEY_DEBT,JSON.stringify(debts)),cSet(KEY_REG,JSON.stringify(regularPayments)),cSet(KEY_COINS,coins)]); }
 
         function updateCoinsDisplay() { document.getElementById('coinsDisplay').textContent = `🪙 ${coins}`; const e=document.getElementById('coinsBalance'); if(e)e.textContent=coins; }
-        function addCoins(n) { coins+=n; updateCoinsDisplay(); savePlat(); }
-        function spendCoins(n) { if(coins<n){tg.showAlert('Недостаточно монет');return false;} coins-=n; updateCoinsDisplay(); savePlat(); return true; }
+        function addCoins(n) { coins+=n; updateCoinsDisplay(); savePlat(); syncUserWithSheet(); }
+        function spendCoins(n) { if(coins<n){tg.showAlert('Недостаточно монет');return false;} coins-=n; updateCoinsDisplay(); savePlat(); syncUserWithSheet(); return true; }
 
         function openCoins() { document.getElementById('coinsBalance').textContent=coins; document.getElementById('donateStatus').textContent=''; document.getElementById('coinsModal').classList.add('active'); }
         document.getElementById('closeCoinsModal').addEventListener('click',()=>document.getElementById('coinsModal').classList.remove('active'));
@@ -391,35 +435,58 @@
 
         function isAdmin() { const u=tg.initDataUnsafe.user.username; return u&&ADMIN_USERNAMES.includes(u.toLowerCase()); }
 
-        document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()){renderAdmin();document.getElementById('adminModal').classList.add('active');} });
-        document.getElementById('closeAdminModal').addEventListener('click',()=>document.getElementById('adminModal').classList.remove('active'));
+        // ========== АДМИН-ПАНЕЛЬ (полноэкранная) ==========
+        function openAdminFullscreen() {
+            document.getElementById('adminFullscreen').classList.add('active');
+            fetch(`${SCRIPT_URL}?action=list`)
+                .then(r => r.json())
+                .then(data => renderAdminUsersFromSheet(data));
+            renderAdminShop();
+            renderAdminTickets();
+            renderAdminStats();
+        }
 
-        function renderAdmin() { renderAdminUsers(); renderAdminShop(); renderAdminTickets(); renderAdminStats(); document.querySelectorAll('#adminModal .admin-section').forEach(s=>s.style.display='none'); document.getElementById('admin-'+adminActiveTab).style.display='block'; document.querySelectorAll('#adminModal .tab').forEach(t=>t.classList.remove('active')); document.querySelector(`#adminModal .tab[data-atab="${adminActiveTab}"]`).classList.add('active'); }
-        document.querySelectorAll('#adminModal .tab').forEach(t=>t.addEventListener('click',()=>{adminActiveTab=t.dataset.atab;renderAdmin();}));
+        document.getElementById('closeAdminFullscreen').addEventListener('click', ()=>{
+            document.getElementById('adminFullscreen').classList.remove('active');
+        });
 
-        function renderAdminUsers() { const c=document.getElementById('admin-users'); c.innerHTML='<div class="section-title">Пользователи</div>'; Object.entries(users).forEach(([uid,u])=>{ c.innerHTML+=`<div class="admin-user-card"><div><div>${u.first_name} (ID: ${uid})</div><div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div></div><div style="display:flex;gap:4px;"><button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button><button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat 30д</button><button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','pro_forever')">PRO ∞</button><button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button><button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button></div></div>`; }); }
-        window.adminSetSub = async (uid, lvl) => {
-            if (!users[uid]) return;
-            if (lvl === 'free') { delete users[uid].sub; delete users[uid].sub_expiry; users[uid].trial_used = false; }
-            else {
-                users[uid].sub = lvl;
-                users[uid].sub_expiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000;
-                if (lvl==='trial') users[uid].trial_used = true;
-            }
-            await saveUsers();
-            if (String(uid) === String(tg.initDataUnsafe.user.id)) {
-                if (lvl === 'free') { subLevel='free'; subExpiry=null; trialUsed=false; }
-                else { subLevel=lvl; subExpiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000; if (lvl==='trial') trialUsed=true; }
-                await saveSub(); updateUI(); renderAll(); updateTimer();
-            }
-            renderAdminUsers();
+        document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()){ openAdminFullscreen(); } });
+
+        function renderAdminUsersFromSheet(usersArray) {
+            const c = document.getElementById('admin-users');
+            c.innerHTML = '<div class="section-title">Пользователи</div>';
+            usersArray.forEach(u => {
+                c.innerHTML += `<div class="admin-user-card">
+                    <div>
+                        <div>${u.first_name} (ID: ${u.user_id})</div>
+                        <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div>
+                    </div>
+                    <div style="display:flex;gap:4px;">
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','pro')">PRO 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','platinum')">Plat 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSubSheet('${u.user_id}','pro_forever')">PRO ∞</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSubSheet('${u.user_id}','platinum_forever')">Plat ∞</button>
+                        <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','free')">Сброс</button>
+                        <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoinsSheet('${u.user_id}',500)">+500🪙</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        window.adminSetSubSheet = async (uid, lvl) => {
+            await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=&sub=${lvl}&coins=0&balance=0`);
+            fetch(`${SCRIPT_URL}?action=list`).then(r=>r.json()).then(renderAdminUsersFromSheet);
         };
-        window.adminAddCoins = async (uid, n) => {
-            if (!users[uid]) return;
-            users[uid].coins = (users[uid].coins||0) + n;
-            await saveUsers();
-            if (String(uid) === String(tg.initDataUnsafe.user.id)) { coins = users[uid].coins; updateCoinsDisplay(); await savePlat(); }
-            renderAdminUsers();
+
+        window.adminAddCoinsSheet = async (uid, amount) => {
+            const resp = await fetch(`${SCRIPT_URL}?action=list`);
+            const users = await resp.json();
+            const user = users.find(u => u.user_id == uid);
+            if (user) {
+                const newCoins = (user.coins || 0) + amount;
+                await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=${encodeURIComponent(user.first_name)}&sub=${user.sub}&coins=${newCoins}&balance=${user.balance}`);
+                fetch(`${SCRIPT_URL}?action=list`).then(r=>r.json()).then(renderAdminUsersFromSheet);
+            }
         };
 
         function renderAdminShop() { document.getElementById('adminShopList').innerHTML=shopItems.map((it,i)=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc} | 🪙${it.price}</div></div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="delShop(${i})">✕</button></div>`).join(''); }
@@ -436,6 +503,7 @@
 
         function renderAdminStats() { const total=Object.keys(users).length, bal=Object.values(users).reduce((s,u)=>s+(u.balance||0),0), co=Object.values(users).reduce((s,u)=>s+(u.coins||0),0); document.getElementById('adminStatsData').innerHTML=`<div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">Пользователей</div></div><div class="stat-item"><div class="stat-value">${bal} ₽</div><div class="stat-label">Общий баланс</div></div><div class="stat-item"><div class="stat-value">${co} 🪙</div><div class="stat-label">Монет выпущено</div></div>`; }
 
+        // ========== ПОДДЕРЖКА И ЧАТ ==========
         document.getElementById('openSupportBtn').addEventListener('click',()=>{ const myTickets=tickets.filter(t=>t.user_id===tg.initDataUnsafe.user.id); const list=document.getElementById('myTicketsList'); list.innerHTML=myTickets.map(t=>`<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;"><div>${t.messages[0]?.text?.substring(0,50)||'Без текста'}</div><div style="font-size:12px;">Статус: ${t.status}</div>${t.status==='in_progress'?`<button class="btn btn-primary" onclick="openUserChat('${t.id}')">Чат</button>`:''}</div>`).join('')||'<p style="color:var(--hint);">Нет тикетов</p><button class="btn btn-primary" id="createTicketBtn" style="width:100%;margin-top:8px;">Создать тикет</button>'; document.getElementById('myTicketsModal').classList.add('active'); });
         document.getElementById('closeMyTicketsModal').addEventListener('click',()=>document.getElementById('myTicketsModal').classList.remove('active'));
         document.getElementById('myTicketsList').addEventListener('click',(e)=>{ if(e.target.id==='createTicketBtn'){ const msg=prompt('Опишите проблему:'); if(msg){ const ticket={ id:'ticket_'+Date.now(), user_id:tg.initDataUnsafe.user.id, user_name:tg.initDataUnsafe.user.first_name||'User', status:'new', messages:[{sender:'user',text:msg,date:Date.now()}] }; tickets.push(ticket); saveTickets(); document.getElementById('myTicketsModal').classList.remove('active'); tg.showAlert('Тикет создан'); } } });
@@ -446,7 +514,7 @@
         setInterval(async()=>{ if(document.getElementById('chatModal').classList.contains('active')&&currentChatTicketId){ const raw=await cGet(KEY_TICKETS); if(raw)tickets=JSON.parse(raw); renderChatMessages(currentChatTicketId); } },3000);
 
         function applyTheme() { if(isDark)document.body.classList.add('dark-theme');else document.body.classList.remove('dark-theme'); document.getElementById('themeToggle').checked=isDark; }
-        async function setSub(lvl,dur) { subLevel=lvl; subExpiry=Date.now()+dur; if(lvl==='trial')trialUsed=true; await saveSub(); updateUI(); renderAll(); updateTimer(); if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial')renderExtra(); }
+        async function setSub(lvl,dur) { subLevel=lvl; subExpiry=Date.now()+dur; if(lvl==='trial')trialUsed=true; await saveSub(); await syncUserWithSheet(); updateUI(); renderAll(); updateTimer(); if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial')renderExtra(); }
         function fmtTime(ms) { if(ms<=0)return'Истекла'; const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000); return `${d?d+'д ':''}${h||d?h+'ч ':''}${m}м ${s}с`; }
         function updateTimer() { if(timerInterval)clearInterval(timerInterval); const box=document.getElementById('timerBox'),lab=document.getElementById('timerLabel'),val=document.getElementById('timerValue'); box.className='timer-box'; if(subLevel==='trial'){box.classList.add('trial','active');lab.textContent='Пробный Platinum';} else if(subLevel==='pro'){box.classList.add('pro','active');lab.textContent='PRO подписка';} else if(subLevel==='platinum'){box.classList.add('platinum','active');lab.textContent='Platinum подписка';} else if(subLevel==='pro_forever'||subLevel==='platinum_forever'){box.classList.add('forever','active');lab.textContent='Вечная подписка';} else{box.classList.remove('active');return;} const tick=()=>{ const rem=subExpiry-Date.now(); if(rem<=0){clearInterval(timerInterval);subLevel='free';subExpiry=null;saveSub();updateUI();renderAll();tg.showAlert('⏰ Подписка истекла');return;} val.textContent=fmtTime(rem); }; tick(); timerInterval=setInterval(tick,1000); }
         function updateUI() { const badge=document.getElementById('levelBadge'),pro=document.getElementById('proAnalytics'),extra=document.getElementById('extraFeatures'),sub=document.getElementById('subscribeBlock'),tbtn=document.getElementById('trialBtn'); badge.className='level-badge'; if(subLevel==='pro'){badge.classList.add('pro');badge.textContent='PRO';} else if(subLevel==='pro_forever'){badge.classList.add('forever');badge.textContent='PRO ∞';} else if(subLevel==='platinum'){badge.classList.add('platinum');badge.textContent='PLATINUM';} else if(subLevel==='platinum_forever'){badge.classList.add('forever');badge.textContent='PLATINUM ∞';} else if(subLevel==='trial'){badge.classList.add('trial');badge.textContent='ПРОБНЫЙ';} else badge.style.display='none'; pro.style.display=subLevel!=='free'?'block':'none'; extra.style.display=(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial')?'block':'none'; sub.style.display=subLevel==='free'?'block':'none'; if(subLevel==='free')tbtn.style.display=trialUsed?'none':'block'; const isPlat=(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial'); document.querySelectorAll('.platinum-only').forEach(el=>el.style.display=isPlat?'':'none'); const act=document.querySelector(`.tab[data-tab="${activeTab}"]`); if(act&&!isPlat&&act.classList.contains('platinum-only')){activeTab='tab-piggy';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const f=document.querySelector('.tab[data-tab="tab-piggy"]');if(f)f.classList.add('active');} document.getElementById('subscriptionInfo').innerHTML=subLevel==='free'?'❌ Нет подписки':subLevel==='trial'?'🟢 Пробный Platinum (3 дня)':subLevel==='pro'?'⭐ PRO активно':subLevel==='pro_forever'?'⭐ PRO навсегда':subLevel==='platinum'?'💎 Platinum активно':'💎 Platinum навсегда'; }
