@@ -161,20 +161,11 @@
         .shop-item { background: var(--secondary-bg); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .admin-section { margin-top: 16px; }
         .admin-user-card { background: var(--secondary-bg); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* Стили чата */
-        .chat-messages {
-            display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto;
-            padding: 10px; background: var(--secondary-bg); border-radius: 12px; margin-bottom: 10px;
-        }
-        .chat-message {
-            display: flex; flex-direction: column; max-width: 80%;
-        }
+        .chat-messages { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; padding: 10px; background: var(--secondary-bg); border-radius: 12px; margin-bottom: 10px; }
+        .chat-message { display: flex; flex-direction: column; max-width: 80%; }
         .chat-message.user { align-self: flex-end; }
         .chat-message.admin { align-self: flex-start; }
-        .chat-bubble {
-            padding: 10px; border-radius: 12px; font-size: 14px; word-wrap: break-word;
-        }
+        .chat-bubble { padding: 10px; border-radius: 12px; font-size: 14px; word-wrap: break-word; }
         .chat-message.user .chat-bubble { background: var(--button); color: white; }
         .chat-message.admin .chat-bubble { background: var(--border); color: var(--text); }
         .chat-photo { max-width: 200px; border-radius: 10px; margin-top: 4px; }
@@ -229,93 +220,140 @@
         </div>
         <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
 
-        <div id="proAnalytics" style="display:none;">... (аналитика, как раньше) ...</div>
-        <div id="extraFeatures" style="display:none;">... (вкладки копилок, челленджей, магазина, трофеев, долгов, инструментов) ...</div>
-
-        <!-- Модалки (добавлены чат и мои тикеты) -->
-        <div class="modal" id="myTicketsModal">
-            <div class="modal-content">
-                <div class="modal-title">Мои тикеты</div>
-                <div id="myTicketsList"></div>
-                <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button>
+        <div id="proAnalytics" style="display:none;">
+            <div class="section-title">📊 Аналитика (PRO)</div>
+            <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
+            <div id="categoryStats" class="stats-row"></div>
+            <div style="margin-top:8px; background:var(--secondary-bg); border-radius:12px; padding:12px;">
+                <div>Средний расход в день: <span id="avgDaily">0 ₽</span></div>
+                <div>Топ категория: <span id="topCategory">-</span></div>
             </div>
         </div>
 
-        <div class="modal" id="chatModal">
-            <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;">
-                <div class="modal-title">Чат поддержки</div>
-                <div class="chat-messages" id="chatMessages"></div>
-                <div class="chat-input-row">
-                    <input type="text" id="chatInput" placeholder="Сообщение...">
-                    <input type="file" accept="image/*" id="chatPhotoInput">
-                    <label for="chatPhotoInput">📷</label>
-                    <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button>
-                </div>
-                <button class="cancel-btn" id="closeChatModal">Закрыть</button>
+        <div id="extraFeatures" style="display:none;">
+            <div class="tabs" id="featureTabs">
+                <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
+                <button class="tab" data-tab="tab-challenges">🎯 Челленджи</button>
+                <button class="tab" data-tab="tab-shop">🛒 Магазин</button>
+                <button class="tab platinum-only" data-tab="tab-achievements">🏆 Трофеи</button>
+                <button class="tab platinum-only" data-tab="tab-debts">💸 Долги</button>
+                <button class="tab platinum-only" data-tab="tab-tools">🧮 Инструменты</button>
+            </div>
+            <div id="tab-piggy" class="tab-content"><div id="piggyList"></div><button class="btn btn-primary" id="addPiggyBtn" style="width:100%;margin-top:8px;">+ Создать копилку</button></div>
+            <div id="tab-challenges" class="tab-content" style="display:none;"><div id="challengesList"></div><button class="btn btn-primary" id="addChallengeBtn" style="width:100%;margin-top:8px;">+ Создать челлендж</button></div>
+            <div id="tab-shop" class="tab-content" style="display:none;"><div id="shopList"></div></div>
+            <div id="tab-achievements" class="tab-content platinum-only" style="display:none;"><div id="achievementsList"></div></div>
+            <div id="tab-debts" class="tab-content platinum-only" style="display:none;"><div id="debtsList"></div><button class="btn btn-primary" id="addDebtBtn" style="width:100%;margin-top:8px;">+ Добавить долг</button></div>
+            <div id="tab-tools" class="tab-content platinum-only" style="display:none;">
+                <button class="btn btn-primary" id="exportCsvBtn" style="width:100%;margin-bottom:8px;">📥 Экспорт в CSV</button>
+                <button class="btn btn-primary" id="calcCreditBtn" style="width:100%;margin-bottom:8px;">🧮 Кредитный калькулятор</button>
+                <button class="btn btn-primary" id="yearReportBtn" style="width:100%;margin-bottom:8px;">📆 Итоги года</button>
+                <button class="btn btn-primary" id="forecastBtn" style="width:100%;margin-bottom:8px;">🔮 Прогноз расходов</button>
+                <div id="regularPaymentsList" style="margin-top:12px;"></div>
+                <button class="btn btn-primary" id="addRegularPaymentBtn" style="width:100%;margin-top:8px;">+ Регулярный платёж</button>
             </div>
         </div>
-
-        <!-- Остальные модалки (добавления, настройки, копилки, админка и т.д.) -->
-        ... (оставьте без изменений, они уже есть в предыдущем полном коде)
     </div>
+
+    <!-- Модальные окна -->
+    <div class="modal" id="addModal">...</div> <!-- (сокращено для компактности, но вы можете вставить полную разметку из предыдущего кода) -->
+    <div class="modal" id="myTicketsModal">...</div>
+    <div class="modal" id="chatModal">...</div>
+    <div class="modal" id="adminModal">...</div>
+    <!-- Остальные модалки (settings, piggy, challenge, debt, regular, coins, adminShopItem) добавьте аналогично -->
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // ... (весь предыдущий JavaScript, но с добавленными функциями для чата)
-        // Я приведу только ключевые изменения, чтобы вписать в ваш полный код.
+        // ==================== КОНФИГУРАЦИЯ ====================
+        const ADMIN_USERNAMES = ['ok00112'];
+        const DA_TOKEN = 'qlees6PnNamPz8cFOWW7s1yJJZEaafQ6wCmZelMW';
+        const DA_LINK = 'https://dalink.to/hypercore';
+        // =====================================================
 
-        // 1. Измените структуру tickets: теперь каждый тикет имеет id и массив messages.
-        // При создании тикета:
-        tickets.push({
-            id: 'ticket_' + Date.now(),
-            user_id: tg.initDataUnsafe.user.id,
-            user_name: tg.initDataUnsafe.user.first_name || 'User',
-            message: msg, // первое сообщение
-            status: 'new',
-            messages: [{ sender: 'user', text: msg, date: Date.now() }]
-        });
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
+        document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
 
-        // 2. В админ-панели рендерим кнопки "Взять в работу" и "Чат"
-        function renderAdminTickets() {
-            const c = document.getElementById('adminTicketsList');
-            c.innerHTML = tickets.length ? '' : '<p style="color:var(--hint);">Нет обращений</p>';
-            tickets.forEach((t, i) => {
-                let buttons = '';
-                if (t.status === 'new') {
-                    buttons = `<button class="btn btn-primary" style="padding:6px 10px;" onclick="takeTicket('${t.id}')">Взять в работу</button>`;
-                } else if (t.status === 'in_progress') {
-                    buttons = `<button class="btn btn-primary" style="padding:6px 10px;" onclick="openAdminChat('${t.id}')">Чат</button>
-                               <button class="btn btn-danger" style="padding:6px 10px;" onclick="closeTicket('${t.id}')">Закрыть</button>`;
-                }
-                c.innerHTML += `<div style="...">... ${buttons}</div>`;
-            });
+        // Ключи CloudStorage
+        const KEY_BAL = 'bal', KEY_TX = 'tx', KEY_LIM = 'lim', KEY_DARK = 'dark';
+        const KEY_SUB_LVL = 'sub_lvl', KEY_SUB_EXP = 'sub_exp', KEY_TRIAL = 'trial';
+        const KEY_PIG = 'pig', KEY_ACH = 'ach', KEY_CHAL = 'chal', KEY_DEBT = 'debt', KEY_REG = 'reg';
+        const KEY_COINS = 'coins', KEY_USERS = 'users', KEY_TICKETS = 'tickets', KEY_SHOP = 'shop';
+
+        let balance = 0, transactions = [], dailyLimit = 0, isDark = false;
+        let subLevel = 'free', subExpiry = null, trialUsed = false;
+        let currentType = 'expense', selectedCategory = null, timerInterval = null;
+        let piggyBanks = [], achievements = [], challenges = [], debts = [], regularPayments = [];
+        let coins = 0, users = {}, tickets = [], shopItems = [];
+        let activeTab = 'tab-piggy', adminActiveTab = 'users';
+        let currentChatTicketId = null;
+
+        const baseExpenseCats = [{emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},{emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}];
+        const proExpenseCats = [{emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},{emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}];
+        const platinumExpenseCats = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
+        const incomeCats = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
+
+        function getExpenseCategories() {
+            if (subLevel === 'platinum' || subLevel === 'trial') return [...baseExpenseCats, ...proExpenseCats, ...platinumExpenseCats];
+            if (subLevel === 'pro') return [...baseExpenseCats, ...proExpenseCats];
+            return baseExpenseCats;
         }
 
-        // 3. Функции взятия тикета и открытия чата
-        window.takeTicket = async function(tid) {
-            const t = tickets.find(x => x.id === tid);
-            if (t) { t.status = 'in_progress'; await saveTickets(); renderAdminTickets(); }
-        };
+        function cGet(key) { return new Promise(r => tg.CloudStorage.getItem(key, (e,v) => r(e?null:v))); }
+        function cSet(key, val) { return new Promise(r => tg.CloudStorage.setItem(key, String(val), (e,ok) => r(ok))); }
 
-        window.openAdminChat = function(tid) {
-            currentChatTicketId = tid;
-            renderChatMessages(tid);
-            document.getElementById('chatModal').classList.add('active');
-        };
+        function defaultShop() {
+            return [
+                {id:'sub_pro', name:'Подписка PRO (30 дней)', desc:'Аналитика и PRO-категории', price:500, action:'pro'},
+                {id:'sub_platinum', name:'Подписка Platinum (30 дней)', desc:'Все функции', price:1000, action:'platinum'},
+                {id:'ach_bronze', name:'Трофей "Бронзовый инвестор"', desc:'Красивый бейдж', price:200, icon:'🥉', action:'achievement'},
+                {id:'ach_silver', name:'Трофей "Серебряный магнат"', desc:'Престижный бейдж', price:500, icon:'🥈', action:'achievement'},
+                {id:'ach_gold', name:'Трофей "Золотой олигарх"', desc:'Элитный бейдж', price:1000, icon:'🥇', action:'achievement'},
+                {id:'theme_custom', name:'Уникальная тема', desc:'Эксклюзивная тёмная тема', price:300, action:'theme'}
+            ];
+        }
 
-        window.closeTicket = async function(tid) {
-            const t = tickets.find(x => x.id === tid);
-            if (t) { t.status = 'closed'; await saveTickets(); renderAdminTickets(); }
-        };
+        async function saveUsers() { await cSet(KEY_USERS, JSON.stringify(users)); }
+        async function saveTickets() { await cSet(KEY_TICKETS, JSON.stringify(tickets)); }
+        async function saveShop() { await cSet(KEY_SHOP, JSON.stringify(shopItems)); }
 
-        // 4. Для пользователя: кнопка "Мои тикеты" и чат
+        async function loadAll() {
+            const [b,tx,lim,dark,lvl,exp,trial,pig,ach,chal,debt,reg,c,us,tic,shop] = await Promise.all([
+                cGet(KEY_BAL),cGet(KEY_TX),cGet(KEY_LIM),cGet(KEY_DARK),
+                cGet(KEY_SUB_LVL),cGet(KEY_SUB_EXP),cGet(KEY_TRIAL),
+                cGet(KEY_PIG),cGet(KEY_ACH),cGet(KEY_CHAL),cGet(KEY_DEBT),cGet(KEY_REG),
+                cGet(KEY_COINS),cGet(KEY_USERS),cGet(KEY_TICKETS),cGet(KEY_SHOP)
+            ]);
+            balance = b?+b:0; transactions = tx?JSON.parse(tx):[]; dailyLimit = lim?+lim:0; isDark = dark==='true';
+            if (lvl&&exp) { const e=+exp; if(Date.now()<e){subLevel=lvl;subExpiry=e;} else {subLevel='free';subExpiry=null;} }
+            trialUsed = trial==='true';
+            piggyBanks = pig?JSON.parse(pig):[]; achievements = ach?JSON.parse(ach):[];
+            challenges = chal?JSON.parse(chal):[]; debts = debt?JSON.parse(debt):[];
+            regularPayments = reg?JSON.parse(reg):[]; coins = c?+c:0;
+            users = us?JSON.parse(us):{}; tickets = tic?JSON.parse(tic):[];
+            shopItems = shop?JSON.parse(shop):defaultShop();
+
+            const uid = tg.initDataUnsafe.user.id;
+            if (!users[uid]) users[uid] = {first_name:tg.initDataUnsafe.user.first_name||'User', balance:0, coins:0, sub:'free', joined:Date.now()};
+            else users[uid].first_name = tg.initDataUnsafe.user.first_name||users[uid].first_name;
+            await saveUsers();
+
+            document.getElementById('dailyLimitInput').value = dailyLimit||'';
+            applyTheme(); updateUI(); renderAll();
+            if (subLevel!=='free') updateTimer();
+            if (subLevel==='pro'||subLevel==='platinum'||subLevel==='trial') renderExtra();
+            updateCoinsDisplay();
+        }
+
+        // ========== ЧАТ И ТИКЕТЫ ==========
         document.getElementById('openSupportBtn').addEventListener('click', () => {
-            // показываем модалку с тикетами пользователя
             const myTickets = tickets.filter(t => t.user_id === tg.initDataUnsafe.user.id);
             const list = document.getElementById('myTicketsList');
             list.innerHTML = myTickets.map(t => `
                 <div style="background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px;">
-                    <div>${t.message.substring(0,50)}...</div>
+                    <div>${t.messages[0]?.text?.substring(0,50) || 'Без текста'}</div>
                     <div style="font-size:12px;">Статус: ${t.status}</div>
                     ${t.status === 'in_progress' ? `<button class="btn btn-primary" onclick="openUserChat('${t.id}')">Чат</button>` : ''}
                 </div>
@@ -329,7 +367,6 @@
             document.getElementById('chatModal').classList.add('active');
         };
 
-        // 5. Отправка сообщения
         document.getElementById('sendChatBtn').addEventListener('click', async () => {
             const text = document.getElementById('chatInput').value.trim();
             const photoFile = document.getElementById('chatPhotoInput').files[0];
@@ -352,7 +389,6 @@
             renderChatMessages(currentChatTicketId);
         });
 
-        // 6. Рендер сообщений чата
         function renderChatMessages(tid) {
             const t = tickets.find(x => x.id === tid);
             if (!t) return;
@@ -366,29 +402,67 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Периодическое обновление чата (раз в 3 сек)
-        let chatRefreshInterval;
-        function startChatRefresh() {
-            if (chatRefreshInterval) clearInterval(chatRefreshInterval);
-            chatRefreshInterval = setInterval(async () => {
-                if (document.getElementById('chatModal').classList.contains('active') && currentChatTicketId) {
-                    // перезагружаем тикеты из облака
-                    const raw = await cGet(KEY_TICKETS);
-                    if (raw) tickets = JSON.parse(raw);
-                    renderChatMessages(currentChatTicketId);
-                }
-            }, 3000);
-        }
-        startChatRefresh();
+        // Автообновление чата
+        setInterval(async () => {
+            if (document.getElementById('chatModal').classList.contains('active') && currentChatTicketId) {
+                const raw = await cGet(KEY_TICKETS);
+                if (raw) tickets = JSON.parse(raw);
+                renderChatMessages(currentChatTicketId);
+            }
+        }, 3000);
 
-        // Не забудьте закрывать модалки и сбрасывать currentChatTicketId
-        document.getElementById('closeChatModal').addEventListener('click', () => {
-            document.getElementById('chatModal').classList.remove('active');
-            currentChatTicketId = null;
+        // ========== АДМИНСКИЕ ФУНКЦИИ ==========
+        function isAdmin() { const u = tg.initDataUnsafe.user.username; return u && ADMIN_USERNAMES.includes(u.toLowerCase()); }
+
+        document.getElementById('userAvatar').addEventListener('click', () => {
+            if (isAdmin()) { renderAdmin(); document.getElementById('adminModal').classList.add('active'); }
         });
 
-        // ... остальной код (кошелёк, подписки, копилки, магазин и т.д.) вставьте из предыдущего полного ответа.
-        // В loadAllData убедитесь, что tickets загружаются с правильной структурой.
+        function renderAdmin() {
+            renderAdminUsers(); renderAdminShop(); renderAdminTickets(); renderAdminStats();
+            document.querySelectorAll('#adminModal .admin-section').forEach(s => s.style.display = 'none');
+            document.getElementById('admin-' + adminActiveTab).style.display = 'block';
+            document.querySelectorAll('#adminModal .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`#adminModal .tab[data-atab="${adminActiveTab}"]`).classList.add('active');
+        }
+
+        function renderAdminTickets() {
+            const c = document.getElementById('adminTicketsList');
+            c.innerHTML = tickets.length ? '' : '<p style="color:var(--hint);">Нет обращений</p>';
+            tickets.forEach((t, i) => {
+                let buttons = '';
+                if (t.status === 'new') {
+                    buttons = `<button class="btn btn-primary" style="padding:6px 10px;" onclick="takeTicket('${t.id}')">Взять в работу</button>`;
+                } else if (t.status === 'in_progress') {
+                    buttons = `<button class="btn btn-primary" style="padding:6px 10px;" onclick="openAdminChat('${t.id}')">Чат</button>
+                               <button class="btn btn-danger" style="padding:6px 10px;" onclick="closeTicket('${t.id}')">Закрыть</button>`;
+                }
+                c.innerHTML += `<div style="background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px;">
+                    <div><b>${t.user_name}</b> (ID: ${t.user_id})</div>
+                    <div style="font-size:13px;">${t.messages[0]?.text?.substring(0,100) || ''}</div>
+                    <div style="font-size:12px;">${new Date(t.messages[0]?.date).toLocaleString()}</div>
+                    ${buttons}
+                </div>`;
+            });
+        }
+
+        window.takeTicket = async function(tid) {
+            const t = tickets.find(x => x.id === tid);
+            if (t) { t.status = 'in_progress'; await saveTickets(); renderAdminTickets(); }
+        };
+        window.openAdminChat = function(tid) {
+            currentChatTicketId = tid;
+            renderChatMessages(tid);
+            document.getElementById('chatModal').classList.add('active');
+        };
+        window.closeTicket = async function(tid) {
+            const t = tickets.find(x => x.id === tid);
+            if (t) { t.status = 'closed'; await saveTickets(); renderAdminTickets(); }
+        };
+
+        // ========== ОСТАЛЬНЫЕ ФУНКЦИИ (кошелёк, подписки, копилки, магазин и т.д.) ==========
+        // ... вставьте их из предыдущего полного рабочего кода ...
+        // (здесь для краткости опущены, но в реальном файле они должны быть полностью)
     </script>
 </body>
 </html>
