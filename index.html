@@ -177,6 +177,7 @@
 </head>
 <body>
     <div id="app">
+        <!-- Header -->
         <div class="header">
             <div class="user-info">
                 <div class="avatar" id="userAvatar" title="Админ-панель">👤</div>
@@ -190,6 +191,7 @@
             <div style="font-size:24px; cursor:pointer;" id="openSettings">⚙️</div>
         </div>
 
+        <!-- Баланс -->
         <div class="balance-card">
             <div class="balance-label">Остаток на месяц</div>
             <div class="balance-amount" id="balanceDisplay">0 ₽</div>
@@ -199,20 +201,24 @@
             </div>
         </div>
 
+        <!-- Таймер -->
         <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
 
+        <!-- Кнопки -->
         <div class="actions">
             <button class="btn btn-primary" id="openExpenseModal">➖ Расход</button>
             <button class="btn" id="openIncomeModal">➕ Доход</button>
         </div>
         <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
 
+        <!-- Подписки -->
         <div style="margin:12px 0;" id="subscribeBlock">
             <button class="trial-btn" id="trialBtn">🎁 Пробный Platinum на 3 дня</button>
             <button class="buy-btn buy-pro" id="buyProBtn">⭐ PRO — 99 ₽</button>
             <button class="buy-btn buy-platinum" id="buyPlatinumBtn">💎 Platinum — 199 ₽</button>
         </div>
 
+        <!-- Операции -->
         <div class="section-title-row">
             <div class="section-title">Операции</div>
             <span class="section-link" id="viewAllBtn">Все</span>
@@ -220,6 +226,7 @@
         </div>
         <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
 
+        <!-- PRO-аналитика -->
         <div id="proAnalytics" style="display:none;">
             <div class="section-title">📊 Аналитика (PRO)</div>
             <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
@@ -230,6 +237,7 @@
             </div>
         </div>
 
+        <!-- Расширенные функции -->
         <div id="extraFeatures" style="display:none;">
             <div class="tabs" id="featureTabs">
                 <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
@@ -256,17 +264,29 @@
     </div>
 
     <!-- Модальные окна -->
+    <!-- Добавление операции -->
     <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
+    <!-- Все операции -->
     <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
+    <!-- Настройки -->
     <div class="modal" id="settingsModal"> <div class="modal-content"> <div class="modal-title">Настройки</div> <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div> <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div> <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div> <button class="submit-btn" id="saveSettings">Сохранить</button> <button class="cancel-btn" id="closeSettings">Отмена</button> </div> </div>
+    <!-- Копилка -->
     <div class="modal" id="piggyModal"> <div class="modal-content"> <div class="modal-title">Новая копилка</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="piggyName" placeholder="На отпуск" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (₽)</div><input type="number" class="amount-input" id="piggyTarget" placeholder="50000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Фото (не обязательно)</div><input type="file" accept="image/*" id="piggyPhoto" style="width:100%; padding:10px; background:var(--secondary-bg); border-radius:12px; color:var(--text);"></div> <button class="submit-btn" id="savePiggyBtn">Создать</button> <button class="cancel-btn" id="closePiggyModal">Отмена</button> </div> </div>
+    <!-- Челлендж -->
     <div class="modal" id="challengeModal"> <div class="modal-content"> <div class="modal-title">Новый челлендж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="challengeName" placeholder="Неделя без доставки" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (дней)</div><input type="number" class="amount-input" id="challengeDays" placeholder="7" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Награда (монет)</div><input type="number" class="amount-input" id="challengeReward" placeholder="50" style="font-size:18px;" value="50"></div> <button class="submit-btn" id="saveChallengeBtn">Создать</button> <button class="cancel-btn" id="closeChallengeModal">Отмена</button> </div> </div>
+    <!-- Долг -->
     <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
+    <!-- Регулярный платёж -->
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
+    <!-- Монеты -->
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
+    <!-- Админ-панель -->
     <div class="modal" id="adminModal"> <div class="modal-content"> <div class="modal-title">🛡 Админ-панель</div> <div class="tabs"> <button class="tab active" data-atab="users">Пользователи</button> <button class="tab" data-atab="shop">Магазин</button> <button class="tab" data-atab="tickets">Тикеты</button> <button class="tab" data-atab="stats">Статистика</button> </div> <div id="admin-users" class="admin-section"></div> <div id="admin-shop" class="admin-section" style="display:none;"><div id="adminShopList"></div><button class="btn btn-primary" id="addShopItemBtn">Добавить товар</button></div> <div id="admin-tickets" class="admin-section" style="display:none;"><div id="adminTicketsList"></div></div> <div id="admin-stats" class="admin-section" style="display:none;"><div id="adminStatsData"></div></div> <button class="cancel-btn" id="closeAdminModal">Закрыть</button> </div> </div>
+    <!-- Мои тикеты -->
     <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
+    <!-- Чат -->
     <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
+    <!-- Товар для админа -->
     <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -283,6 +303,7 @@
         const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
         document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
 
+        // Ключи CloudStorage
         const KEY_BAL = 'bal', KEY_TX = 'tx', KEY_LIM = 'lim', KEY_DARK = 'dark';
         const KEY_SUB_LVL = 'sub_lvl', KEY_SUB_EXP = 'sub_exp', KEY_TRIAL = 'trial';
         const KEY_PIG = 'pig', KEY_ACH = 'ach', KEY_CHAL = 'chal', KEY_DEBT = 'debt', KEY_REG = 'reg';
@@ -347,6 +368,7 @@
             } else {
                 users[uid].first_name = tg.initDataUnsafe.user.first_name||users[uid].first_name;
             }
+            // Синхронизируем подписку и монеты из админских данных
             if (users[uid].sub && users[uid].sub !== 'free' && users[uid].sub_expiry && Date.now() < users[uid].sub_expiry) {
                 subLevel = users[uid].sub;
                 subExpiry = users[uid].sub_expiry;
@@ -395,23 +417,19 @@
         function renderAdminUsers() { const c=document.getElementById('admin-users'); c.innerHTML='<div class="section-title">Пользователи</div>'; Object.entries(users).forEach(([uid,u])=>{ c.innerHTML+=`<div class="admin-user-card"><div><div>${u.first_name} (ID: ${uid})</div><div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div></div><div style="display:flex;gap:4px;"><button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO</button><button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat</button><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button><button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button></div></div>`; }); }
         window.adminSetSub = async (uid, lvl) => {
             if (!users[uid]) return;
-            if (lvl === 'free') {
-                delete users[uid].sub; delete users[uid].sub_expiry; users[uid].trial_used = false;
-            } else {
-                users[uid].sub = lvl; users[uid].sub_expiry = Date.now() + 30*24*60*60*1000;
-                if (lvl === 'trial') users[uid].trial_used = true;
-            }
+            if (lvl === 'free') { delete users[uid].sub; delete users[uid].sub_expiry; users[uid].trial_used = false; }
+            else { users[uid].sub = lvl; users[uid].sub_expiry = Date.now() + 30*24*60*60*1000; if (lvl==='trial') users[uid].trial_used = true; }
             await saveUsers();
             if (String(uid) === String(tg.initDataUnsafe.user.id)) {
-                if (lvl === 'free') { subLevel = 'free'; subExpiry = null; trialUsed = false; }
-                else { subLevel = lvl; subExpiry = Date.now() + 30*24*60*60*1000; if (lvl === 'trial') trialUsed = true; }
+                if (lvl === 'free') { subLevel='free'; subExpiry=null; trialUsed=false; }
+                else { subLevel=lvl; subExpiry=Date.now()+30*24*60*60*1000; if (lvl==='trial') trialUsed=true; }
                 await saveSub(); updateUI(); renderAll(); updateTimer();
             }
             renderAdminUsers();
         };
         window.adminAddCoins = async (uid, n) => {
             if (!users[uid]) return;
-            users[uid].coins = (users[uid].coins || 0) + n;
+            users[uid].coins = (users[uid].coins||0) + n;
             await saveUsers();
             if (String(uid) === String(tg.initDataUnsafe.user.id)) { coins = users[uid].coins; updateCoinsDisplay(); await savePlat(); }
             renderAdminUsers();
@@ -431,6 +449,7 @@
 
         function renderAdminStats() { const total=Object.keys(users).length, bal=Object.values(users).reduce((s,u)=>s+(u.balance||0),0), co=Object.values(users).reduce((s,u)=>s+(u.coins||0),0); document.getElementById('adminStatsData').innerHTML=`<div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">Пользователей</div></div><div class="stat-item"><div class="stat-value">${bal} ₽</div><div class="stat-label">Общий баланс</div></div><div class="stat-item"><div class="stat-value">${co} 🪙</div><div class="stat-label">Монет выпущено</div></div>`; }
 
+        // Поддержка и чат
         document.getElementById('openSupportBtn').addEventListener('click',()=>{ const myTickets=tickets.filter(t=>t.user_id===tg.initDataUnsafe.user.id); const list=document.getElementById('myTicketsList'); list.innerHTML=myTickets.map(t=>`<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;"><div>${t.messages[0]?.text?.substring(0,50)||'Без текста'}</div><div style="font-size:12px;">Статус: ${t.status}</div>${t.status==='in_progress'?`<button class="btn btn-primary" onclick="openUserChat('${t.id}')">Чат</button>`:''}</div>`).join('')||'<p style="color:var(--hint);">Нет тикетов</p><button class="btn btn-primary" id="createTicketBtn" style="width:100%;margin-top:8px;">Создать тикет</button>'; document.getElementById('myTicketsModal').classList.add('active'); });
         document.getElementById('closeMyTicketsModal').addEventListener('click',()=>document.getElementById('myTicketsModal').classList.remove('active'));
 
