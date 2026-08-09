@@ -187,17 +187,6 @@
         .achievement-info { flex: 1; }
         .achievement-name { font-weight: 600; }
         .achievement-desc { font-size: 13px; color: var(--hint); }
-        .achievement-progress {
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            margin-top: 4px;
-        }
-        .achievement-progress-bar {
-            height: 100%;
-            border-radius: 2px;
-            background: gold;
-        }
         .piggy-card {
             background: var(--secondary-bg);
             border-radius: 12px;
@@ -208,16 +197,8 @@
         .piggy-icon { font-size: 36px; }
         .piggy-name { font-weight: 600; }
         .piggy-target { font-size: 13px; color: var(--hint); }
-        .piggy-progress {
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-        }
-        .piggy-bar {
-            height: 100%;
-            border-radius: 4px;
-            background: #34c759;
-        }
+        .piggy-progress { height: 8px; background: var(--border); border-radius: 4px; }
+        .piggy-bar { height: 100%; border-radius: 4px; background: #34c759; }
         .challenge-card {
             background: var(--secondary-bg);
             border-radius: 12px;
@@ -270,7 +251,7 @@
         <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
 
         <div style="margin:12px 0;" id="subscribeBlock">
-            <button class="trial-btn" id="trialBtn">🎁 Пробный PRO на 3 дня</button>
+            <button class="trial-btn" id="trialBtn">🎁 Пробный Platinum на 3 дня</button>
             <button class="buy-btn buy-pro" id="buyProBtn">⭐ PRO — 99 ₽</button>
             <button class="buy-btn buy-platinum" id="buyPlatinumBtn">💎 Platinum — 199 ₽</button>
         </div>
@@ -281,7 +262,7 @@
         </div>
         <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
 
-        <!-- PRO/Platinum функции -->
+        <!-- PRO/Platinum общая аналитика -->
         <div id="proAnalytics" style="display:none;">
             <div class="section-title">📊 Аналитика (PRO)</div>
             <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
@@ -292,8 +273,8 @@
             </div>
         </div>
 
+        <!-- Platinum-функции (теперь и пробный период) -->
         <div id="platinumFeatures" style="display:none;">
-            <!-- Табы для Platinum функций -->
             <div class="tabs" style="margin-top:16px;">
                 <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
                 <button class="tab" data-tab="tab-achievements">🏆 Достижения</button>
@@ -302,30 +283,25 @@
                 <button class="tab" data-tab="tab-tools">🧮 Инструменты</button>
             </div>
 
-            <!-- Копилки -->
             <div id="tab-piggy" class="tab-content">
                 <div id="piggyList"></div>
                 <button class="btn btn-primary" id="addPiggyBtn" style="width:100%; margin-top:8px;">+ Создать копилку</button>
             </div>
 
-            <!-- Достижения -->
             <div id="tab-achievements" class="tab-content" style="display:none;">
                 <div id="achievementsList"></div>
             </div>
 
-            <!-- Челленджи -->
             <div id="tab-challenges" class="tab-content" style="display:none;">
                 <div id="challengesList"></div>
                 <button class="btn btn-primary" id="addChallengeBtn" style="width:100%; margin-top:8px;">+ Создать челлендж</button>
             </div>
 
-            <!-- Долги -->
             <div id="tab-debts" class="tab-content" style="display:none;">
                 <div id="debtsList"></div>
                 <button class="btn btn-primary" id="addDebtBtn" style="width:100%; margin-top:8px;">+ Добавить долг</button>
             </div>
 
-            <!-- Инструменты -->
             <div id="tab-tools" class="tab-content" style="display:none;">
                 <button class="btn btn-primary" id="exportCsvBtn" style="width:100%; margin-bottom:8px;">📥 Экспорт в CSV</button>
                 <button class="btn btn-primary" id="calcCreditBtn" style="width:100%; margin-bottom:8px;">🧮 Кредитный калькулятор</button>
@@ -365,7 +341,7 @@
         </div>
     </div>
 
-    <!-- Модалка для копилки -->
+    <!-- Модалки для Platinum -->
     <div class="modal" id="piggyModal">
         <div class="modal-content">
             <div class="modal-title">Новая копилка</div>
@@ -376,8 +352,6 @@
             <button class="cancel-btn" id="closePiggyModal">Отмена</button>
         </div>
     </div>
-
-    <!-- Модалка для челленджа -->
     <div class="modal" id="challengeModal">
         <div class="modal-content">
             <div class="modal-title">Новый челлендж</div>
@@ -387,8 +361,6 @@
             <button class="cancel-btn" id="closeChallengeModal">Отмена</button>
         </div>
     </div>
-
-    <!-- Модалка для долга -->
     <div class="modal" id="debtModal">
         <div class="modal-content">
             <div class="modal-title">Добавить долг</div>
@@ -405,8 +377,6 @@
             <button class="cancel-btn" id="closeDebtModal">Отмена</button>
         </div>
     </div>
-
-    <!-- Модалка для регулярного платежа -->
     <div class="modal" id="regularModal">
         <div class="modal-content">
             <div class="modal-title">Регулярный платёж</div>
@@ -470,16 +440,15 @@
         ];
 
         function getExpenseCategories() {
-            if (subLevel === 'platinum') return [...baseExpenseCats, ...proExpenseCats, ...platinumExpenseCats];
-            if (subLevel === 'pro' || subLevel === 'trial') return [...baseExpenseCats, ...proExpenseCats];
+            // пробный период даёт полный Platinum
+            if (subLevel === 'platinum' || subLevel === 'trial') return [...baseExpenseCats, ...proExpenseCats, ...platinumExpenseCats];
+            if (subLevel === 'pro') return [...baseExpenseCats, ...proExpenseCats];
             return baseExpenseCats;
         }
 
-        // CloudStorage
         function cloudGet(key) { return new Promise(resolve => tg.CloudStorage.getItem(key, (err, val) => resolve(err ? null : val))); }
         function cloudSet(key, value) { return new Promise(resolve => tg.CloudStorage.setItem(key, String(value), (err, ok) => resolve(ok))); }
 
-        // ========== ЗАГРУЗКА ==========
         async function loadFinanceData() {
             const [b, tx, limit, dark] = await Promise.all([
                 cloudGet(KEY_BALANCE), cloudGet(KEY_TRANSACTIONS),
@@ -523,10 +492,9 @@
             updateUI();
             renderAll();
             if (subLevel !== 'free') updateTimer();
-            if (subLevel === 'platinum') renderPlatinumTabs();
+            if (subLevel === 'platinum' || subLevel === 'trial') renderPlatinumTabs();
         }
 
-        // ========== СОХРАНЕНИЕ ==========
         async function saveFinanceData() {
             await Promise.all([
                 cloudSet(KEY_BALANCE, balance), cloudSet(KEY_TRANSACTIONS, JSON.stringify(transactions)),
@@ -551,27 +519,22 @@
             ]);
         }
 
-        // ========== ДОСТИЖЕНИЯ ==========
+        // Достижения
         function checkAchievements() {
             const newAch = [...achievements];
-            
-            // Ачивка: 10 транзакций
             if (!newAch.find(a => a.id === 'tx10') && transactions.length >= 10) {
                 newAch.push({id:'tx10', name:'Бухгалтер', desc:'Добавлено 10 операций', icon:'📊', date:Date.now()});
                 tg.showAlert('🏆 Получено достижение: Бухгалтер!');
             }
-            // Ачивка: баланс > 10000
             if (!newAch.find(a => a.id === 'bal10k') && balance >= 10000) {
                 newAch.push({id:'bal10k', name:'Капиталист', desc:'Баланс превысил 10 000 ₽', icon:'💰', date:Date.now()});
                 tg.showAlert('🏆 Получено достижение: Капиталист!');
             }
-            // Ачивка: 5 дней подряд с транзакциями
             const days = [...new Set(transactions.map(tx => tx.date))].sort().reverse();
             if (!newAch.find(a => a.id === 'streak5') && days.length >= 5) {
                 newAch.push({id:'streak5', name:'Регулярный', desc:'5 дней подряд с операциями', icon:'🔥', date:Date.now()});
                 tg.showAlert('🏆 Получено достижение: Регулярный!');
             }
-            
             if (JSON.stringify(newAch) !== JSON.stringify(achievements)) {
                 achievements = newAch;
                 savePlatinumData();
@@ -594,7 +557,6 @@
             });
         }
 
-        // ========== КОПИЛКИ ==========
         function renderPiggyBanks() {
             const container = document.getElementById('piggyList');
             container.innerHTML = piggyBanks.length ? '' : '<p style="color:var(--hint);">Нет копилок. Создайте первую!</p>';
@@ -633,7 +595,6 @@
             input.value = '';
         };
 
-        // ========== ЧЕЛЛЕНДЖИ ==========
         function renderChallenges() {
             const container = document.getElementById('challengesList');
             container.innerHTML = challenges.length ? '' : '<p style="color:var(--hint);">Нет активных челленджей</p>';
@@ -643,7 +604,7 @@
                     <div class="challenge-card">
                         <div>🎯 <b>${c.name}</b></div>
                         <div style="font-size:13px; color:var(--hint);">День ${c.progress}/${c.days} ${daysLeft > 0 ? '(' + daysLeft + ' осталось)' : '✅ Завершён!'}</div>
-                        <div class="achievement-progress" style="margin-top:6px;"><div class="achievement-progress-bar" style="width:${(c.progress/c.days)*100}%"></div></div>
+                        <div class="achievement-progress" style="margin-top:6px;"><div class="achievement-progress-bar" style="width:${(c.progress/c.days)*100}%; background:gold;"></div></div>
                         ${daysLeft > 0 ? `<button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="progressChallenge(${i})">Отметить день</button>` : ''}
                     </div>`;
             });
@@ -657,7 +618,6 @@
             }
         };
 
-        // ========== ДОЛГИ ==========
         function renderDebts() {
             const container = document.getElementById('debtsList');
             container.innerHTML = debts.length ? '' : '<p style="color:var(--hint);">Нет долгов</p>';
@@ -679,7 +639,6 @@
             renderDebts();
         };
 
-        // ========== РЕГУЛЯРНЫЕ ПЛАТЕЖИ ==========
         function renderRegularPayments() {
             const container = document.getElementById('regularPaymentsList');
             container.innerHTML = regularPayments.length ? '<div class="section-title">Регулярные платежи</div>' : '';
@@ -701,7 +660,6 @@
             renderRegularPayments();
         };
 
-        // ========== ИНСТРУМЕНТЫ ==========
         function showCreditCalculator() {
             const amount = prompt('Сумма кредита (₽):', '100000');
             const rate = prompt('Процентная ставка (%):', '15');
@@ -735,7 +693,6 @@
             tg.showAlert(`🔮 Прогноз на следующий месяц\n\nПримерно: -${forecast.toLocaleString()} ₽\nСредний чек: ${Math.round(avg)} ₽\nВ день: ${Math.round(dailyAvg)} ₽`);
         }
 
-        // ========== UI ==========
         function applyTheme() {
             if (isDark) document.body.classList.add('dark-theme');
             else document.body.classList.remove('dark-theme');
@@ -750,7 +707,7 @@
             updateUI();
             renderAll();
             updateTimer();
-            if (subLevel === 'platinum') renderPlatinumTabs();
+            if (subLevel === 'platinum' || subLevel === 'trial') renderPlatinumTabs();
         }
 
         function formatTime(ms) {
@@ -772,7 +729,7 @@
             const label = document.getElementById('timerLabel');
             const value = document.getElementById('timerValue');
             box.className = 'timer-box';
-            if (subLevel === 'trial') { box.classList.add('trial', 'active'); label.textContent = 'Пробный период'; }
+            if (subLevel === 'trial') { box.classList.add('trial', 'active'); label.textContent = 'Пробный Platinum'; }
             else if (subLevel === 'pro') { box.classList.add('pro', 'active'); label.textContent = 'PRO подписка'; }
             else if (subLevel === 'platinum') { box.classList.add('platinum', 'active'); label.textContent = 'Platinum подписка'; }
             else { box.classList.remove('active'); return; }
@@ -803,13 +760,16 @@
             else if (subLevel === 'platinum') { badge.classList.add('platinum'); badge.textContent = 'PLATINUM'; }
             else if (subLevel === 'trial') { badge.classList.add('trial'); badge.textContent = 'ПРОБНЫЙ'; }
             else badge.style.display = 'none';
+
             pro.style.display = (subLevel !== 'free') ? 'block' : 'none';
-            plat.style.display = (subLevel === 'platinum') ? 'block' : 'none';
+            // пробный и платинум показывают Platinum-функции
+            plat.style.display = (subLevel === 'platinum' || subLevel === 'trial') ? 'block' : 'none';
             sub.style.display = (subLevel === 'free') ? 'block' : 'none';
             if (subLevel === 'free') trialBtn.style.display = trialUsed ? 'none' : 'block';
+
             const info = document.getElementById('subscriptionInfo');
             if (subLevel === 'free') info.innerHTML = '❌ Нет подписки';
-            else if (subLevel === 'trial') info.innerHTML = '🟢 Пробный PRO (3 дня)';
+            else if (subLevel === 'trial') info.innerHTML = '🟢 Пробный Platinum (3 дня)';
             else if (subLevel === 'pro') info.innerHTML = '⭐ PRO активно';
             else if (subLevel === 'platinum') info.innerHTML = '💎 Platinum активно';
         }
@@ -824,7 +784,6 @@
             document.getElementById(activeTab).style.display = 'block';
         }
 
-        // Переключение табов
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -847,7 +806,7 @@
                 updateCategoryStats();
                 updateAdvancedStats();
             }
-            if (subLevel === 'platinum') renderPlatinumTabs();
+            if (subLevel === 'platinum' || subLevel === 'trial') renderPlatinumTabs();
         }
 
         function renderTransactions(listId, list) {
@@ -930,11 +889,11 @@
             document.getElementById('topCategory').textContent = top ? `${top[0]} (${top[1]} ₽)` : '-';
         }
 
-        // ========== ОБРАБОТЧИКИ ==========
+        // Обработчики подписок
         document.getElementById('trialBtn').addEventListener('click', async () => {
-            if (trialUsed) return tg.showAlert('Уже использован');
+            if (trialUsed) return tg.showAlert('Пробный период уже использован');
             await setSubscription('trial', 3*24*60*60*1000);
-            tg.showAlert('✅ Пробный PRO на 3 дня!');
+            tg.showAlert('✅ Пробный Platinum на 3 дня активирован!');
         });
         document.getElementById('buyProBtn').addEventListener('click', async () => {
             await setSubscription('pro', 30*24*60*60*1000);
