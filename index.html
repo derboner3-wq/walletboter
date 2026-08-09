@@ -303,6 +303,14 @@
     <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
     <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
     <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="pro_forever">PRO навсегда</option><option value="platinum_forever">Platinum навсегда</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
+    <!-- Новое модальное окно для напоминаний -->
+    <div class="modal" id="reminderModal">
+        <div class="modal-content">
+            <div class="modal-title">🔔 Напоминания</div>
+            <div id="reminderList"></div>
+            <button class="cancel-btn" id="closeReminderModal">Позже</button>
+        </div>
+    </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -411,6 +419,9 @@
             if (subLevel!=='free') updateTimer();
             if (subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') renderExtra();
             updateCoinsDisplay();
+            
+            // Проверка регулярных платежей
+            checkRegularPayments();
         }
 
         async function saveFin() { await Promise.all([cSet(KEY_BAL,balance),cSet(KEY_TX,JSON.stringify(transactions)),cSet(KEY_LIM,dailyLimit),cSet(KEY_DARK,isDark)]); }
@@ -582,9 +593,105 @@
         document.getElementById('closeDebtModal').addEventListener('click',()=>document.getElementById('debtModal').classList.remove('active'));
         document.getElementById('saveDebtBtn').addEventListener('click',async()=>{ const p=document.getElementById('debtPerson').value, a=parseFloat(document.getElementById('debtAmount').value), t=document.getElementById('debtType').value; if(!p||!a)return tg.showAlert('Заполните поля'); debts.push({person:p,amount:a,type:t}); await savePlat(); renderDebts(); document.getElementById('debtModal').classList.remove('active'); });
 
+        // ========== РЕГУЛЯРНЫЕ ПЛАТЕЖИ С НАПОМИНАНИЯМИ ==========
         document.getElementById('addRegularPaymentBtn').addEventListener('click',()=>document.getElementById('regularModal').classList.add('active'));
         document.getElementById('closeRegularModal').addEventListener('click',()=>document.getElementById('regularModal').classList.remove('active'));
-        document.getElementById('saveRegularBtn').addEventListener('click',async()=>{ const n=document.getElementById('regularName').value, a=parseFloat(document.getElementById('regularAmount').value), p=document.getElementById('regularPeriod').value; if(!n||!a)return tg.showAlert('Заполните поля'); regularPayments.push({name:n,amount:a,period:p}); await savePlat(); renderRegular(); document.getElementById('regularModal').classList.remove('active'); });
+        document.getElementById('saveRegularBtn').addEventListener('click',async()=>{
+            const n=document.getElementById('regularName').value;
+            const a=parseFloat(document.getElementById('regularAmount').value);
+            const p=document.getElementById('regularPeriod').value;
+            if(!n||!a)return tg.showAlert('Заполните поля');
+            regularPayments.push({name:n, amount:a, period:p, lastPaid: null}); // lastPaid добавлено
+            await savePlat();
+            renderRegular();
+            document.getElementById('regularModal').classList.remove('active');
+        });
+
+        // Проверка регулярных платежей при загрузке
+        function checkRegularPayments() {
+            const today = new Date();
+            const reminders = [];
+            
+            regularPayments.forEach((p, idx) => {
+                let needReminder = false;
+                if (!p.lastPaid) {
+                    needReminder = true; // ещё ни разу не оплачивали
+                } else {
+                    const last = new Date(p.lastPaid);
+                    const diffDays = Math.floor((today - last) / (1000 * 60 * 60 * 24));
+                    if (p.period === 'weekly' && diffDays >= 7) needReminder = true;
+                    else if (p.period === 'monthly' && diffDays >= 30) needReminder = true;
+                }
+                if (needReminder) {
+                    reminders.push({ index: idx, ...p });
+                }
+            });
+
+            if (reminders.length > 0) {
+                showReminders(reminders);
+            }
+        }
+
+        function showReminders(reminders) {
+            const list = document.getElementById('reminderList');
+            list.innerHTML = reminders.map(r => `
+                <div style="background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div><b>${r.name}</b></div>
+                        <div style="font-size:13px;">${r.amount} ₽ · ${r.period==='weekly'?'Раз в неделю':'Раз в месяц'}</div>
+                    </div>
+                    <button class="btn btn-primary" style="flex:0; padding:8px 12px;" onclick="payReminder(${r.index})">Оплатить</button>
+                </div>
+            `).join('');
+            document.getElementById('reminderModal').classList.add('active');
+        }
+
+        window.payReminder = async function(index) {
+            const p = regularPayments[index];
+            if (!p) return;
+            if (balance < p.amount) {
+                tg.showAlert('Недостаточно средств для оплаты');
+                return;
+            }
+            // Добавляем расходную транзакцию
+            const tx = {
+                type: 'expense',
+                category: '📅 Регулярный платёж',
+                emoji: '📅',
+                amount: p.amount,
+                date: new Date().toISOString().split('T')[0]
+            };
+            transactions.unshift(tx);
+            balance -= p.amount;
+            // Обновляем дату последней оплаты
+            regularPayments[index].lastPaid = new Date().toISOString();
+            await saveFin();
+            await savePlat();
+            renderAll();
+            // Обновляем список напоминаний
+            const list = document.getElementById('reminderList');
+            // Удаляем оплаченный элемент из списка
+            const items = list.querySelectorAll('div');
+            items.forEach(item => item.remove());
+            // Проверяем, остались ли ещё напоминания
+            const remaining = regularPayments.filter((p, i) => {
+                if (i === index) return false;
+                if (!p.lastPaid) return true;
+                const last = new Date(p.lastPaid);
+                const diff = Math.floor((new Date() - last) / (1000 * 60 * 60 * 24));
+                return (p.period === 'weekly' && diff >= 7) || (p.period === 'monthly' && diff >= 30);
+            });
+            if (remaining.length === 0) {
+                document.getElementById('reminderModal').classList.remove('active');
+            } else {
+                showReminders(remaining);
+            }
+            tg.showAlert('Платёж выполнен');
+        };
+
+        document.getElementById('closeReminderModal').addEventListener('click', ()=>{
+            document.getElementById('reminderModal').classList.remove('active');
+        });
 
         function openAdd(type) { currentType=type; selectedCategory=null; document.getElementById('modalTitle').textContent=type==='expense'?'Добавить расход':'Добавить доход'; document.getElementById('amountInput').value=''; const grid=document.getElementById('categoryGrid'); grid.innerHTML=''; (type==='expense'?getExpenseCategories():incomeCats).forEach(cat=>{ const d=document.createElement('div'); d.className='category-item'; d.innerHTML=`${cat.emoji}<div class="category-label">${cat.name}</div>`; d.onclick=()=>{grid.querySelectorAll('.category-item').forEach(e=>e.classList.remove('selected'));d.classList.add('selected');selectedCategory=cat;}; grid.appendChild(d); }); document.getElementById('addModal').classList.add('active'); }
 
