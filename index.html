@@ -178,7 +178,6 @@
         .chat-input-row input[type="file"] { display: none; }
         .chat-input-row label { padding: 10px; background: var(--secondary-bg); border-radius: 10px; cursor: pointer; }
 
-        /* Нижняя панель */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 400px; background: var(--bg); border-top: 1px solid var(--border);
@@ -203,7 +202,7 @@
     </style>
 </head>
 <body>
-    <!-- Экраны -->
+    <!-- Главный экран -->
     <div id="screen-main" class="screen active">
         <div class="header">
             <div class="user-info">
@@ -218,6 +217,7 @@
             <div class="coins-display" id="coinsDisplay">🪙 0</div>
             <div style="font-size:24px; cursor:pointer;" id="openSettings">⚙️</div>
         </div>
+
         <div class="balance-card">
             <div class="balance-label">Остаток на месяц</div>
             <div class="balance-amount" id="balanceDisplay">0 ₽</div>
@@ -226,12 +226,15 @@
                 <span id="limitStatus" style="display:none;">⚠️ Превышен</span>
             </div>
         </div>
+
         <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
+
         <div class="actions">
             <button class="btn btn-primary" id="openExpenseModal">➖ Расход</button>
             <button class="btn" id="openIncomeModal">➕ Доход</button>
         </div>
         <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
+
         <div style="margin:12px 0;" id="subscribeBlock">
             <button class="trial-btn" id="trialBtn">🎁 Пробный Platinum на 3 дня</button>
             <button class="buy-btn buy-pro" id="buyProBtn">⭐ PRO — 99 ₽</button>
@@ -239,6 +242,7 @@
             <button class="forever-btn" id="buyForeverProBtn">⭐ PRO навсегда — 299 ₽</button>
             <button class="forever-btn" id="buyForeverPlatinumBtn">💎 Platinum навсегда — 499 ₽</button>
         </div>
+
         <div class="section-title-row">
             <div class="section-title">Операции</div>
             <span class="section-link" id="viewAllBtn">Все</span>
@@ -247,6 +251,7 @@
         <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
     </div>
 
+    <!-- Экран Аналитика (PRO) -->
     <div id="screen-analytics" class="screen">
         <div class="section-title">📊 Аналитика (PRO)</div>
         <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
@@ -257,11 +262,13 @@
         </div>
     </div>
 
+    <!-- Экран Магазин -->
     <div id="screen-shop" class="screen">
         <div class="section-title">🛒 Магазин</div>
         <div id="shopList"></div>
     </div>
 
+    <!-- Экран Ещё (копилки, челленджи, трофеи, долги, инструменты) -->
     <div id="screen-more" class="screen">
         <div class="tabs" id="featureTabs">
             <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
@@ -289,7 +296,7 @@
         </div>
     </div>
 
-    <!-- Нижняя панель -->
+    <!-- Нижняя навигация -->
     <div class="bottom-nav">
         <button class="nav-btn active" data-screen="main">🏠</button>
         <button class="nav-btn" data-screen="analytics">📊</button>
@@ -298,7 +305,7 @@
         <button class="nav-btn" id="adminNavBtn" style="display:none;" data-screen="admin">🛡</button>
     </div>
 
-    <!-- Админ-панель (полноэкранная) -->
+    <!-- Админ полноэкранная панель -->
     <div id="adminFullscreen" class="admin-fullscreen">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2>🛡 Админ-панель</h2>
@@ -323,7 +330,7 @@
         </div>
     </div>
 
-    <!-- Модальные окна (полный список) -->
+    <!-- Все модальные окна (полная разметка) -->
     <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
     <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
     <div class="modal" id="settingsModal"> <div class="modal-content"> <div class="modal-title">Настройки</div> <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div> <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div> <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div> <button class="submit-btn" id="saveSettings">Сохранить</button> <button class="cancel-btn" id="closeSettings">Отмена</button> </div> </div>
@@ -452,29 +459,6 @@
             await saveCustomCategories();
             renderCustomCategoriesList();
         };
-
-        document.getElementById('addCustomCategoryBtn').addEventListener('click', () => {
-            document.getElementById('customCatModalTitle').textContent = 'Новая категория';
-            document.getElementById('customCatName').value = '';
-            document.getElementById('customCatEmoji').value = '';
-            document.getElementById('customCatType').value = 'expense';
-            document.getElementById('customCategoryModal').classList.add('active');
-        });
-
-        document.getElementById('closeCustomCatModal').addEventListener('click', () => {
-            document.getElementById('customCategoryModal').classList.remove('active');
-        });
-
-        document.getElementById('saveCustomCatBtn').addEventListener('click', async () => {
-            const name = document.getElementById('customCatName').value.trim();
-            const emoji = document.getElementById('customCatEmoji').value.trim() || '📌';
-            const type = document.getElementById('customCatType').value;
-            if (!name) return tg.showAlert('Введите название');
-            customCategories[type].push({ name, emoji });
-            await saveCustomCategories();
-            renderCustomCategoriesList();
-            document.getElementById('customCategoryModal').classList.remove('active');
-        });
 
         // ========== СИНХРОНИЗАЦИЯ С GOOGLE SHEETS ==========
         async function syncUserWithSheet() {
@@ -659,10 +643,7 @@
         function fmtTime(ms) { if(ms<=0)return'Истекла'; const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000); return `${d?d+'д ':''}${h||d?h+'ч ':''}${m}м ${s}с`; }
         function updateTimer() { if(timerInterval)clearInterval(timerInterval); const box=document.getElementById('timerBox'),lab=document.getElementById('timerLabel'),val=document.getElementById('timerValue'); box.className='timer-box'; if(subLevel==='trial'){box.classList.add('trial','active');lab.textContent='Пробный Platinum';} else if(subLevel==='pro'){box.classList.add('pro','active');lab.textContent='PRO подписка';} else if(subLevel==='platinum'){box.classList.add('platinum','active');lab.textContent='Platinum подписка';} else if(subLevel==='pro_forever'||subLevel==='platinum_forever'){box.classList.add('forever','active');lab.textContent='Вечная подписка';} else{box.classList.remove('active');return;} const tick=()=>{ const rem=subExpiry-Date.now(); if(rem<=0){clearInterval(timerInterval);subLevel='free';subExpiry=null;saveSub();updateUI();renderAll();tg.showAlert('⏰ Подписка истекла');return;} val.textContent=fmtTime(rem); }; tick(); timerInterval=setInterval(tick,1000); }
         function updateUI() { const badge=document.getElementById('levelBadge'),pro=document.getElementById('proAnalytics'),extra=document.getElementById('extraFeatures'),sub=document.getElementById('subscribeBlock'),tbtn=document.getElementById('trialBtn'); badge.className='level-badge'; if(subLevel==='pro'){badge.classList.add('pro');badge.textContent='PRO';} else if(subLevel==='pro_forever'){badge.classList.add('forever');badge.textContent='PRO ∞';} else if(subLevel==='platinum'){badge.classList.add('platinum');badge.textContent='PLATINUM';} else if(subLevel==='platinum_forever'){badge.classList.add('forever');badge.textContent='PLATINUM ∞';} else if(subLevel==='trial'){badge.classList.add('trial');badge.textContent='ПРОБНЫЙ';} else badge.style.display='none';
-        pro.style.display = (subLevel !== 'free') ? 'block' : 'none';
-        // Скрываем/показываем экран аналитики в зависимости от подписки
         document.getElementById('screen-analytics').style.display = (subLevel !== 'free') ? '' : 'none';
-        extra.style.display=(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial')?'block':'none';
         sub.style.display=subLevel==='free'?'block':'none';
         if(subLevel==='free')tbtn.style.display=trialUsed?'none':'block';
         const isPlat=(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial');
@@ -703,7 +684,7 @@
         document.getElementById('saveSettings').addEventListener('click',async()=>{ dailyLimit=parseFloat(document.getElementById('dailyLimitInput').value)||0; isDark=document.getElementById('themeToggle').checked; applyTheme(); await saveFin(); document.getElementById('settingsModal').classList.remove('active'); renderAll(); });
 
         // Копилки, челленджи, магазин и т.д. (функции renderPiggy, renderChallenges, renderShop, renderAchievements, renderDebts, renderRegular)
-        // ... (оставьте их из предыдущего полного кода, они идентичны)
+        // ... (вставьте их из последней полной версии, они уже были)
 
         function openAdd(type) { currentType=type; selectedCategory=null; document.getElementById('modalTitle').textContent=type==='expense'?'Добавить расход':'Добавить доход'; document.getElementById('amountInput').value=''; const grid=document.getElementById('categoryGrid'); grid.innerHTML=''; const cats = type==='expense' ? getExpenseCategories() : getIncomeCategories(); cats.forEach(cat=>{ const d=document.createElement('div'); d.className='category-item'; d.innerHTML=`${cat.emoji}<div class="category-label">${cat.name}</div>`; d.onclick=()=>{grid.querySelectorAll('.category-item').forEach(e=>e.classList.remove('selected'));d.classList.add('selected');selectedCategory=cat;}; grid.appendChild(d); }); document.getElementById('addModal').classList.add('active'); }
 
