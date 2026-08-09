@@ -87,6 +87,9 @@
             padding: 24px 20px 30px; animation: slideUp 0.3s ease; color: var(--text);
             max-height: 80vh; overflow-y: auto;
         }
+        .chat-modal .modal-content {
+            height: 100vh; max-height: 100vh; border-radius: 0;
+        }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; text-align: center; }
         .form-group { margin-bottom: 16px; }
@@ -161,7 +164,7 @@
         .shop-item { background: var(--secondary-bg); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .admin-section { margin-top: 16px; }
         .admin-user-card { background: var(--secondary-bg); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .chat-messages { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; padding: 10px; background: var(--secondary-bg); border-radius: 12px; margin-bottom: 10px; }
+        .chat-messages { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; padding: 10px; background: var(--secondary-bg); border-radius: 12px; margin-bottom: 10px; }
         .chat-message { display: flex; flex-direction: column; max-width: 80%; }
         .chat-message.user { align-self: flex-end; }
         .chat-message.admin { align-self: flex-start; }
@@ -266,7 +269,7 @@
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
     <div class="modal" id="adminModal"> <div class="modal-content"> <div class="modal-title">🛡 Админ-панель</div> <div class="tabs"> <button class="tab active" data-atab="users">Пользователи</button> <button class="tab" data-atab="shop">Магазин</button> <button class="tab" data-atab="tickets">Тикеты</button> <button class="tab" data-atab="stats">Статистика</button> </div> <div id="admin-users" class="admin-section"></div> <div id="admin-shop" class="admin-section" style="display:none;"><div id="adminShopList"></div><button class="btn btn-primary" id="addShopItemBtn">Добавить товар</button></div> <div id="admin-tickets" class="admin-section" style="display:none;"><div id="adminTicketsList"></div></div> <div id="admin-stats" class="admin-section" style="display:none;"><div id="adminStatsData"></div></div> <button class="cancel-btn" id="closeAdminModal">Закрыть</button> </div> </div>
     <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
+    <div class="modal chat-modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column;"> <div class="modal-title">Чат поддержки <button class="btn btn-danger" id="closeChatModalFromTitle" style="float:right; padding:4px 10px; font-size:14px;">✕</button></div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> </div> </div>
     <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -342,8 +345,16 @@
             shopItems = shop?JSON.parse(shop):defaultShop();
 
             const uid = tg.initDataUnsafe.user.id;
-            if (!users[uid]) users[uid] = {first_name:tg.initDataUnsafe.user.first_name||'User', balance:0, coins:0, sub:'free', joined:Date.now()};
-            else users[uid].first_name = tg.initDataUnsafe.user.first_name||users[uid].first_name;
+            if (!users[uid]) {
+                users[uid] = {first_name:tg.initDataUnsafe.user.first_name||'User', balance:0, coins:0, sub:'free', joined:Date.now()};
+            } else {
+                users[uid].first_name = tg.initDataUnsafe.user.first_name||users[uid].first_name;
+                if (users[uid].sub && users[uid].sub !== 'free' && users[uid].sub_expiry && Date.now() < users[uid].sub_expiry) {
+                    subLevel = users[uid].sub; subExpiry = users[uid].sub_expiry;
+                }
+                if (users[uid].coins !== undefined) coins = users[uid].coins;
+                if (users[uid].trial_used !== undefined) trialUsed = users[uid].trial_used;
+            }
             await saveUsers();
 
             document.getElementById('dailyLimitInput').value = dailyLimit||'';
@@ -382,8 +393,32 @@
         document.querySelectorAll('#adminModal .tab').forEach(t=>t.addEventListener('click',()=>{adminActiveTab=t.dataset.atab;renderAdmin();}));
 
         function renderAdminUsers() { const c=document.getElementById('admin-users'); c.innerHTML='<div class="section-title">Пользователи</div>'; Object.entries(users).forEach(([uid,u])=>{ c.innerHTML+=`<div class="admin-user-card"><div><div>${u.first_name} (ID: ${uid})</div><div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div></div><div style="display:flex;gap:4px;"><button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSub('${uid}','pro')">PRO</button><button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSub('${uid}','platinum')">Plat</button><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSub('${uid}','free')">Сброс</button><button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminCoins('${uid}',500)">+500🪙</button></div></div>`; }); }
-        window.adminSub=async(uid,lvl)=>{if(users[uid]){users[uid].sub=lvl;await saveUsers();renderAdminUsers();}};
-        window.adminCoins=async(uid,n)=>{if(users[uid]){users[uid].coins=(users[uid].coins||0)+n;await saveUsers();renderAdminUsers();}};
+        window.adminSub = async (uid, lvl) => {
+            if (users[uid]) {
+                if (lvl === 'free') { users[uid].sub = 'free'; delete users[uid].sub_expiry; users[uid].trial_used = false; }
+                else { users[uid].sub = lvl; users[uid].sub_expiry = Date.now() + 30*24*60*60*1000; }
+                await saveUsers();
+                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
+                    if (lvl === 'free') { subLevel = 'free'; subExpiry = null; trialUsed = false; }
+                    else { subLevel = lvl; subExpiry = Date.now() + 30*24*60*60*1000; }
+                    await saveSub();
+                    updateUI(); renderAll(); updateTimer();
+                }
+                renderAdminUsers();
+            }
+        };
+        window.adminCoins = async (uid, n) => {
+            if (users[uid]) {
+                users[uid].coins = (users[uid].coins || 0) + n;
+                await saveUsers();
+                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
+                    coins = users[uid].coins;
+                    updateCoinsDisplay();
+                    savePlat();
+                }
+                renderAdminUsers();
+            }
+        };
 
         function renderAdminShop() { document.getElementById('adminShopList').innerHTML=shopItems.map((it,i)=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc} | 🪙${it.price}</div></div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="delShop(${i})">✕</button></div>`).join(''); }
         window.delShop=async(i)=>{shopItems.splice(i,1);await saveShop();renderAdminShop();};
@@ -410,6 +445,10 @@
         document.getElementById('sendChatBtn').addEventListener('click',async()=>{ const text=document.getElementById('chatInput').value.trim(); const photoFile=document.getElementById('chatPhotoInput').files[0]; if(!text&&!photoFile)return; const ticket=tickets.find(t=>t.id===currentChatTicketId); if(!ticket)return; const sender=isAdmin()?'admin':'user'; let photoData=null; if(photoFile){ photoData=await new Promise(resolve=>{ const reader=new FileReader(); reader.onload=e=>resolve(e.target.result); reader.readAsDataURL(photoFile); }); } ticket.messages.push({sender,text,photo:photoData,date:Date.now()}); await saveTickets(); document.getElementById('chatInput').value=''; document.getElementById('chatPhotoInput').value=''; renderChatMessages(currentChatTicketId); });
 
         function renderChatMessages(tid){ const t=tickets.find(x=>x.id===tid); if(!t)return; const container=document.getElementById('chatMessages'); container.innerHTML=t.messages.map(m=>{ let content=''; if(m.text)content+=`<div class="chat-bubble">${m.text}</div>`; if(m.photo)content+=`<img src="${m.photo}" class="chat-photo">`; return `<div class="chat-message ${m.sender}">${content}</div>`; }).join(''); container.scrollTop=container.scrollHeight; }
+
+        document.getElementById('closeChatModalFromTitle').addEventListener('click',()=>{ document.getElementById('chatModal').classList.remove('active'); currentChatTicketId=null; });
+        // Закрытие по клику на фон
+        document.getElementById('chatModal').addEventListener('click',function(e){ if(e.target===this){ this.classList.remove('active'); currentChatTicketId=null; } });
 
         setInterval(async()=>{ if(document.getElementById('chatModal').classList.contains('active')&&currentChatTicketId){ const raw=await cGet(KEY_TICKETS); if(raw)tickets=JSON.parse(raw); renderChatMessages(currentChatTicketId); } },3000);
 
