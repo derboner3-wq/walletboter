@@ -34,7 +34,6 @@
         .level-badge.platinum { background: linear-gradient(135deg, #e0e0e0, #f5f5f5, #b0b0b0); color: #333; display: inline-block; }
         .level-badge.trial { background: #34c759; color: white; display: inline-block; }
         .level-badge.forever { background: linear-gradient(135deg, #ffd700, #ff8c00); color: black; display: inline-block; }
-        .user-level { font-size: 12px; color: var(--hint); margin-left: 6px; }
         .coins-display {
             background: gold; color: black; padding: 4px 10px; border-radius: 12px;
             font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 4px;
@@ -49,13 +48,17 @@
         .daily-limit-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 14px; opacity: 0.9; }
         .timer-box {
             background: var(--secondary-bg); border-radius: 12px; padding: 10px 16px;
-            margin-bottom: 20px; text-align: center; font-size: 14px; font-weight: 500; display: none;
+            margin-bottom: 12px; text-align: center; font-size: 14px; font-weight: 500; display: none;
         }
         .timer-box.active { display: block; }
         .timer-box.trial { background: #34c759; color: white; }
         .timer-box.pro { background: gold; color: black; }
         .timer-box.platinum { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #333; }
         .timer-box.forever { background: linear-gradient(135deg, #ffd700, #ff8c00); color: black; }
+        .level-box {
+            background: var(--secondary-bg); border-radius: 12px; padding: 8px 16px;
+            margin-bottom: 12px; text-align: center; font-size: 13px;
+        }
         .actions { display: flex; gap: 12px; margin-bottom: 8px; }
         .btn {
             flex: 1; padding: 14px 10px; border: none; border-radius: 14px; font-size: 14px;
@@ -214,7 +217,6 @@
                     <div class="name" id="userName">...</div>
                 </div>
                 <span class="level-badge" id="levelBadge"></span>
-                <span class="user-level" id="userLevel"></span>
             </div>
             <div class="coins-display" id="coinsDisplay">🪙 0</div>
             <div style="font-size:24px; cursor:pointer;" id="openSettings">⚙️</div>
@@ -230,6 +232,7 @@
         </div>
 
         <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
+        <div class="level-box" id="levelBox">🌱 Новичок</div>
 
         <div class="actions">
             <button class="btn btn-primary" id="openExpenseModal">➖ Расход</button>
@@ -270,7 +273,7 @@
         <div id="shopList"></div>
     </div>
 
-    <!-- Экран Ещё (копилки, челленджи, трофеи, долги, инструменты) -->
+    <!-- Экран Ещё -->
     <div id="screen-more" class="screen">
         <div class="tabs" id="featureTabs">
             <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
@@ -427,7 +430,7 @@
 
         function updateUserLevel() {
             const level = getUserLevel();
-            document.getElementById('userLevel').textContent = `${level.emoji} ${level.name}`;
+            document.getElementById('levelBox').textContent = `${level.emoji} ${level.name}`;
         }
 
         // ========== СВОИ КАТЕГОРИИ ==========
@@ -501,7 +504,7 @@
             } catch(e) {}
         }
 
-        // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ИЗ ГРУППЫ (для админки) ==========
+        // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ИЗ ГРУППЫ ==========
         async function loadAdminUsersFromChannel() {
             const container = document.getElementById('admin-users');
             container.innerHTML = '<p>Загрузка пользователей из группы...</p>';
@@ -635,7 +638,7 @@
         document.getElementById('adminNavBtn').addEventListener('click', openAdminFullscreen);
         if (isAdmin()) document.getElementById('adminNavBtn').style.display = 'flex';
 
-        // ========== АДМИН-ПАНЕЛЬ (полноэкранная) ==========
+        // ========== АДМИН-ПАНЕЛЬ ==========
         function openAdminFullscreen() {
             document.getElementById('adminFullscreen').classList.add('active');
             loadAdminUsersFromChannel();
