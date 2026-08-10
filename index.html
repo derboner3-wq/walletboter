@@ -352,7 +352,6 @@
         const ADMIN_USERNAMES = ['ok00112'];
         const DA_TOKEN = 'qlees6PnNamPz8cFOWW7s1yJJZEaafQ6wCmZelMW';
         const DA_LINK = 'https://dalink.to/hypercore';
-        // ЗАМЕНИТЕ на ваш SCRIPT_URL из Google Apps Script
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXsMArGxnOaZlmYI0q3_wmcjiIPqCDDYa9rns-yFrejyQC3nlavQFK_9uU2l80nYEx/exec';
         // =====================================================================
 
@@ -649,7 +648,7 @@
 
         window.adminSetSubSheet = async (uid, lvl) => {
             await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=&sub=${lvl}&coins=0&balance=0`);
-            loadAdminUsers(); // обновляем список
+            loadAdminUsers();
         };
 
         window.adminAddCoinsSheet = async (uid, amount) => {
