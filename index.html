@@ -13,16 +13,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .user-info{display:flex;align-items:center;gap:10px}
 .avatar{width:44px;height:44px;border-radius:50%;background:var(--button);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;cursor:pointer}
 .name{font-size:18px;font-weight:600}
+.level-badge{color:#000;font-size:11px;padding:2px 8px;border-radius:10px;margin-left:8px;display:none;font-weight:700}
+.level-badge.pro{background:gold;display:inline-block}
+.level-badge.platinum{background:linear-gradient(135deg,#e0e0e0,#f5f5f5,#b0b0b0);color:#333;display:inline-block}
+.level-badge.trial{background:#34c759;color:#fff;display:inline-block}
+.level-badge.forever{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;display:inline-block}
+.coins-display,.stars-display{padding:4px 10px;border-radius:12px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+.coins-display{background:gold;color:#000}
+.stars-display{background:#ffd700;color:#000}
 .balance-card{background:linear-gradient(135deg,#007aff,#5856d6);border-radius:16px;padding:20px;color:#fff;margin-bottom:12px}
 .balance-amount{font-size:34px;font-weight:700}
 .daily-limit-row{display:flex;justify-content:space-between;font-size:14px;opacity:.9;margin-top:8px}
+.timer-box{background:var(--secondary-bg);border-radius:12px;padding:10px 16px;margin-bottom:12px;text-align:center;font-size:14px;font-weight:500;display:none}
+.timer-box.active{display:block}
+.timer-box.trial{background:#34c759;color:#fff}
+.timer-box.pro{background:gold;color:#000}
+.timer-box.platinum{background:linear-gradient(135deg,#c0c0c0,#e8e8e8);color:#333}
+.timer-box.forever{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000}
+.level-box{background:var(--secondary-bg);border-radius:12px;padding:8px 16px;margin-bottom:12px;text-align:center;font-size:13px}
+.actions{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
 .btn{flex:1;padding:12px 10px;border:none;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--secondary-bg);color:var(--text);transition:opacity .2s}
 .btn:active{opacity:.7}
 .btn-primary{background:var(--button);color:var(--button-text)}
 .btn-danger{background:#ff3b30;color:#fff}
 .btn-gold{background:gold;color:#000}
-.actions{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
 .section-title{font-size:18px;font-weight:600;margin:16px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.section-link{font-size:14px;color:var(--button);cursor:pointer}
 .transaction-list{list-style:none}
 .transaction-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
 .empty-state{text-align:center;color:var(--hint);padding:30px 0}
@@ -73,18 +89,6 @@ input:checked+.slider:before{transform:translateX(20px)}
 .referral-btn{padding:6px 12px;border:none;border-radius:6px;background:var(--button);color:#fff;cursor:pointer;font-size:12px}
 .profile-form input{width:100%;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--secondary-bg);color:var(--text);margin-bottom:10px;font-size:16px}
 .profile-form label{font-size:13px;color:var(--hint);display:block;margin-bottom:3px}
-#subscribeBlock .btn{width:100%;margin-top:6px}
-.timer-box{background:var(--secondary-bg);border-radius:12px;padding:10px 16px;margin-bottom:12px;text-align:center;font-size:14px;font-weight:500;display:none}
-.timer-box.active{display:block}
-.timer-box.trial{background:#34c759;color:#fff}
-.timer-box.pro{background:gold;color:#000}
-.timer-box.platinum{background:linear-gradient(135deg,#c0c0c0,#e8e8e8);color:#333}
-.timer-box.forever{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000}
-.level-badge{color:#000;font-size:11px;padding:2px 8px;border-radius:10px;margin-left:8px;display:none;font-weight:700}
-.level-badge.pro{background:gold;display:inline-block}
-.level-badge.platinum{background:linear-gradient(135deg,#e0e0e0,#f5f5f5,#b0b0b0);color:#333;display:inline-block}
-.level-badge.trial{background:#34c759;color:#fff;display:inline-block}
-.level-badge.forever{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;display:inline-block}
 .tabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:10px}
 .tab{padding:8px 14px;background:var(--secondary-bg);border:none;border-radius:20px;font-size:13px;cursor:pointer;color:var(--text);white-space:nowrap}
 .tab.active{background:var(--button);color:var(--button-text)}
@@ -123,6 +127,9 @@ input:checked+.slider:before{transform:translateX(20px)}
     </div>
   </div>
 
+  <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
+  <div class="level-box" id="levelBox">🌱 Новичок</div>
+
   <!-- Лента наград -->
   <div style="margin:10px 0">
     <div style="font-size:14px;font-weight:600;margin-bottom:6px">🎁 Ежедневная награда</div>
@@ -135,8 +142,6 @@ input:checked+.slider:before{transform:translateX(20px)}
     <span>👥 Рефералы: <span id="refCount">0</span> (бонус <span id="refBonus">0</span>⭐/день)</span>
     <button class="referral-btn" id="shareRefBtn">Поделиться ссылкой</button>
   </div>
-
-  <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
 
   <div class="actions">
     <button class="btn btn-primary" id="openExpenseBtn">➖ Расход</button>
@@ -152,7 +157,7 @@ input:checked+.slider:before{transform:translateX(20px)}
     <button class="forever-btn btn btn-gold" id="buyForeverPlatinumBtn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000">💎 Platinum навсегда — 499 ₽</button>
   </div>
 
-  <div class="section-title">Операции <span class="section-link" id="viewAllBtn" style="font-size:14px;color:var(--button);cursor:pointer">Все</span></div>
+  <div class="section-title">Операции <span class="section-link" id="viewAllBtn">Все</span></div>
   <ul class="transaction-list" id="txList"><li class="empty-state">Нет записей</li></ul>
 </div>
 
@@ -229,7 +234,7 @@ input:checked+.slider:before{transform:translateX(20px)}
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-// Конфиг
+// ===== КОНФИГ =====
 const BOT_TOKEN = '8898902806:AAFYphd_-5qVAsLOaMrVXk5Jo8gbuO7qZUQ';
 const ADMIN_USERNAME = 'ok00112';
 const tg = window.Telegram.WebApp;
@@ -237,34 +242,36 @@ tg.ready();
 tg.expand();
 document.documentElement.style.setProperty('--safe-top', Math.max(tg.safeAreaInset?.top||24,50)+'px');
 
-// CloudStorage keys
+// ===== КЛЮЧИ CLOUDSTORAGE =====
 const KEYS = {
   BAL:'bal', TX:'tx', LIM:'lim', DARK:'dark', SUB:'sub', SUB_EXP:'sub_exp', TRIAL:'trial',
   PIG:'pig', CHAL:'chal', COINS:'coins', STARS:'stars', CURRENCY:'currency',
   DAILY:'daily', REF:'referrals', PROFILE:'profile', STREAK:'streak'
 };
 
+// ===== ПЕРЕМЕННЫЕ =====
 let balance=0, transactions=[], dailyLimit=0, isDark=false;
 let subLevel='free', subExpiry=null, trialUsed=false;
 let piggyBanks=[], challenges=[], coins=0, stars=0, currency='RUB';
 let dailyData=null, referrals=[], profile=null, streak=0;
 let currentType='expense', selectedCategory=null, timerInterval=null;
+let activeTab = 'tab-piggy';
 
+// ===== КАТЕГОРИИ =====
 const baseCats = [{emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},{emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}];
 const proCats = [{emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},{emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}];
 const platCats = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
 const incomeCats = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
 const rates = {RUB:1, USD:0.012, EUR:0.011};
 
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 function cGet(k){return new Promise(r=>tg.CloudStorage.getItem(k,(e,v)=>r(e?null:v)));}
 function cSet(k,v){return new Promise(r=>tg.CloudStorage.setItem(k,String(v),(e,ok)=>r(ok)));}
 
 function getExpenseCats(){
-  let c = [];
-  if(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') c = [...baseCats,...proCats,...platCats];
-  else if(subLevel==='pro'||subLevel==='pro_forever') c = [...baseCats,...proCats];
-  else c = [...baseCats];
-  return c;
+  if(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') return [...baseCats,...proCats,...platCats];
+  if(subLevel==='pro'||subLevel==='pro_forever') return [...baseCats,...proCats];
+  return [...baseCats];
 }
 function getIncomeCats(){return [...incomeCats];}
 function formatCurrency(a){
@@ -280,7 +287,7 @@ function getUserLevel(){
   return{name:'Новичок',emoji:'🌱'};
 }
 
-// Загрузка всех данных
+// ===== ЗАГРУЗКА =====
 async function loadAll(){
   let [b,tx,lim,dark,sub,subexp,trial,pig,chal,coinsv,starsv,cur,daily,ref,prof,strk] = await Promise.all([
     cGet(KEYS.BAL), cGet(KEYS.TX), cGet(KEYS.LIM), cGet(KEYS.DARK),
@@ -313,7 +320,7 @@ async function loadAll(){
       if(!name){ tg.showAlert('Введите имя'); return; }
       profile = {name, email:email||''};
       await saveProfile();
-      // Отправляем в канал
+      // Отправляем в канал/личку боту
       let uid = tg.initDataUnsafe.user.id;
       try{
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${uid}&text=📝 Регистрация: ID: ${uid}, Имя: ${name}, Email: ${email||'не указан'}`);
@@ -327,7 +334,6 @@ async function loadAll(){
         if(refId != uid){
           referrals.push(refId);
           await saveRef();
-          // Отправим уведомление рефереру
           try{
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${refId}&text=👋 Пользователь ${name} зарегистрировался по вашей ссылке! Вы получите +1 звезду.`);
           }catch(e){}
@@ -496,7 +502,7 @@ function renderExtra(){
   if(a) a.style.display='block';
 }
 
-// Копилки
+// ===== КОПИЛКИ =====
 function renderPiggy(){
   let c = document.getElementById('piggyList');
   if(!c) return;
@@ -548,7 +554,7 @@ document.getElementById('savePiggy').addEventListener('click', async ()=>{
   document.getElementById('piggyModal').classList.remove('active');
 });
 
-// Челленджи
+// ===== ЧЕЛЛЕНДЖИ =====
 function renderChallenges(){
   let c = document.getElementById('chalList');
   if(!c) return;
@@ -595,7 +601,7 @@ document.getElementById('saveChal').addEventListener('click', async ()=>{
   document.getElementById('chalModal').classList.remove('active');
 });
 
-// Магазин
+// ===== МАГАЗИН =====
 function renderShop(){
   let shopItems = [
     {id:'pro', name:'PRO (30 дней)', price:500, action:'pro'},
@@ -630,7 +636,7 @@ window.buyItem = function(id){
   });
 };
 
-// Daily streak
+// ===== ЕЖЕДНЕВНАЯ НАГРАДА =====
 function checkDailyBonus(){
   let today = new Date().toISOString().split('T')[0];
   let streakEl = document.getElementById('dailyStreak');
@@ -707,7 +713,7 @@ document.getElementById('shareRefBtn').addEventListener('click', ()=>{
   });
 });
 
-// Admin panel - get users from channel
+// ===== АДМИН-ПАНЕЛЬ (парсим getUpdates) =====
 async function getChannelUsers(){
   try{
     let r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?limit=200`);
@@ -771,7 +777,7 @@ document.getElementById('searchAdminBtn').addEventListener('click', ()=>{
   });
 });
 
-// Navigation
+// ===== НАВИГАЦИЯ =====
 function isAdmin(){
   let u = tg.initDataUnsafe.user.username;
   return u && u === ADMIN_USERNAME;
@@ -802,7 +808,7 @@ function openAdmin(){
 document.getElementById('closeAdmin').addEventListener('click', ()=>document.getElementById('adminFullscreen').classList.remove('active'));
 document.getElementById('userAvatar').addEventListener('click', ()=>{ if(isAdmin()) openAdmin(); });
 
-// Modals for add tx
+// ===== МОДАЛКИ ДЛЯ ОПЕРАЦИЙ =====
 document.getElementById('openExpenseBtn').addEventListener('click', ()=>openAdd('expense'));
 document.getElementById('openIncomeBtn').addEventListener('click', ()=>openAdd('income'));
 document.getElementById('closeAddModal').addEventListener('click', ()=>document.getElementById('addModal').classList.remove('active'));
@@ -838,6 +844,8 @@ function openAdd(type){
   });
   document.getElementById('addModal').classList.add('active');
 }
+
+// ===== ПРОЧИЕ ОБРАБОТЧИКИ =====
 document.getElementById('viewAllBtn').addEventListener('click', ()=>{
   renderTxList('allTxList', transactions);
   document.getElementById('allTxModal').classList.add('active');
@@ -960,7 +968,7 @@ document.getElementById('calcBtn').addEventListener('click', ()=>{
 document.getElementById('userAvatar').textContent = (tg.initDataUnsafe?.user?.first_name||'Г')[0].toUpperCase();
 document.getElementById('userName').textContent = tg.initDataUnsafe?.user?.first_name||'Гость';
 
-// Подписки
+// ===== ПОДПИСКИ =====
 document.getElementById('trialBtn').addEventListener('click', async ()=>{
   if(!profile){ tg.showAlert('Сначала зарегистрируйтесь'); return; }
   if(trialUsed) return tg.showAlert('Уже использован');
@@ -988,7 +996,7 @@ document.getElementById('buyForeverPlatinumBtn').addEventListener('click', async
   tg.showAlert('✅ Platinum навсегда!');
 });
 
-// Tab switching in "Ещё"
+// ===== ВКЛАДКИ В "ЕЩЁ" =====
 document.querySelectorAll('.tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -998,7 +1006,7 @@ document.querySelectorAll('.tab').forEach(tab=>{
   });
 });
 
-// Start
+// ===== СТАРТ =====
 loadAll();
 </script>
 </body>
