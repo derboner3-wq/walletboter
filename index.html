@@ -270,7 +270,7 @@
         <div id="shopList"></div>
     </div>
 
-    <!-- Экран Ещё -->
+    <!-- Экран Ещё (копилки, челленджи, трофеи, долги, инструменты) -->
     <div id="screen-more" class="screen">
         <div class="tabs" id="featureTabs">
             <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
@@ -352,6 +352,7 @@
         const ADMIN_USERNAMES = ['ok00112'];
         const DA_TOKEN = 'qlees6PnNamPz8cFOWW7s1yJJZEaafQ6wCmZelMW';
         const DA_LINK = 'https://dalink.to/hypercore';
+        // ЗАМЕНИТЕ на ваш SCRIPT_URL из Google Apps Script
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXsMArGxnOaZlmYI0q3_wmcjiIPqCDDYa9rns-yFrejyQC3nlavQFK_9uU2l80nYEx/exec';
         // =====================================================================
 
@@ -579,14 +580,33 @@
         // ========== АДМИН-ПАНЕЛЬ (полноэкранная) ==========
         function openAdminFullscreen() {
             document.getElementById('adminFullscreen').classList.add('active');
-            fetch(`${SCRIPT_URL}?action=list`).then(r=>r.json()).then(data=>renderAdminUsersFromSheet(data));
+            loadAdminUsers();
             renderAdminShop();
             renderAdminTickets();
             renderAdminStats();
-            document.querySelectorAll('#adminTabs .tab').forEach(t=>t.classList.remove('active'));
+            document.querySelectorAll('#adminTabs .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#adminTabs .tab[data-atab="users"]').classList.add('active');
-            document.querySelectorAll('#adminFullscreen .admin-section').forEach(s=>s.style.display='none');
-            document.getElementById('admin-users').style.display='block';
+            document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
+            document.getElementById('admin-users').style.display = 'block';
+        }
+
+        async function loadAdminUsers() {
+            const container = document.getElementById('admin-users');
+            container.innerHTML = '<p>Загрузка пользователей...</p>';
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=list`);
+                if (!response.ok) throw new Error('Ошибка сервера');
+                const data = await response.json();
+                renderAdminUsersFromSheet(data);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="section-title">❌ Не удалось загрузить пользователей</div>
+                    <p style="color:var(--hint); font-size:14px;">
+                        Проверьте настройки Google Sheets и SCRIPT_URL.
+                    </p>
+                    <button class="btn btn-primary" onclick="loadAdminUsers()">🔄 Повторить</button>
+                `;
+            }
         }
 
         document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
@@ -604,6 +624,10 @@
 
         function renderAdminUsersFromSheet(usersArray) {
             const c = document.getElementById('admin-users');
+            if (!usersArray || usersArray.length === 0) {
+                c.innerHTML = '<p style="color:var(--hint);">Нет зарегистрированных пользователей</p>';
+                return;
+            }
             c.innerHTML = '<div class="section-title">Пользователи</div>';
             usersArray.forEach(u => {
                 c.innerHTML += `<div class="admin-user-card">
@@ -625,7 +649,7 @@
 
         window.adminSetSubSheet = async (uid, lvl) => {
             await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=&sub=${lvl}&coins=0&balance=0`);
-            fetch(`${SCRIPT_URL}?action=list`).then(r=>r.json()).then(renderAdminUsersFromSheet);
+            loadAdminUsers(); // обновляем список
         };
 
         window.adminAddCoinsSheet = async (uid, amount) => {
@@ -635,7 +659,7 @@
             if (user) {
                 const newCoins = (user.coins || 0) + amount;
                 await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=${encodeURIComponent(user.first_name)}&sub=${user.sub}&coins=${newCoins}&balance=${user.balance}`);
-                fetch(`${SCRIPT_URL}?action=list`).then(r=>r.json()).then(renderAdminUsersFromSheet);
+                loadAdminUsers();
             }
         };
 
