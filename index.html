@@ -164,7 +164,8 @@
         .debt-owed { color: #ff3b30; }
         .shop-item { background: var(--secondary-bg); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .admin-section { margin-top: 16px; }
-        .admin-user-card { background: var(--secondary-bg); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-user-card { background: var(--secondary-bg); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .admin-user-card .btn { flex: 0 0 auto; }
         .chat-messages { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; padding: 10px; background: var(--secondary-bg); border-radius: 12px; margin-bottom: 10px; }
         .chat-message { display: flex; flex-direction: column; max-width: 80%; }
         .chat-message.user { align-self: flex-end; }
@@ -199,11 +200,7 @@
         }
         .admin-fullscreen.active { display: block; }
 
-        #tab-tools .btn {
-            flex: none;
-            width: 100%;
-            margin-bottom: 8px;
-        }
+        #tab-tools .btn { flex: none; width: 100%; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -273,7 +270,7 @@
         <div id="shopList"></div>
     </div>
 
-    <!-- Экран Ещё (копилки, челленджи, трофеи, долги, инструменты) -->
+    <!-- Экран Ещё -->
     <div id="screen-more" class="screen">
         <div class="tabs" id="featureTabs">
             <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
@@ -435,11 +432,8 @@
         // ========== СВОИ КАТЕГОРИИ ==========
         async function loadCustomCategories() {
             const raw = await cGet(KEY_CUSTOM_CATS);
-            if (raw) {
-                customCategories = JSON.parse(raw);
-            } else {
-                customCategories = { expense: [], income: [] };
-            }
+            if (raw) customCategories = JSON.parse(raw);
+            else customCategories = { expense: [], income: [] };
         }
 
         async function saveCustomCategories() {
@@ -488,7 +482,7 @@
             document.getElementById('customCategoryModal').classList.remove('active');
         });
 
-        // ========== СИНХРОНИЗАЦИЯ С GOOGLE SHEETS ==========
+        // ========== СИНХРОНИЗАЦИЯ ==========
         async function syncUserWithSheet() {
             const uid = tg.initDataUnsafe.user.id;
             const name = tg.initDataUnsafe.user.first_name || 'User';
@@ -529,9 +523,7 @@
                 subExpiry = users[uid].sub_expiry;
                 trialUsed = users[uid].trial_used || false;
             }
-            if (users[uid].coins !== undefined) {
-                coins = users[uid].coins;
-            }
+            if (users[uid].coins !== undefined) coins = users[uid].coins;
             await saveUsers();
             await syncUserWithSheet();
 
@@ -570,54 +562,43 @@
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const screen = btn.dataset.screen;
-                if (screen === 'admin') {
-                    openAdminFullscreen();
-                    return;
-                }
+                if (screen === 'admin') { openAdminFullscreen(); return; }
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
                 document.getElementById('screen-' + screen).classList.add('active');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                if (screen === 'analytics' && subLevel !== 'free') {
-                    drawChart(); updateCatStats(); updateAdvStats();
-                }
+                if (screen === 'analytics' && subLevel !== 'free') { drawChart(); updateCatStats(); updateAdvStats(); }
                 if (screen === 'shop') renderShop();
                 if (screen === 'more') renderExtra();
             });
         });
 
         document.getElementById('adminNavBtn').addEventListener('click', openAdminFullscreen);
-
         if (isAdmin()) document.getElementById('adminNavBtn').style.display = 'flex';
 
         // ========== АДМИН-ПАНЕЛЬ (полноэкранная) ==========
         function openAdminFullscreen() {
             document.getElementById('adminFullscreen').classList.add('active');
-            fetch(`${SCRIPT_URL}?action=list`)
-                .then(r => r.json())
-                .then(data => renderAdminUsersFromSheet(data));
+            fetch(`${SCRIPT_URL}?action=list`).then(r=>r.json()).then(data=>renderAdminUsersFromSheet(data));
             renderAdminShop();
             renderAdminTickets();
             renderAdminStats();
-            document.querySelectorAll('#adminTabs .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#adminTabs .tab').forEach(t=>t.classList.remove('active'));
             document.querySelector('#adminTabs .tab[data-atab="users"]').classList.add('active');
-            document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
-            document.getElementById('admin-users').style.display = 'block';
+            document.querySelectorAll('#adminFullscreen .admin-section').forEach(s=>s.style.display='none');
+            document.getElementById('admin-users').style.display='block';
         }
 
-        document.getElementById('closeAdminFullscreen').addEventListener('click', ()=>{
-            document.getElementById('adminFullscreen').classList.remove('active');
-        });
-
-        document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()){ openAdminFullscreen(); } });
+        document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
+        document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()) openAdminFullscreen(); });
 
         document.querySelectorAll('#adminTabs .tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const section = tab.dataset.atab;
-                document.querySelectorAll('#adminTabs .tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('#adminTabs .tab').forEach(t=>t.classList.remove('active'));
                 tab.classList.add('active');
-                document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
-                document.getElementById('admin-' + section).style.display = 'block';
+                document.querySelectorAll('#adminFullscreen .admin-section').forEach(s=>s.style.display='none');
+                document.getElementById('admin-' + section).style.display='block';
             });
         });
 
@@ -630,7 +611,7 @@
                         <div>${u.first_name} (ID: ${u.user_id})</div>
                         <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div>
                     </div>
-                    <div style="display:flex;gap:4px;">
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
                         <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','pro')">PRO 30д</button>
                         <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','platinum')">Plat 30д</button>
                         <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSubSheet('${u.user_id}','pro_forever')">PRO ∞</button>
@@ -767,32 +748,11 @@
             const due = regularPayments.filter(p => !p.lastPaid || p.lastPaid !== today);
             if (due.length === 0) return;
             let message = '📅 Напоминание о регулярных платежах:\n';
-            due.forEach(p => {
-                message += `- ${p.name}: ${p.amount} ₽\n`;
-                p.lastPaid = today;
-            });
-            tg.showPopup({
-                title: 'Регулярные платежи',
-                message: message,
-                buttons: [{ type: 'ok', text: 'Оплатить' }, { type: 'cancel', text: 'Закрыть' }]
-            }, (btn) => {
+            due.forEach(p => { message += `- ${p.name}: ${p.amount} ₽\n`; p.lastPaid = today; });
+            tg.showPopup({ title: 'Регулярные платежи', message: message, buttons: [{ type: 'ok', text: 'Оплатить' }, { type: 'cancel', text: 'Закрыть' }] }, (btn) => {
                 if (btn === 'ok') {
-                    due.forEach(p => {
-                        if (balance >= p.amount) {
-                            balance -= p.amount;
-                            transactions.unshift({
-                                type: 'expense',
-                                category: 'Регулярный платёж',
-                                emoji: '📅',
-                                amount: p.amount,
-                                date: today
-                            });
-                        }
-                    });
-                    saveFin();
-                    savePlat();
-                    renderAll();
-                    updateUserLevel();
+                    due.forEach(p => { if (balance >= p.amount) { balance -= p.amount; transactions.unshift({ type: 'expense', category: 'Регулярный платёж', emoji: '📅', amount: p.amount, date: today }); } });
+                    saveFin(); savePlat(); renderAll(); updateUserLevel();
                 }
             });
         }
