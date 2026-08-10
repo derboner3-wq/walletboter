@@ -209,6 +209,13 @@
             flex: 1; padding: 10px; border-radius: 10px;
             border: 1px solid var(--border); background: var(--secondary-bg); color: var(--text);
         }
+
+        .ticket-create-area { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
+        .ticket-create-area textarea {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: var(--secondary-bg); color: var(--text); resize: vertical; font-size: 14px;
+            min-height: 80px; margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -345,7 +352,20 @@
     <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
+
+    <!-- НОВАЯ МОДАЛКА ТИКЕТОВ (переработана) -->
+    <div class="modal" id="myTicketsModal">
+        <div class="modal-content">
+            <div class="modal-title">Мои тикеты</div>
+            <div id="myTicketsList"></div>
+            <div class="ticket-create-area">
+                <textarea id="newTicketText" placeholder="Опишите вашу проблему..."></textarea>
+                <button class="btn btn-primary" id="createTicketBtn" style="width:100%;">➕ Отправить новый тикет</button>
+            </div>
+            <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button>
+        </div>
+    </div>
+
     <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
     <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="pro_forever">PRO навсегда</option><option value="platinum_forever">Platinum навсегда</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
     <div class="modal" id="customCategoryModal"> <div class="modal-content"> <div class="modal-title" id="customCatModalTitle">Новая категория</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="customCatName" placeholder="Например, Хобби" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Эмодзи</div><input type="text" class="amount-input" id="customCatEmoji" placeholder="🎨" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="customCatType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="expense">Расход</option><option value="income">Доход</option></select></div> <button class="submit-btn" id="saveCustomCatBtn">Сохранить</button> <button class="cancel-btn" id="closeCustomCatModal">Отмена</button> </div> </div>
@@ -499,7 +519,7 @@
             } catch(e) {}
         }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПОИСКА: ищем в объекте users
+        // Поиск пользователя в локальном хранилище users
         async function searchUserInChannel(userId) {
             const container = document.getElementById('searchResult');
             container.innerHTML = '<p>Поиск...</p>';
@@ -526,7 +546,7 @@
             }
         }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ: используем users
+        // Список всех пользователей из users
         async function loadAllUsers() {
             const container = document.getElementById('allUsersList');
             const entries = Object.entries(users);
@@ -697,14 +717,119 @@
 
         function renderAdminStats() { const total=Object.keys(users).length, bal=Object.values(users).reduce((s,u)=>s+(u.balance||0),0), co=Object.values(users).reduce((s,u)=>s+(u.coins||0),0); document.getElementById('adminStatsData').innerHTML=`<div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">Пользователей</div></div><div class="stat-item"><div class="stat-value">${bal} ₽</div><div class="stat-label">Общий баланс</div></div><div class="stat-item"><div class="stat-value">${co} 🪙</div><div class="stat-label">Монет выпущено</div></div>`; }
 
-        document.getElementById('openSupportBtn').addEventListener('click',()=>{ const myTickets=tickets.filter(t=>t.user_id===tg.initDataUnsafe.user.id); const list=document.getElementById('myTicketsList'); list.innerHTML=myTickets.map(t=>`<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;"><div>${t.messages[0]?.text?.substring(0,50)||'Без текста'}</div><div style="font-size:12px;">Статус: ${t.status}</div>${t.status==='in_progress'?`<button class="btn btn-primary" onclick="openUserChat('${t.id}')">Чат</button>`:''}</div>`).join('')||'<p style="color:var(--hint);">Нет тикетов</p><button class="btn btn-primary" id="createTicketBtn" style="width:100%;margin-top:8px;">Создать тикет</button>'; document.getElementById('myTicketsModal').classList.add('active'); });
-        document.getElementById('closeMyTicketsModal').addEventListener('click',()=>document.getElementById('myTicketsModal').classList.remove('active'));
-        document.getElementById('myTicketsList').addEventListener('click',(e)=>{ if(e.target.id==='createTicketBtn'){ const msg=prompt('Опишите проблему:'); if(msg){ const ticket={ id:'ticket_'+Date.now(), user_id:tg.initDataUnsafe.user.id, user_name:tg.initDataUnsafe.user.first_name||'User', status:'new', messages:[{sender:'user',text:msg,date:Date.now()}] }; tickets.push(ticket); saveTickets(); document.getElementById('myTicketsModal').classList.remove('active'); tg.showAlert('Тикет создан'); } } });
-        window.openUserChat=function(tid){ currentChatTicketId=tid; renderChatMessages(tid); document.getElementById('chatModal').classList.add('active'); };
+        // ========== ПЕРЕРАБОТАННЫЙ РАЗДЕЛ ТИКЕТОВ ==========
+        function renderMyTickets() {
+            const list = document.getElementById('myTicketsList');
+            const myTickets = tickets.filter(t => t.user_id === tg.initDataUnsafe.user.id);
+            if (myTickets.length === 0) {
+                list.innerHTML = '<p style="color:var(--hint);">У вас пока нет тикетов</p>';
+                return;
+            }
+            list.innerHTML = myTickets.map(t => {
+                const lastMsg = t.messages[t.messages.length - 1];
+                const statusText = t.status === 'new' ? '🟡 Новый' : t.status === 'in_progress' ? '🟢 В работе' : '🔒 Закрыт';
+                const chatBtn = t.status === 'in_progress' ? `<button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="openUserChat('${t.id}')">Чат</button>` : '';
+                return `<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>${statusText}</span>
+                        <span style="font-size:12px;color:var(--hint);">${new Date(t.messages[0]?.date).toLocaleString()}</span>
+                    </div>
+                    <div style="margin-top:6px;font-size:14px;">${lastMsg?.text?.substring(0,80)||'Без текста'}${lastMsg?.text?.length>80?'...':''}</div>
+                    <div style="margin-top:8px;">${chatBtn}</div>
+                </div>`;
+            }).join('');
+        }
 
-        document.getElementById('sendChatBtn').addEventListener('click',async()=>{ const text=document.getElementById('chatInput').value.trim(); const photoFile=document.getElementById('chatPhotoInput').files[0]; if(!text&&!photoFile)return; const ticket=tickets.find(t=>t.id===currentChatTicketId); if(!ticket)return; const sender=isAdmin()?'admin':'user'; let photoData=null; if(photoFile){ photoData=await new Promise(resolve=>{ const reader=new FileReader(); reader.onload=e=>resolve(e.target.result); reader.readAsDataURL(photoFile); }); } ticket.messages.push({sender,text,photo:photoData,date:Date.now()}); await saveTickets(); document.getElementById('chatInput').value=''; document.getElementById('chatPhotoInput').value=''; renderChatMessages(currentChatTicketId); });
-        function renderChatMessages(tid){ const t=tickets.find(x=>x.id===tid); if(!t)return; const container=document.getElementById('chatMessages'); container.innerHTML=t.messages.map(m=>{ let content=''; if(m.text)content+=`<div class="chat-bubble">${m.text}</div>`; if(m.photo)content+=`<img src="${m.photo}" class="chat-photo">`; return `<div class="chat-message ${m.sender}">${content}</div>`; }).join(''); container.scrollTop=container.scrollHeight; }
-        setInterval(async()=>{ if(document.getElementById('chatModal').classList.contains('active')&&currentChatTicketId){ const raw=await cGet(KEY_TICKETS); if(raw)tickets=JSON.parse(raw); renderChatMessages(currentChatTicketId); } },3000);
+        // Создание нового тикета из формы
+        document.getElementById('createTicketBtn').addEventListener('click', async () => {
+            const textarea = document.getElementById('newTicketText');
+            const msg = textarea.value.trim();
+            if (!msg) {
+                tg.showAlert('Введите текст обращения');
+                return;
+            }
+            const ticket = {
+                id: 'ticket_' + Date.now(),
+                user_id: tg.initDataUnsafe.user.id,
+                user_name: tg.initDataUnsafe.user.first_name || 'User',
+                status: 'new',
+                messages: [{ sender: 'user', text: msg, date: Date.now() }]
+            };
+            tickets.push(ticket);
+            await saveTickets();
+            textarea.value = '';
+            renderMyTickets(); // обновим список
+            tg.showAlert('Тикет создан! Администратор скоро ответит.');
+        });
+
+        // Открытие окна "Мои тикеты"
+        document.getElementById('openSupportBtn').addEventListener('click', () => {
+            renderMyTickets();
+            document.getElementById('myTicketsModal').classList.add('active');
+        });
+        document.getElementById('closeMyTicketsModal').addEventListener('click', () => {
+            document.getElementById('myTicketsModal').classList.remove('active');
+        });
+
+        // Функция открытия чата для пользователя
+        window.openUserChat = function(tid) {
+            currentChatTicketId = tid;
+            renderChatMessages(tid);
+            document.getElementById('chatModal').classList.add('active');
+        };
+
+        // Отправка сообщения в чате (пользователь или админ)
+        document.getElementById('sendChatBtn').addEventListener('click', async () => {
+            const text = document.getElementById('chatInput').value.trim();
+            const photoFile = document.getElementById('chatPhotoInput').files[0];
+            if (!text && !photoFile) return;
+            const ticket = tickets.find(t => t.id === currentChatTicketId);
+            if (!ticket) return;
+            const sender = isAdmin() ? 'admin' : 'user';
+            let photoData = null;
+            if (photoFile) {
+                photoData = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.readAsDataURL(photoFile);
+                });
+            }
+            ticket.messages.push({ sender, text, photo: photoData, date: Date.now() });
+            await saveTickets();
+            document.getElementById('chatInput').value = '';
+            document.getElementById('chatPhotoInput').value = '';
+            renderChatMessages(currentChatTicketId);
+            // Если это пользователь, обновим список тикетов, чтобы показать последнее сообщение
+            if (sender === 'user') renderMyTickets();
+        });
+
+        function renderChatMessages(tid) {
+            const t = tickets.find(x => x.id === tid);
+            if (!t) return;
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = t.messages.map(m => {
+                let content = '';
+                if (m.text) content += `<div class="chat-bubble">${m.text}</div>`;
+                if (m.photo) content += `<img src="${m.photo}" class="chat-photo">`;
+                return `<div class="chat-message ${m.sender}">${content}</div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Автообновление чата каждые 3 секунды
+        setInterval(async () => {
+            if (document.getElementById('chatModal').classList.contains('active') && currentChatTicketId) {
+                const raw = await cGet(KEY_TICKETS);
+                if (raw) tickets = JSON.parse(raw);
+                renderChatMessages(currentChatTicketId);
+                // также обновим список тикетов в окне "Мои тикеты", если оно открыто
+                if (document.getElementById('myTicketsModal').classList.contains('active')) {
+                    renderMyTickets();
+                }
+            }
+        }, 3000);
+
+        // ========== КОНЕЦ РАЗДЕЛА ТИКЕТОВ ==========
 
         function applyTheme() { if(isDark)document.body.classList.add('dark-theme');else document.body.classList.remove('dark-theme'); document.getElementById('themeToggle').checked=isDark; }
         async function setSub(lvl,dur) { subLevel=lvl; subExpiry=Date.now()+dur; if(lvl==='trial')trialUsed=true; await saveSub(); updateUI(); renderAll(); updateTimer(); if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial')renderExtra(); }
