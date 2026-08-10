@@ -352,7 +352,6 @@
         const ADMIN_USERNAMES = ['ok00112'];
         const DA_TOKEN = 'qlees6PnNamPz8cFOWW7s1yJJZEaafQ6wCmZelMW';
         const DA_LINK = 'https://dalink.to/hypercore';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXsMArGxnOaZlmYI0q3_wmcjiIPqCDDYa9rns-yFrejyQC3nlavQFK_9uU2l80nYEx/exec';
         // =====================================================================
 
         const tg = window.Telegram.WebApp;
@@ -482,15 +481,6 @@
             document.getElementById('customCategoryModal').classList.remove('active');
         });
 
-        // ========== СИНХРОНИЗАЦИЯ ==========
-        async function syncUserWithSheet() {
-            const uid = tg.initDataUnsafe.user.id;
-            const name = tg.initDataUnsafe.user.first_name || 'User';
-            try {
-                await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=${encodeURIComponent(name)}&sub=${subLevel}&coins=${coins}&balance=${balance}`);
-            } catch(e) {}
-        }
-
         async function saveUsers() { await cSet(KEY_USERS, JSON.stringify(users)); }
         async function saveTickets() { await cSet(KEY_TICKETS, JSON.stringify(tickets)); }
         async function saveShop() { await cSet(KEY_SHOP, JSON.stringify(shopItems)); }
@@ -525,7 +515,6 @@
             }
             if (users[uid].coins !== undefined) coins = users[uid].coins;
             await saveUsers();
-            await syncUserWithSheet();
 
             document.getElementById('dailyLimitInput').value = dailyLimit||'';
             applyTheme(); updateUI(); renderAll();
@@ -541,8 +530,8 @@
         async function savePlat() { await Promise.all([cSet(KEY_PIG,JSON.stringify(piggyBanks)),cSet(KEY_ACH,JSON.stringify(achievements)),cSet(KEY_CHAL,JSON.stringify(challenges)),cSet(KEY_DEBT,JSON.stringify(debts)),cSet(KEY_REG,JSON.stringify(regularPayments)),cSet(KEY_COINS,coins)]); }
 
         function updateCoinsDisplay() { document.getElementById('coinsDisplay').textContent = `🪙 ${coins}`; const e=document.getElementById('coinsBalance'); if(e)e.textContent=coins; }
-        function addCoins(n) { coins+=n; updateCoinsDisplay(); savePlat(); syncUserWithSheet(); }
-        function spendCoins(n) { if(coins<n){tg.showAlert('Недостаточно монет');return false;} coins-=n; updateCoinsDisplay(); savePlat(); syncUserWithSheet(); return true; }
+        function addCoins(n) { coins+=n; updateCoinsDisplay(); savePlat(); }
+        function spendCoins(n) { if(coins<n){tg.showAlert('Недостаточно монет');return false;} coins-=n; updateCoinsDisplay(); savePlat(); return true; }
 
         function openCoins() { document.getElementById('coinsBalance').textContent=coins; document.getElementById('donateStatus').textContent=''; document.getElementById('coinsModal').classList.add('active'); }
         document.getElementById('closeCoinsModal').addEventListener('click',()=>document.getElementById('coinsModal').classList.remove('active'));
@@ -589,24 +578,60 @@
             document.getElementById('admin-users').style.display = 'block';
         }
 
-        async function loadAdminUsers() {
+        function loadAdminUsers() {
             const container = document.getElementById('admin-users');
-            container.innerHTML = '<p>Загрузка пользователей...</p>';
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=list`);
-                if (!response.ok) throw new Error('Ошибка сервера');
-                const data = await response.json();
-                renderAdminUsersFromSheet(data);
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="section-title">❌ Не удалось загрузить пользователей</div>
-                    <p style="color:var(--hint); font-size:14px;">
-                        Проверьте настройки Google Sheets и SCRIPT_URL.
-                    </p>
-                    <button class="btn btn-primary" onclick="loadAdminUsers()">🔄 Повторить</button>
-                `;
+            // Показываем пользователей из локального CloudStorage (users)
+            const usersArray = Object.values(users).filter(u => u.first_name);
+            if (usersArray.length === 0) {
+                container.innerHTML = '<p style="color:var(--hint);">Нет зарегистрированных пользователей на этом устройстве</p>';
+                return;
             }
+            container.innerHTML = '<div class="section-title">Пользователи (это устройство)</div>';
+            usersArray.forEach(u => {
+                // Ищем uid пользователя
+                const uid = Object.keys(users).find(key => users[key] === u);
+                container.innerHTML += `<div class="admin-user-card">
+                    <div>
+                        <div>${u.first_name} (ID: ${uid})</div>
+                        <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','pro_forever')">PRO ∞</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button>
+                        <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button>
+                        <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
+                    </div>
+                </div>`;
+            });
         }
+
+        window.adminSetSub = async (uid, lvl) => {
+            if (!users[uid]) return;
+            if (lvl === 'free') { delete users[uid].sub; delete users[uid].sub_expiry; users[uid].trial_used = false; }
+            else {
+                users[uid].sub = lvl;
+                users[uid].sub_expiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000;
+                if (lvl==='trial') users[uid].trial_used = true;
+            }
+            await saveUsers();
+            // Если меняем текущего пользователя, применяем изменения
+            if (String(uid) === String(tg.initDataUnsafe.user.id)) {
+                if (lvl === 'free') { subLevel='free'; subExpiry=null; trialUsed=false; }
+                else { subLevel=lvl; subExpiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000; if (lvl==='trial') trialUsed=true; }
+                await saveSub(); updateUI(); renderAll(); updateTimer();
+            }
+            loadAdminUsers();
+        };
+
+        window.adminAddCoins = async (uid, amount) => {
+            if (!users[uid]) return;
+            users[uid].coins = (users[uid].coins||0) + amount;
+            await saveUsers();
+            if (String(uid) === String(tg.initDataUnsafe.user.id)) { coins = users[uid].coins; updateCoinsDisplay(); await savePlat(); }
+            loadAdminUsers();
+        };
 
         document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
         document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()) openAdminFullscreen(); });
@@ -620,47 +645,6 @@
                 document.getElementById('admin-' + section).style.display='block';
             });
         });
-
-        function renderAdminUsersFromSheet(usersArray) {
-            const c = document.getElementById('admin-users');
-            if (!usersArray || usersArray.length === 0) {
-                c.innerHTML = '<p style="color:var(--hint);">Нет зарегистрированных пользователей</p>';
-                return;
-            }
-            c.innerHTML = '<div class="section-title">Пользователи</div>';
-            usersArray.forEach(u => {
-                c.innerHTML += `<div class="admin-user-card">
-                    <div>
-                        <div>${u.first_name} (ID: ${u.user_id})</div>
-                        <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div>
-                    </div>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','pro')">PRO 30д</button>
-                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','platinum')">Plat 30д</button>
-                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSubSheet('${u.user_id}','pro_forever')">PRO ∞</button>
-                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSubSheet('${u.user_id}','platinum_forever')">Plat ∞</button>
-                        <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSubSheet('${u.user_id}','free')">Сброс</button>
-                        <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoinsSheet('${u.user_id}',500)">+500🪙</button>
-                    </div>
-                </div>`;
-            });
-        }
-
-        window.adminSetSubSheet = async (uid, lvl) => {
-            await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=&sub=${lvl}&coins=0&balance=0`);
-            loadAdminUsers();
-        };
-
-        window.adminAddCoinsSheet = async (uid, amount) => {
-            const resp = await fetch(`${SCRIPT_URL}?action=list`);
-            const users = await resp.json();
-            const user = users.find(u => u.user_id == uid);
-            if (user) {
-                const newCoins = (user.coins || 0) + amount;
-                await fetch(`${SCRIPT_URL}?action=register&uid=${uid}&name=${encodeURIComponent(user.first_name)}&sub=${user.sub}&coins=${newCoins}&balance=${user.balance}`);
-                loadAdminUsers();
-            }
-        };
 
         function renderAdminShop() { document.getElementById('adminShopList').innerHTML=shopItems.map((it,i)=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc} | 🪙${it.price}</div></div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="delShop(${i})">✕</button></div>`).join(''); }
         window.delShop=async(i)=>{shopItems.splice(i,1);await saveShop();renderAdminShop();};
@@ -687,7 +671,7 @@
         setInterval(async()=>{ if(document.getElementById('chatModal').classList.contains('active')&&currentChatTicketId){ const raw=await cGet(KEY_TICKETS); if(raw)tickets=JSON.parse(raw); renderChatMessages(currentChatTicketId); } },3000);
 
         function applyTheme() { if(isDark)document.body.classList.add('dark-theme');else document.body.classList.remove('dark-theme'); document.getElementById('themeToggle').checked=isDark; }
-        async function setSub(lvl,dur) { subLevel=lvl; subExpiry=Date.now()+dur; if(lvl==='trial')trialUsed=true; await saveSub(); await syncUserWithSheet(); updateUI(); renderAll(); updateTimer(); if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial')renderExtra(); }
+        async function setSub(lvl,dur) { subLevel=lvl; subExpiry=Date.now()+dur; if(lvl==='trial')trialUsed=true; await saveSub(); updateUI(); renderAll(); updateTimer(); if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial')renderExtra(); }
         function fmtTime(ms) { if(ms<=0)return'Истекла'; const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000); return `${d?d+'д ':''}${h||d?h+'ч ':''}${m}м ${s}с`; }
         function updateTimer() { if(timerInterval)clearInterval(timerInterval); const box=document.getElementById('timerBox'),lab=document.getElementById('timerLabel'),val=document.getElementById('timerValue'); box.className='timer-box'; if(subLevel==='trial'){box.classList.add('trial','active');lab.textContent='Пробный Platinum';} else if(subLevel==='pro'){box.classList.add('pro','active');lab.textContent='PRO подписка';} else if(subLevel==='platinum'){box.classList.add('platinum','active');lab.textContent='Platinum подписка';} else if(subLevel==='pro_forever'||subLevel==='platinum_forever'){box.classList.add('forever','active');lab.textContent='Вечная подписка';} else{box.classList.remove('active');return;} const tick=()=>{ const rem=subExpiry-Date.now(); if(rem<=0){clearInterval(timerInterval);subLevel='free';subExpiry=null;saveSub();updateUI();renderAll();tg.showAlert('⏰ Подписка истекла');return;} val.textContent=fmtTime(rem); }; tick(); timerInterval=setInterval(tick,1000); }
         function updateUI() { const badge=document.getElementById('levelBadge'),pro=document.getElementById('proAnalytics'),extra=document.getElementById('extraFeatures'),sub=document.getElementById('subscribeBlock'),tbtn=document.getElementById('trialBtn'); badge.className='level-badge'; if(subLevel==='pro'){badge.classList.add('pro');badge.textContent='PRO';} else if(subLevel==='pro_forever'){badge.classList.add('forever');badge.textContent='PRO ∞';} else if(subLevel==='platinum'){badge.classList.add('platinum');badge.textContent='PLATINUM';} else if(subLevel==='platinum_forever'){badge.classList.add('forever');badge.textContent='PLATINUM ∞';} else if(subLevel==='trial'){badge.classList.add('trial');badge.textContent='ПРОБНЫЙ';} else badge.style.display='none';
