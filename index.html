@@ -199,7 +199,6 @@
         }
         .admin-fullscreen.active { display: block; }
 
-        /* фикс для кнопок инструментов */
         #tab-tools .btn {
             flex: none;
             width: 100%;
@@ -336,19 +335,8 @@
         </div>
     </div>
 
-    <!-- Все модальные окна (без изменений, вставлены полностью) -->
-    <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
-    <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
-    <div class="modal" id="settingsModal"> <div class="modal-content"> <div class="modal-title">Настройки</div> <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div> <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div> <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div> <button class="submit-btn" id="saveSettings">Сохранить</button> <button class="cancel-btn" id="closeSettings">Отмена</button> </div> </div>
-    <div class="modal" id="piggyModal"> <div class="modal-content"> <div class="modal-title">Новая копилка</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="piggyName" placeholder="На отпуск" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (₽)</div><input type="number" class="amount-input" id="piggyTarget" placeholder="50000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Фото (не обязательно)</div><input type="file" accept="image/*" id="piggyPhoto" style="width:100%; padding:10px; background:var(--secondary-bg); border-radius:12px; color:var(--text);"></div> <button class="submit-btn" id="savePiggyBtn">Создать</button> <button class="cancel-btn" id="closePiggyModal">Отмена</button> </div> </div>
-    <div class="modal" id="challengeModal"> <div class="modal-content"> <div class="modal-title">Новый челлендж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="challengeName" placeholder="Неделя без доставки" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (дней)</div><input type="number" class="amount-input" id="challengeDays" placeholder="7" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Награда (монет)</div><input type="number" class="amount-input" id="challengeReward" placeholder="50" style="font-size:18px;" value="50"></div> <button class="submit-btn" id="saveChallengeBtn">Создать</button> <button class="cancel-btn" id="closeChallengeModal">Отмена</button> </div> </div>
-    <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
-    <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
-    <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
-    <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="pro_forever">PRO навсегда</option><option value="platinum_forever">Platinum навсегда</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
-    <div class="modal" id="customCategoryModal"> <div class="modal-content"> <div class="modal-title" id="customCatModalTitle">Новая категория</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="customCatName" placeholder="Например, Хобби" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Эмодзи</div><input type="text" class="amount-input" id="customCatEmoji" placeholder="🎨" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="customCatType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="expense">Расход</option><option value="income">Доход</option></select></div> <button class="submit-btn" id="saveCustomCatBtn">Сохранить</button> <button class="cancel-btn" id="closeCustomCatModal">Отмена</button> </div> </div>
+    <!-- Все модальные окна -->
+    <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button и" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Эмодзи</div><input type="text" class="amount-input" id="customCatEmoji" placeholder="🎨" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="customCatType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="expense">Расход</option><option value="income">Доход</option></select></div> <button class="submit-btn" id="saveCustomCatBtn">Сохранить</button> <button class="cancel-btn" id="closeCustomCatModal">Отмена</button> </div> </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -594,16 +582,14 @@
         // ========== АДМИН-ПАНЕЛЬ (полноэкранная) ==========
         function openAdminFullscreen() {
             document.getElementById('adminFullscreen').classList.add('active');
-            // обновляем данные и показываем вкладку users
             fetch(`${SCRIPT_URL}?action=list`)
                 .then(r => r.json())
                 .then(data => renderAdminUsersFromSheet(data));
             renderAdminShop();
             renderAdminTickets();
             renderAdminStats();
-            // переключаем на users
-            document.querySelectorAll('#adminFullscreen .tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('#adminFullscreen .tab[data-atab="users"]').classList.add('active');
+            document.querySelectorAll('#adminTabs .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#adminTabs .tab[data-atab="users"]').classList.add('active');
             document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
             document.getElementById('admin-users').style.display = 'block';
         }
@@ -614,7 +600,6 @@
 
         document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()){ openAdminFullscreen(); } });
 
-        // Переключение вкладок в админке
         document.querySelectorAll('#adminTabs .tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const section = tab.dataset.atab;
@@ -731,16 +716,75 @@
         document.getElementById('closeSettings').addEventListener('click',()=>document.getElementById('settingsModal').classList.remove('active'));
         document.getElementById('saveSettings').addEventListener('click',async()=>{ dailyLimit=parseFloat(document.getElementById('dailyLimitInput').value)||0; isDark=document.getElementById('themeToggle').checked; applyTheme(); await saveFin(); document.getElementById('settingsModal').classList.remove('active'); renderAll(); });
 
-        // Копилки, челленджи, магазин, долги, регулярные платежи – все функции ниже
-        // (уже были в предыдущем полном коде, вставлены без изменений)
-        // ...
-        // Вставьте их сюда из последнего полного ответа (где всё работало)
-        // или скопируйте из предыдущего блока.
-        // Здесь они опущены для краткости, но в реальном файле они должны быть.
-        // =================================================================
-        // === НАЧАЛО ВСТАВКИ ФУНКЦИЙ КОПИЛОК, ЧЕЛЛЕНДЖЕЙ, МАГАЗИНА, ДОЛГОВ ===
-        // (скопируйте их из предыдущего сообщения)
-        // =================================================================
+        // ========== КОПИЛКИ ==========
+        document.getElementById('addPiggyBtn').addEventListener('click',()=>document.getElementById('piggyModal').classList.add('active'));
+        document.getElementById('closePiggyModal').addEventListener('click',()=>document.getElementById('piggyModal').classList.remove('active'));
+        document.getElementById('savePiggyBtn').addEventListener('click',async()=>{ const n=document.getElementById('piggyName').value, t=parseFloat(document.getElementById('piggyTarget').value); if(!n||!t)return tg.showAlert('Заполните поля'); let ph=null; const f=document.getElementById('piggyPhoto').files[0]; if(f){ph=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});} piggyBanks.push({name:n,target:t,saved:0,emoji:'🐷',photo:ph}); await savePlat(); renderPiggy(); document.getElementById('piggyModal').classList.remove('active'); });
+        function renderPiggy() { const c=document.getElementById('piggyList'); c.innerHTML=piggyBanks.length?'':'<p style="color:var(--hint);">Нет копилок</p>'; piggyBanks.forEach((p,i)=>{ const pct=Math.min(100,Math.round((p.saved/p.target)*100)); const img=p.photo?`<img src="${p.photo}" class="piggy-image">`:`<span class="piggy-icon">${p.emoji}</span>`; c.innerHTML+=`<div class="piggy-card"><div class="piggy-actions"><button onclick="editPiggy(${i})">✏️</button><button onclick="delPiggy(${i})">🗑️</button></div><div class="piggy-header">${img}<div><div class="piggy-name">${p.name}</div><div class="piggy-target">${p.saved}/${p.target} ₽ (${pct}%)</div></div></div><div class="piggy-progress"><div class="piggy-bar" style="width:${pct}%"></div></div><div style="display:flex;gap:8px;margin-top:8px;"><input type="number" id="pa_${i}" placeholder="Сумма" style="flex:1;padding:8px;border-radius:8px;"><button class="btn btn-primary" onclick="addPig(${i})">+</button></div></div>`; }); }
+        window.editPiggy=async(i)=>{const n=prompt('Название:',piggyBanks[i].name);if(n){piggyBanks[i].name=n;await savePlat();renderPiggy();}};
+        window.delPiggy=async(i)=>{tg.showConfirm('Удалить?',async(ok)=>{if(ok){piggyBanks.splice(i,1);await savePlat();renderPiggy();}});};
+        window.addPig=async(i)=>{const inp=document.getElementById('pa_'+i);const a=parseFloat(inp.value);if(!a||a<=0)return;if(balance<a)return tg.showAlert('Недостаточно средств');piggyBanks[i].saved+=a;balance-=a;transactions.unshift({type:'expense',category:'🐷 Копилка',emoji:piggyBanks[i].emoji,amount:a,date:new Date().toISOString().split('T')[0]});await saveFin();await savePlat();renderAll();renderPiggy();inp.value='';};
+
+        // ========== ЧЕЛЛЕНДЖИ ==========
+        document.getElementById('addChallengeBtn').addEventListener('click',()=>document.getElementById('challengeModal').classList.add('active'));
+        document.getElementById('closeChallengeModal').addEventListener('click',()=>document.getElementById('challengeModal').classList.remove('active'));
+        document.getElementById('saveChallengeBtn').addEventListener('click',async()=>{ const n=document.getElementById('challengeName').value, d=parseInt(document.getElementById('challengeDays').value), rw=parseInt(document.getElementById('challengeReward').value)||50; if(!n||!d)return tg.showAlert('Заполните поля'); challenges.push({name:n,days:d,progress:0,reward:rw,completed:false}); await savePlat(); renderChallenges(); document.getElementById('challengeModal').classList.remove('active'); });
+        function renderChallenges() { const c=document.getElementById('challengesList'); c.innerHTML=challenges.length?'':'<p style="color:var(--hint);">Нет челленджей</p>'; challenges.forEach((ch,i)=>{ const left=ch.days-ch.progress; c.innerHTML+=`<div class="challenge-card"><div>🎯 <b>${ch.name}</b> — награда ${ch.reward}🪙</div><div style="font-size:13px;">День ${ch.progress}/${ch.days} ${left>0?'('+left+' осталось)':'✅ Завершён!'}</div><div class="achievement-progress" style="margin-top:6px;"><div class="achievement-progress-bar" style="width:${(ch.progress/ch.days)*100}%;background:gold;"></div></div>${left>0?`<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="progChal(${i})">Отметить день</button>`:''}${!left&&!ch.completed?`<button class="btn btn-gold" style="width:100%;margin-top:8px;" onclick="claimChal(${i})">Получить награду</button>`:''}</div>`; }); }
+        window.progChal=async(i)=>{if(challenges[i].progress<challenges[i].days){challenges[i].progress++;await savePlat();renderChallenges();}};
+        window.claimChal=async(i)=>{if(!challenges[i].completed){challenges[i].completed=true;addCoins(challenges[i].reward);await savePlat();renderChallenges();tg.showAlert(`+${challenges[i].reward}🪙`);}};
+
+        // ========== МАГАЗИН ==========
+        function renderShop() { document.getElementById('shopList').innerHTML=shopItems.map(it=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc}</div></div><button class="btn btn-primary" onclick="buy('${it.id}')">🪙 ${it.price}</button></div>`).join(''); }
+        window.buy=function(id){ const it=shopItems.find(i=>i.id===id); if(!it)return; if(coins<it.price)return tg.showAlert('Недостаточно монет'); tg.showConfirm(`Купить "${it.name}"?`,async(ok)=>{ if(!ok)return; if(!spendCoins(it.price))return; if(it.action==='pro')await setSub('pro',30*24*60*60*1000); else if(it.action==='pro_forever')await setSub('pro_forever',100*365*24*60*60*1000); else if(it.action==='platinum')await setSub('platinum',30*24*60*60*1000); else if(it.action==='platinum_forever')await setSub('platinum_forever',100*365*24*60*60*1000); else if(it.action==='achievement'){ if(!achievements.find(a=>a.id===it.id)){achievements.push({id:it.id,name:it.name,icon:it.icon,date:Date.now()});await savePlat();renderAchievements();tg.showAlert('Трофей добавлен!');} else tg.showAlert('Уже есть'); } else tg.showAlert('Тема (заглушка)'); }); };
+
+        function renderAchievements() { document.getElementById('achievementsList').innerHTML=achievements.map(a=>`<div class="achievement-card"><div class="achievement-icon">${a.icon||'🏆'}</div><div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${new Date(a.date).toLocaleDateString()}</div></div></div>`).join('')||'<p style="color:var(--hint);">Нет трофеев</p>'; }
+        function renderDebts() { document.getElementById('debtsList').innerHTML=debts.map((d,i)=>`<div class="debt-card"><div><div>${d.person}</div><div class="debt-amount ${d.type==='owed'?'debt-owed':'debt-paid'}">${d.type==='owed'?'+':'-'}${d.amount} ₽</div></div><button class="btn btn-danger" onclick="delDebt(${i})">✕</button></div>`).join('')||'<p style="color:var(--hint);">Нет долгов</p>'; }
+        window.delDebt=async(i)=>{debts.splice(i,1);await savePlat();renderDebts();};
+        function renderRegular() { document.getElementById('regularPaymentsList').innerHTML=regularPayments.length?regularPayments.map((p,i)=>`<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;"><div><div>${p.name}</div><div style="font-size:13px;">${p.amount} ₽ · ${p.period==='weekly'?'Раз в неделю':'Раз в месяц'}</div></div><button class="btn btn-danger" onclick="delReg(${i})">✕</button></div>`).join(''):''; }
+        window.delReg=async(i)=>{regularPayments.splice(i,1);await savePlat();renderRegular();};
+
+        document.getElementById('addDebtBtn').addEventListener('click',()=>document.getElementById('debtModal').classList.add('active'));
+        document.getElementById('closeDebtModal').addEventListener('click',()=>document.getElementById('debtModal').classList.remove('active'));
+        document.getElementById('saveDebtBtn').addEventListener('click',async()=>{ const p=document.getElementById('debtPerson').value, a=parseFloat(document.getElementById('debtAmount').value), t=document.getElementById('debtType').value; if(!p||!a)return tg.showAlert('Заполните поля'); debts.push({person:p,amount:a,type:t}); await savePlat(); renderDebts(); document.getElementById('debtModal').classList.remove('active'); });
+
+        document.getElementById('addRegularPaymentBtn').addEventListener('click',()=>document.getElementById('regularModal').classList.add('active'));
+        document.getElementById('closeRegularModal').addEventListener('click',()=>document.getElementById('regularModal').classList.remove('active'));
+        document.getElementById('saveRegularBtn').addEventListener('click',async()=>{ const n=document.getElementById('regularName').value, a=parseFloat(document.getElementById('regularAmount').value), p=document.getElementById('regularPeriod').value; if(!n||!a)return tg.showAlert('Заполните поля'); regularPayments.push({name:n,amount:a,period:p}); await savePlat(); renderRegular(); document.getElementById('regularModal').classList.remove('active'); });
+
+        function checkRegularPayments() {
+            const today = new Date().toISOString().split('T')[0];
+            const due = regularPayments.filter(p => !p.lastPaid || p.lastPaid !== today);
+            if (due.length === 0) return;
+            let message = '📅 Напоминание о регулярных платежах:\n';
+            due.forEach(p => {
+                message += `- ${p.name}: ${p.amount} ₽\n`;
+                p.lastPaid = today;
+            });
+            tg.showPopup({
+                title: 'Регулярные платежи',
+                message: message,
+                buttons: [{ type: 'ok', text: 'Оплатить' }, { type: 'cancel', text: 'Закрыть' }]
+            }, (btn) => {
+                if (btn === 'ok') {
+                    due.forEach(p => {
+                        if (balance >= p.amount) {
+                            balance -= p.amount;
+                            transactions.unshift({
+                                type: 'expense',
+                                category: 'Регулярный платёж',
+                                emoji: '📅',
+                                amount: p.amount,
+                                date: today
+                            });
+                        }
+                    });
+                    saveFin();
+                    savePlat();
+                    renderAll();
+                    updateUserLevel();
+                }
+            });
+        }
 
         function openAdd(type) { currentType=type; selectedCategory=null; document.getElementById('modalTitle').textContent=type==='expense'?'Добавить расход':'Добавить доход'; document.getElementById('amountInput').value=''; const grid=document.getElementById('categoryGrid'); grid.innerHTML=''; const cats = type==='expense' ? getExpenseCategories() : getIncomeCategories(); cats.forEach(cat=>{ const d=document.createElement('div'); d.className='category-item'; d.innerHTML=`${cat.emoji}<div class="category-label">${cat.name}</div>`; d.onclick=()=>{grid.querySelectorAll('.category-item').forEach(e=>e.classList.remove('selected'));d.classList.add('selected');selectedCategory=cat;}; grid.appendChild(d); }); document.getElementById('addModal').classList.add('active'); }
 
