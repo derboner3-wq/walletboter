@@ -204,10 +204,14 @@
         .admin-fullscreen.active { display: block; }
 
         #tab-tools .btn { flex: none; width: 100%; margin-bottom: 8px; }
+        .search-box { display: flex; gap: 8px; margin-bottom: 16px; }
+        .search-box input {
+            flex: 1; padding: 10px; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--secondary-bg); color: var(--text);
+        }
     </style>
 </head>
 <body>
-    <!-- Главный экран -->
     <div id="screen-main" class="screen active">
         <div class="header">
             <div class="user-info">
@@ -221,7 +225,6 @@
             <div class="coins-display" id="coinsDisplay">🪙 0</div>
             <div style="font-size:24px; cursor:pointer;" id="openSettings">⚙️</div>
         </div>
-
         <div class="balance-card">
             <div class="balance-label">Остаток на месяц</div>
             <div class="balance-amount" id="balanceDisplay">0 ₽</div>
@@ -230,16 +233,13 @@
                 <span id="limitStatus" style="display:none;">⚠️ Превышен</span>
             </div>
         </div>
-
         <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
         <div class="level-box" id="levelBox">🌱 Новичок</div>
-
         <div class="actions">
             <button class="btn btn-primary" id="openExpenseModal">➖ Расход</button>
             <button class="btn" id="openIncomeModal">➕ Доход</button>
         </div>
         <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
-
         <div style="margin:12px 0;" id="subscribeBlock">
             <button class="trial-btn" id="trialBtn">🎁 Пробный Platinum на 3 дня</button>
             <button class="buy-btn buy-pro" id="buyProBtn">⭐ PRO — 99 ₽</button>
@@ -247,7 +247,6 @@
             <button class="forever-btn" id="buyForeverProBtn">⭐ PRO навсегда — 299 ₽</button>
             <button class="forever-btn" id="buyForeverPlatinumBtn">💎 Platinum навсегда — 499 ₽</button>
         </div>
-
         <div class="section-title-row">
             <div class="section-title">Операции</div>
             <span class="section-link" id="viewAllBtn">Все</span>
@@ -256,7 +255,6 @@
         <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
     </div>
 
-    <!-- Экран Аналитика (PRO) -->
     <div id="screen-analytics" class="screen">
         <div class="section-title">📊 Аналитика (PRO)</div>
         <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
@@ -267,13 +265,11 @@
         </div>
     </div>
 
-    <!-- Экран Магазин -->
     <div id="screen-shop" class="screen">
         <div class="section-title">🛒 Магазин</div>
         <div id="shopList"></div>
     </div>
 
-    <!-- Экран Ещё -->
     <div id="screen-more" class="screen">
         <div class="tabs" id="featureTabs">
             <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
@@ -301,7 +297,6 @@
         </div>
     </div>
 
-    <!-- Нижняя навигация -->
     <div class="bottom-nav">
         <button class="nav-btn active" data-screen="main">🏠</button>
         <button class="nav-btn" data-screen="analytics">📊</button>
@@ -310,7 +305,6 @@
         <button class="nav-btn" id="adminNavBtn" style="display:none;" data-screen="admin">🛡</button>
     </div>
 
-    <!-- Админ полноэкранная панель -->
     <div id="adminFullscreen" class="admin-fullscreen">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2>🛡 Админ-панель</h2>
@@ -322,7 +316,15 @@
             <button class="tab" data-atab="tickets">Тикеты</button>
             <button class="tab" data-atab="stats">Статистика</button>
         </div>
-        <div id="admin-users" class="admin-section"></div>
+        <div id="admin-users" class="admin-section">
+            <div class="search-box">
+                <input type="text" id="searchUserId" placeholder="Введите ID пользователя">
+                <button class="btn btn-primary" id="searchUserBtn" style="flex:none; width:auto;">🔍 Найти</button>
+                <button class="btn btn-secondary" id="refreshUsersBtn" style="flex:none; width:auto;">🔄 Все</button>
+            </div>
+            <div id="searchResult"></div>
+            <div id="allUsersList"></div>
+        </div>
         <div id="admin-shop" class="admin-section" style="display:none;">
             <div id="adminShopList"></div>
             <button class="btn btn-primary" id="addShopItemBtn" style="margin-top:10px;">Добавить товар</button>
@@ -335,7 +337,6 @@
         </div>
     </div>
 
-    <!-- Все модальные окна -->
     <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
     <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
     <div class="modal" id="settingsModal"> <div class="modal-content"> <div class="modal-title">Настройки</div> <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div> <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div> <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div> <button class="submit-btn" id="saveSettings">Сохранить</button> <button class="cancel-btn" id="closeSettings">Отмена</button> </div> </div>
@@ -351,13 +352,11 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // ==================== КОНФИГУРАЦИЯ ====================
         const ADMIN_USERNAMES = ['ok00112'];
         const DA_TOKEN = 'qlees6PnNamPz8cFOWW7s1yJJZEaafQ6wCmZelMW';
         const DA_LINK = 'https://dalink.to/hypercore';
         const BOT_TOKEN = '8905381944:AAFo5D_3Ewxbl13ZqQZg5afZGL4DgYzzF4M';
         const CHANNEL_ID = '-1002772072809';
-        // =====================================================================
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -365,7 +364,6 @@
         const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
         document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
 
-        // Ключи CloudStorage
         const KEY_BAL = 'bal', KEY_TX = 'tx', KEY_LIM = 'lim', KEY_DARK = 'dark';
         const KEY_SUB_LVL = 'sub_lvl', KEY_SUB_EXP = 'sub_exp', KEY_TRIAL = 'trial';
         const KEY_PIG = 'pig', KEY_ACH = 'ach', KEY_CHAL = 'chal', KEY_DEBT = 'debt', KEY_REG = 'reg';
@@ -418,7 +416,6 @@
             ];
         }
 
-        // ========== УРОВНИ ==========
         function getUserLevel() {
             const count = transactions.length;
             if (count >= 200) return { name: 'Магнат', emoji: '👑' };
@@ -433,7 +430,6 @@
             document.getElementById('levelBox').textContent = `${level.emoji} ${level.name}`;
         }
 
-        // ========== СВОИ КАТЕГОРИИ ==========
         async function loadCustomCategories() {
             const raw = await cGet(KEY_CUSTOM_CATS);
             if (raw) customCategories = JSON.parse(raw);
@@ -490,7 +486,6 @@
         async function saveTickets() { await cSet(KEY_TICKETS, JSON.stringify(tickets)); }
         async function saveShop() { await cSet(KEY_SHOP, JSON.stringify(shopItems)); }
 
-        // ========== ОТПРАВКА ЛОГОВ В ГРУППУ ==========
         async function syncUserToChannel() {
             const uid = tg.initDataUnsafe.user.id;
             const name = tg.initDataUnsafe.user.first_name || 'User';
@@ -504,10 +499,58 @@
             } catch(e) {}
         }
 
-        // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ ИЗ ГРУППЫ ==========
-        async function loadAdminUsersFromChannel() {
-            const container = document.getElementById('admin-users');
-            container.innerHTML = '<p>Загрузка пользователей из группы...</p>';
+        async function searchUserInChannel(userId) {
+            const container = document.getElementById('searchResult');
+            container.innerHTML = '<p>Поиск...</p>';
+            try {
+                const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?limit=100`);
+                const data = await resp.json();
+                if (!data.ok) throw new Error('Ошибка');
+                let found = null;
+                for (const update of data.result) {
+                    const msg = update.message || update.channel_post;
+                    if (msg && msg.text && String(msg.chat.id) === CHANNEL_ID) {
+                        const match = msg.text.match(/ID: (\d+)\nИмя: (.+)\nПодписка: (.+)\nМонеты: (\d+)\nБаланс: ([\d.]+)/);
+                        if (match && match[1] === userId) {
+                            found = {
+                                uid: match[1],
+                                first_name: match[2],
+                                sub: match[3],
+                                coins: parseInt(match[4]),
+                                balance: parseFloat(match[5])
+                            };
+                            break;
+                        }
+                    }
+                }
+                if (found) {
+                    container.innerHTML = `
+                        <div class="admin-user-card">
+                            <div>
+                                <div>${found.first_name} (ID: ${found.uid})</div>
+                                <div style="font-size:12px;">Подписка: ${found.sub||'free'} | Баланс: ${found.balance||0} ₽ | Монеты: ${found.coins||0}</div>
+                            </div>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${found.uid}','pro')">PRO 30д</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${found.uid}','platinum')">Plat 30д</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${found.uid}','pro_forever')">PRO ∞</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${found.uid}','platinum_forever')">Plat ∞</button>
+                                <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${found.uid}','free')">Сброс</button>
+                                <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${found.uid}',500)">+500🪙</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = '<p style="color:var(--hint);">Пользователь не найден в последних логах</p>';
+                }
+            } catch(e) {
+                container.innerHTML = '<p style="color:red;">Ошибка поиска</p>';
+            }
+        }
+
+        async function loadAllUsers() {
+            const container = document.getElementById('allUsersList');
+            container.innerHTML = '<p>Загрузка...</p>';
             try {
                 const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?limit=50`);
                 const data = await resp.json();
@@ -516,8 +559,7 @@
                     data.result.forEach(update => {
                         const msg = update.message || update.channel_post;
                         if (msg && msg.text && String(msg.chat.id) === CHANNEL_ID) {
-                            const text = msg.text;
-                            const match = text.match(/ID: (\d+)\nИмя: (.+)\nПодписка: (.+)\nМонеты: (\d+)\nБаланс: ([\d.]+)/);
+                            const match = msg.text.match(/ID: (\d+)\nИмя: (.+)\nПодписка: (.+)\nМонеты: (\d+)\nБаланс: ([\d.]+)/);
                             if (match) {
                                 const uid = match[1];
                                 usersMap[uid] = {
@@ -532,10 +574,10 @@
                 }
                 const entries = Object.entries(usersMap);
                 if (entries.length === 0) {
-                    container.innerHTML = '<p style="color:var(--hint);">Нет данных о пользователях в группе</p>';
+                    container.innerHTML = '<p style="color:var(--hint);">Нет данных</p>';
                     return;
                 }
-                container.innerHTML = '<div class="section-title">Пользователи (из группы)</div>';
+                container.innerHTML = '<div class="section-title">Все пользователи</div>';
                 entries.forEach(([uid, u]) => {
                     container.innerHTML += `<div class="admin-user-card">
                         <div>
@@ -553,7 +595,7 @@
                     </div>`;
                 });
             } catch(e) {
-                container.innerHTML = '<p style="color:red;">Ошибка загрузки из группы</p>';
+                container.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
             }
         }
 
@@ -620,7 +662,6 @@
 
         function isAdmin() { const u=tg.initDataUnsafe.user.username; return u&&ADMIN_USERNAMES.includes(u.toLowerCase()); }
 
-        // ========== НАВИГАЦИЯ ==========
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const screen = btn.dataset.screen;
@@ -638,10 +679,9 @@
         document.getElementById('adminNavBtn').addEventListener('click', openAdminFullscreen);
         if (isAdmin()) document.getElementById('adminNavBtn').style.display = 'flex';
 
-        // ========== АДМИН-ПАНЕЛЬ ==========
         function openAdminFullscreen() {
             document.getElementById('adminFullscreen').classList.add('active');
-            loadAdminUsersFromChannel();
+            loadAllUsers();
             renderAdminShop();
             renderAdminTickets();
             renderAdminStats();
@@ -678,7 +718,7 @@
                 else { subLevel=lvl; subExpiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000; if (lvl==='trial') trialUsed=true; }
                 await saveSub(); updateUI(); renderAll(); updateTimer();
             }
-            loadAdminUsersFromChannel();
+            loadAllUsers();
         };
 
         window.adminAddCoins = async (uid, amount) => {
@@ -686,7 +726,7 @@
             users[uid].coins = (users[uid].coins||0) + amount;
             await saveUsers();
             if (String(uid) === String(tg.initDataUnsafe.user.id)) { coins = users[uid].coins; updateCoinsDisplay(); await savePlat(); }
-            loadAdminUsersFromChannel();
+            loadAllUsers();
         };
 
         function renderAdminShop() { document.getElementById('adminShopList').innerHTML=shopItems.map((it,i)=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc} | 🪙${it.price}</div></div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="delShop(${i})">✕</button></div>`).join(''); }
@@ -703,7 +743,6 @@
 
         function renderAdminStats() { const total=Object.keys(users).length, bal=Object.values(users).reduce((s,u)=>s+(u.balance||0),0), co=Object.values(users).reduce((s,u)=>s+(u.coins||0),0); document.getElementById('adminStatsData').innerHTML=`<div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">Пользователей</div></div><div class="stat-item"><div class="stat-value">${bal} ₽</div><div class="stat-label">Общий баланс</div></div><div class="stat-item"><div class="stat-value">${co} 🪙</div><div class="stat-label">Монет выпущено</div></div>`; }
 
-        // ========== ПОДДЕРЖКА И ЧАТ ==========
         document.getElementById('openSupportBtn').addEventListener('click',()=>{ const myTickets=tickets.filter(t=>t.user_id===tg.initDataUnsafe.user.id); const list=document.getElementById('myTicketsList'); list.innerHTML=myTickets.map(t=>`<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;"><div>${t.messages[0]?.text?.substring(0,50)||'Без текста'}</div><div style="font-size:12px;">Статус: ${t.status}</div>${t.status==='in_progress'?`<button class="btn btn-primary" onclick="openUserChat('${t.id}')">Чат</button>`:''}</div>`).join('')||'<p style="color:var(--hint);">Нет тикетов</p><button class="btn btn-primary" id="createTicketBtn" style="width:100%;margin-top:8px;">Создать тикет</button>'; document.getElementById('myTicketsModal').classList.add('active'); });
         document.getElementById('closeMyTicketsModal').addEventListener('click',()=>document.getElementById('myTicketsModal').classList.remove('active'));
         document.getElementById('myTicketsList').addEventListener('click',(e)=>{ if(e.target.id==='createTicketBtn'){ const msg=prompt('Опишите проблему:'); if(msg){ const ticket={ id:'ticket_'+Date.now(), user_id:tg.initDataUnsafe.user.id, user_name:tg.initDataUnsafe.user.first_name||'User', status:'new', messages:[{sender:'user',text:msg,date:Date.now()}] }; tickets.push(ticket); saveTickets(); document.getElementById('myTicketsModal').classList.remove('active'); tg.showAlert('Тикет создан'); } } });
@@ -758,7 +797,6 @@
         document.getElementById('closeSettings').addEventListener('click',()=>document.getElementById('settingsModal').classList.remove('active'));
         document.getElementById('saveSettings').addEventListener('click',async()=>{ dailyLimit=parseFloat(document.getElementById('dailyLimitInput').value)||0; isDark=document.getElementById('themeToggle').checked; applyTheme(); await saveFin(); document.getElementById('settingsModal').classList.remove('active'); renderAll(); });
 
-        // ========== КОПИЛКИ ==========
         document.getElementById('addPiggyBtn').addEventListener('click',()=>document.getElementById('piggyModal').classList.add('active'));
         document.getElementById('closePiggyModal').addEventListener('click',()=>document.getElementById('piggyModal').classList.remove('active'));
         document.getElementById('savePiggyBtn').addEventListener('click',async()=>{ const n=document.getElementById('piggyName').value, t=parseFloat(document.getElementById('piggyTarget').value); if(!n||!t)return tg.showAlert('Заполните поля'); let ph=null; const f=document.getElementById('piggyPhoto').files[0]; if(f){ph=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});} piggyBanks.push({name:n,target:t,saved:0,emoji:'🐷',photo:ph}); await savePlat(); renderPiggy(); document.getElementById('piggyModal').classList.remove('active'); });
@@ -767,7 +805,6 @@
         window.delPiggy=async(i)=>{tg.showConfirm('Удалить?',async(ok)=>{if(ok){piggyBanks.splice(i,1);await savePlat();renderPiggy();}});};
         window.addPig=async(i)=>{const inp=document.getElementById('pa_'+i);const a=parseFloat(inp.value);if(!a||a<=0)return;if(balance<a)return tg.showAlert('Недостаточно средств');piggyBanks[i].saved+=a;balance-=a;transactions.unshift({type:'expense',category:'🐷 Копилка',emoji:piggyBanks[i].emoji,amount:a,date:new Date().toISOString().split('T')[0]});await saveFin();await savePlat();renderAll();renderPiggy();inp.value='';};
 
-        // ========== ЧЕЛЛЕНДЖИ ==========
         document.getElementById('addChallengeBtn').addEventListener('click',()=>document.getElementById('challengeModal').classList.add('active'));
         document.getElementById('closeChallengeModal').addEventListener('click',()=>document.getElementById('challengeModal').classList.remove('active'));
         document.getElementById('saveChallengeBtn').addEventListener('click',async()=>{ const n=document.getElementById('challengeName').value, d=parseInt(document.getElementById('challengeDays').value), rw=parseInt(document.getElementById('challengeReward').value)||50; if(!n||!d)return tg.showAlert('Заполните поля'); challenges.push({name:n,days:d,progress:0,reward:rw,completed:false}); await savePlat(); renderChallenges(); document.getElementById('challengeModal').classList.remove('active'); });
@@ -775,7 +812,6 @@
         window.progChal=async(i)=>{if(challenges[i].progress<challenges[i].days){challenges[i].progress++;await savePlat();renderChallenges();}};
         window.claimChal=async(i)=>{if(!challenges[i].completed){challenges[i].completed=true;addCoins(challenges[i].reward);await savePlat();renderChallenges();tg.showAlert(`+${challenges[i].reward}🪙`);}};
 
-        // ========== МАГАЗИН ==========
         function renderShop() { document.getElementById('shopList').innerHTML=shopItems.map(it=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc}</div></div><button class="btn btn-primary" onclick="buy('${it.id}')">🪙 ${it.price}</button></div>`).join(''); }
         window.buy=function(id){ const it=shopItems.find(i=>i.id===id); if(!it)return; if(coins<it.price)return tg.showAlert('Недостаточно монет'); tg.showConfirm(`Купить "${it.name}"?`,async(ok)=>{ if(!ok)return; if(!spendCoins(it.price))return; if(it.action==='pro')await setSub('pro',30*24*60*60*1000); else if(it.action==='pro_forever')await setSub('pro_forever',100*365*24*60*60*1000); else if(it.action==='platinum')await setSub('platinum',30*24*60*60*1000); else if(it.action==='platinum_forever')await setSub('platinum_forever',100*365*24*60*60*1000); else if(it.action==='achievement'){ if(!achievements.find(a=>a.id===it.id)){achievements.push({id:it.id,name:it.name,icon:it.icon,date:Date.now()});await savePlat();renderAchievements();tg.showAlert('Трофей добавлен!');} else tg.showAlert('Уже есть'); } else tg.showAlert('Тема (заглушка)'); }); };
 
@@ -811,6 +847,14 @@
 
         document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');}));
         document.getElementById('coinsDisplay').addEventListener('click',openCoins);
+        document.getElementById('searchUserBtn').addEventListener('click', () => {
+            const userId = document.getElementById('searchUserId').value.trim();
+            if (userId) searchUserInChannel(userId);
+        });
+        document.getElementById('refreshUsersBtn').addEventListener('click', () => {
+            loadAllUsers();
+            document.getElementById('searchResult').innerHTML = '';
+        });
         document.getElementById('userAvatar').textContent=(tg.initDataUnsafe?.user?.first_name||'Г')[0].toUpperCase();
         document.getElementById('userName').textContent=tg.initDataUnsafe?.user?.first_name||'Гость';
         loadAll();
