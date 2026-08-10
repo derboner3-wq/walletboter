@@ -499,104 +499,58 @@
             } catch(e) {}
         }
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ПОИСКА: ищем в объекте users
         async function searchUserInChannel(userId) {
             const container = document.getElementById('searchResult');
             container.innerHTML = '<p>Поиск...</p>';
-            try {
-                const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?limit=100`);
-                const data = await resp.json();
-                if (!data.ok) throw new Error('Ошибка');
-                let found = null;
-                for (const update of data.result) {
-                    const msg = update.message || update.channel_post;
-                    if (msg && msg.text && String(msg.chat.id) === CHANNEL_ID) {
-                        const match = msg.text.match(/ID: (\d+)\nИмя: (.+)\nПодписка: (.+)\nМонеты: (\d+)\nБаланс: ([\d.]+)/);
-                        if (match && match[1] === userId) {
-                            found = {
-                                uid: match[1],
-                                first_name: match[2],
-                                sub: match[3],
-                                coins: parseInt(match[4]),
-                                balance: parseFloat(match[5])
-                            };
-                            break;
-                        }
-                    }
-                }
-                if (found) {
-                    container.innerHTML = `
-                        <div class="admin-user-card">
-                            <div>
-                                <div>${found.first_name} (ID: ${found.uid})</div>
-                                <div style="font-size:12px;">Подписка: ${found.sub||'free'} | Баланс: ${found.balance||0} ₽ | Монеты: ${found.coins||0}</div>
-                            </div>
-                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${found.uid}','pro')">PRO 30д</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${found.uid}','platinum')">Plat 30д</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${found.uid}','pro_forever')">PRO ∞</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${found.uid}','platinum_forever')">Plat ∞</button>
-                                <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${found.uid}','free')">Сброс</button>
-                                <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${found.uid}',500)">+500🪙</button>
-                            </div>
+            const user = users[userId];
+            if (user) {
+                container.innerHTML = `
+                    <div class="admin-user-card">
+                        <div>
+                            <div>${user.first_name} (ID: ${userId})</div>
+                            <div style="font-size:12px;">Подписка: ${user.sub||'free'} | Баланс: ${user.balance||0} ₽ | Монеты: ${user.coins||0}</div>
                         </div>
-                    `;
-                } else {
-                    container.innerHTML = '<p style="color:var(--hint);">Пользователь не найден в последних логах</p>';
-                }
-            } catch(e) {
-                container.innerHTML = '<p style="color:red;">Ошибка поиска</p>';
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','pro')">PRO 30д</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','platinum')">Plat 30д</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${userId}','pro_forever')">PRO ∞</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${userId}','platinum_forever')">Plat ∞</button>
+                            <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','free')">Сброс</button>
+                            <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${userId}',500)">+500🪙</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '<p style="color:var(--hint);">Пользователь не найден в базе. Возможно, он ещё не заходил в приложение.</p>';
             }
         }
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ: используем users
         async function loadAllUsers() {
             const container = document.getElementById('allUsersList');
-            container.innerHTML = '<p>Загрузка...</p>';
-            try {
-                const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?limit=50`);
-                const data = await resp.json();
-                const usersMap = {};
-                if (data.ok) {
-                    data.result.forEach(update => {
-                        const msg = update.message || update.channel_post;
-                        if (msg && msg.text && String(msg.chat.id) === CHANNEL_ID) {
-                            const match = msg.text.match(/ID: (\d+)\nИмя: (.+)\nПодписка: (.+)\nМонеты: (\d+)\nБаланс: ([\d.]+)/);
-                            if (match) {
-                                const uid = match[1];
-                                usersMap[uid] = {
-                                    first_name: match[2],
-                                    sub: match[3],
-                                    coins: parseInt(match[4]),
-                                    balance: parseFloat(match[5])
-                                };
-                            }
-                        }
-                    });
-                }
-                const entries = Object.entries(usersMap);
-                if (entries.length === 0) {
-                    container.innerHTML = '<p style="color:var(--hint);">Нет данных</p>';
-                    return;
-                }
-                container.innerHTML = '<div class="section-title">Все пользователи</div>';
-                entries.forEach(([uid, u]) => {
-                    container.innerHTML += `<div class="admin-user-card">
-                        <div>
-                            <div>${u.first_name} (ID: ${uid})</div>
-                            <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div>
-                        </div>
-                        <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button>
-                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat 30д</button>
-                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','pro_forever')">PRO ∞</button>
-                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button>
-                            <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button>
-                            <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
-                        </div>
-                    </div>`;
-                });
-            } catch(e) {
-                container.innerHTML = '<p style="color:red;">Ошибка загрузки</p>';
+            const entries = Object.entries(users);
+            if (entries.length === 0) {
+                container.innerHTML = '<p style="color:var(--hint);">Нет пользователей</p>';
+                return;
             }
+            container.innerHTML = '<div class="section-title">Все пользователи</div>';
+            entries.forEach(([uid, u]) => {
+                container.innerHTML += `<div class="admin-user-card">
+                    <div>
+                        <div>${u.first_name} (ID: ${uid})</div>
+                        <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','pro_forever')">PRO ∞</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button>
+                        <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button>
+                        <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
+                    </div>
+                </div>`;
+            });
         }
 
         async function loadAll() {
