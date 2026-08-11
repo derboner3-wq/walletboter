@@ -296,7 +296,7 @@
         <div class="daily-reward-card" id="dailyRewardCard">
             <div class="day-info">
                 <span class="day-number" id="rewardDayDisplay">День 1</span>
-                <span class="reward-amount" id="rewardAmountDisplay">⭐ +5</span>
+                <span class="reward-amount" id="rewardAmountDisplay">⭐ +1</span>
             </div>
             <button class="btn btn-primary claim-btn" id="claimRewardBtn">Забрать</button>
             <span class="claimed" id="claimedStatus" style="display:none;">✅ Забрано</span>
@@ -475,7 +475,6 @@
         const KEY_STREAK = 'streak';
         const KEY_REFERRER = 'referrer';
         const KEY_REGISTERED_AT = 'registered_at';
-        // Новые ключи
         const KEY_STARS = 'stars';
         const KEY_REWARD_DAY = 'reward_day';
         const KEY_LAST_REWARD = 'last_reward';
@@ -489,7 +488,6 @@
         let customCategories = { expense: [], income: [] };
         let activeTab = 'tab-piggy', currentChatTicketId = null;
         let registered = false, lastVisit = null, streak = 0, referrer = null, registeredAt = null;
-        // Новые переменные
         let stars = 0;
         let rewardDay = 1;      // текущий день ленты (1-30)
         let lastRewardDate = null; // дата последнего получения награды
@@ -615,6 +613,19 @@
                     coins += amount;
                     updateCoinsDisplay();
                     await savePlat(); await syncUserToServer();
+                }
+                await loadAllUsers();
+            } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
+        };
+
+        // Добавляем админскую функцию для звёзд
+        window.adminAddStars = async function(uid, amount) {
+            try {
+                await apiFetch('admin_add_stars', { uid, amount });
+                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
+                    stars += amount;
+                    updateStarsDisplay();
+                    await saveStars(); await syncUserToServer();
                 }
                 await loadAllUsers();
             } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
@@ -749,10 +760,8 @@
                 updateCoinsDisplay();
                 tg.showAlert('🎉 Добро пожаловать! Вы получили 50 монет за регистрацию.');
             }
-            // Начальный стрик = 1
             streak = 1;
             lastVisit = new Date().toISOString().split('T')[0];
-            // Начальная награда дня
             rewardDay = 1;
             lastRewardDate = null;
             await saveRegistration(); await saveStars();
@@ -767,6 +776,11 @@
                 const diff = Math.floor((Date.now() - new Date(lastVisit).getTime()) / 86400000);
                 if (diff >= 2) {
                     streak = 0;
+                    // сброс ленты
+                    rewardDay = 1;
+                    lastRewardDate = null;
+                    await saveStars();
+                    await syncUserToServer();
                 } else if (diff === 1) {
                     streak += 1;
                 }
@@ -779,7 +793,18 @@
             updateStreakDisplay();
         }
 
-        // ----- Daily Reward -----
+        // ----- Daily Reward (новая логика) -----
+        function getDailyRewardAmount(day, streakDays) {
+            // базовая 1 звезда
+            let reward = 1;
+            // бонус за стрик
+            if (streakDays >= 3) reward += 1;
+            if (streakDays >= 7) reward += 1; // итого до 3
+            // бонус за каждые 10 дней
+            if (day % 10 === 0) reward += 10;
+            return reward;
+        }
+
         async function checkDailyReward() {
             const today = new Date().toISOString().split('T')[0];
             if (lastRewardDate === today) return; // уже забрали сегодня
@@ -793,7 +818,6 @@
                     await syncUserToServer();
                 }
             }
-            // Если не забирали сегодня, показываем возможность
             updateDailyRewardUI();
         }
 
@@ -811,8 +835,7 @@
                     lastRewardDate = null;
                 }
             }
-            // Начисляем награду: чем больше день, тем больше звезд
-            const reward = Math.min(rewardDay * 3 + 2, 50); // например, день 1: 5, день 10: 32, день 30: 50
+            const reward = getDailyRewardAmount(rewardDay, streak);
             stars += reward;
             await saveStars();
             await syncUserToServer();
@@ -824,26 +847,23 @@
             updateStarsDisplay();
             updateDailyRewardUI();
             tg.showAlert(`⭐ Получено ${reward} звёзд!`);
-            // Проверяем достижения за стрик (уже есть)
             await checkStreakAchievements();
-        }
-
-        function getRewardForDay(day) {
-            return Math.min(day * 3 + 2, 50);
         }
 
         function updateDailyRewardUI() {
             const today = new Date().toISOString().split('T')[0];
             const claimed = (lastRewardDate === today);
-            const card = document.getElementById('dailyRewardCard');
             const dayDisplay = document.getElementById('rewardDayDisplay');
             const amountDisplay = document.getElementById('rewardAmountDisplay');
             const claimBtn = document.getElementById('claimRewardBtn');
             const claimedStatus = document.getElementById('claimedStatus');
 
-            dayDisplay.textContent = `День ${Math.min(rewardDay, 30)}`;
-            const reward = getRewardForDay(Math.min(rewardDay, 30));
-            amountDisplay.textContent = `⭐ +${reward}`;
+            const day = Math.min(rewardDay, 30);
+            dayDisplay.textContent = `День ${day}`;
+            const reward = getDailyRewardAmount(day, streak);
+            let text = `⭐ +${reward}`;
+            if (day % 10 === 0) text += ' (бонус +10!)';
+            amountDisplay.textContent = text;
             if (claimed) {
                 claimBtn.style.display = 'none';
                 claimedStatus.style.display = 'inline';
@@ -1420,19 +1440,6 @@
                 container.innerHTML = '<p style="color:red;">Ошибка загрузки пользователей: ' + e.message + '</p>';
             }
         }
-
-        // Добавляем админскую функцию для звёзд
-        window.adminAddStars = async function(uid, amount) {
-            try {
-                await apiFetch('admin_add_stars', { uid, amount });
-                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
-                    stars += amount;
-                    updateStarsDisplay();
-                    await saveStars(); await syncUserToServer();
-                }
-                await loadAllUsers();
-            } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
-        };
 
         async function searchUserInChannel(userId) {
             const container = document.getElementById('searchResult');
