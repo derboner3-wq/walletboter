@@ -3,38 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Кошелёк PRO</title>
+    <title>Кошелёк PRO (локальная версия)</title>
     <style>
-        /* === все стили (те же, что были) === */
-        :root { --bg: #fff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff; --button-text: #fff; --secondary-bg: #f2f2f7; --border: #e5e5ea; --safe-top: 60px; }
-        .dark-theme { --bg: #1c1c1e; --text: #fff; --hint: #8e8e93; --button: #0a84ff; --button-text: #fff; --secondary-bg: #2c2c2e; --border: #3a3a3c; }
+        /* ===== БАЗОВЫЕ СТИЛИ (без Telegram) ===== */
+        :root {
+            --bg: #fff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff;
+            --button-text: #fff; --secondary-bg: #f2f2f7; --border: #e5e5ea;
+            --safe-top: 20px;
+        }
+        .dark-theme {
+            --bg: #1c1c1e; --text: #fff; --hint: #8e8e93; --button: #0a84ff;
+            --button-text: #fff; --secondary-bg: #2c2c2e; --border: #3a3a3c;
+        }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); padding:16px; padding-top:var(--safe-top); padding-bottom:70px; max-width:400px; margin:0 auto; min-height:100vh; transition: background .3s, color .3s; }
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text); padding:16px;
+            padding-top: var(--safe-top); padding-bottom:70px;
+            max-width:400px; margin:0 auto; min-height:100vh;
+            transition: background .3s, color .3s;
+        }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:6px; }
         .user-info { display:flex; align-items:center; gap:12px; }
-        .avatar { width:44px; height:44px; border-radius:50%; background:var(--button); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:500; cursor:pointer; }
+        .avatar {
+            width:44px; height:44px; border-radius:50%; background:var(--button);
+            color:#fff; display:flex; align-items:center; justify-content:center;
+            font-size:20px; font-weight:500; cursor:pointer;
+        }
         .greeting { font-size:14px; color:var(--hint); }
         .name { font-size:18px; font-weight:600; }
-        .level-badge { color:#000; font-size:11px; padding:2px 8px; border-radius:10px; margin-left:8px; display:none; font-weight:bold; }
+        .level-badge {
+            color:#000; font-size:11px; padding:2px 8px; border-radius:10px;
+            margin-left:8px; display:none; font-weight:bold;
+        }
         .level-badge.pro { background:gold; display:inline-block; }
         .level-badge.platinum { background:linear-gradient(135deg,#e0e0e0,#f5f5f5,#b0b0b0); color:#333; display:inline-block; }
         .level-badge.trial { background:#34c759; color:#fff; display:inline-block; }
         .level-badge.forever { background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; display:inline-block; }
-        .coins-display { background:gold; color:#000; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:14px; display:flex; align-items:center; gap:4px; margin-left:auto; margin-right:10px; cursor:pointer; }
-        .streak-display { background:#ff6b6b; color:#fff; padding:4px 8px; border-radius:12px; font-weight:bold; font-size:13px; display:flex; align-items:center; gap:4px; margin-right:6px; }
-        .balance-card { background:linear-gradient(135deg,#007aff,#5856d6); border-radius:20px; padding:24px; color:#fff; margin-bottom:12px; box-shadow:0 8px 24px rgba(0,122,255,.2); }
+        .coins-display {
+            background:gold; color:#000; padding:4px 10px; border-radius:12px;
+            font-weight:bold; font-size:14px; display:flex; align-items:center; gap:4px;
+            margin-left:auto; margin-right:10px; cursor:pointer;
+        }
+        .streak-display {
+            background:#ff6b6b; color:#fff; padding:4px 8px; border-radius:12px;
+            font-weight:bold; font-size:13px; display:flex; align-items:center; gap:4px;
+            margin-right:6px;
+        }
+        .balance-card {
+            background:linear-gradient(135deg,#007aff,#5856d6); border-radius:20px;
+            padding:24px; color:#fff; margin-bottom:12px;
+            box-shadow:0 8px 24px rgba(0,122,255,.2);
+        }
         .balance-label { font-size:14px; opacity:.9; }
         .balance-amount { font-size:36px; font-weight:bold; margin-top:6px; }
         .daily-limit-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:14px; opacity:.9; }
-        .timer-box { background:var(--secondary-bg); border-radius:12px; padding:10px 16px; margin-bottom:12px; text-align:center; font-size:14px; font-weight:500; display:none; }
+        .timer-box {
+            background:var(--secondary-bg); border-radius:12px; padding:10px 16px;
+            margin-bottom:12px; text-align:center; font-size:14px; font-weight:500;
+            display:none;
+        }
         .timer-box.active { display:block; }
         .timer-box.trial { background:#34c759; color:#fff; }
         .timer-box.pro { background:gold; color:#000; }
         .timer-box.platinum { background:linear-gradient(135deg,#c0c0c0,#e8e8e8); color:#333; }
         .timer-box.forever { background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; }
-        .level-box { background:var(--secondary-bg); border-radius:12px; padding:8px 16px; margin-bottom:12px; text-align:center; font-size:13px; }
+        .level-box {
+            background:var(--secondary-bg); border-radius:12px; padding:8px 16px;
+            margin-bottom:12px; text-align:center; font-size:13px;
+        }
         .actions { display:flex; gap:12px; margin-bottom:8px; }
-        .btn { flex:1; padding:14px 10px; border:none; border-radius:14px; font-size:14px; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; background:var(--secondary-bg); color:var(--text); transition:opacity .2s; }
+        .btn {
+            flex:1; padding:14px 10px; border:none; border-radius:14px; font-size:14px;
+            font-weight:500; cursor:pointer; display:flex; align-items:center;
+            justify-content:center; gap:6px; background:var(--secondary-bg);
+            color:var(--text); transition:opacity .2s;
+        }
         .btn:active { opacity:.7; }
         .btn-primary { background:var(--button); color:var(--button-text); }
         .btn-danger { background:transparent; color:#ff3b30; border:1px solid #ff3b30; margin-top:8px; width:100%; }
@@ -42,7 +86,10 @@
         .section-title { font-size:18px; font-weight:600; margin:20px 0 12px; display:flex; justify-content:space-between; align-items:center; }
         .section-link { font-size:14px; color:var(--button); cursor:pointer; }
         .transaction-list { list-style:none; }
-        .transaction-item { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--border); }
+        .transaction-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:14px 0; border-bottom:1px solid var(--border);
+        }
         .transaction-left { display:flex; align-items:center; gap:14px; }
         .transaction-emoji { font-size:28px; width:40px; text-align:center; }
         .transaction-category { font-size:16px; font-weight:500; }
@@ -50,20 +97,42 @@
         .transaction-amount { font-weight:600; font-size:16px; }
         .income { color:#34c759; } .expense { color:#ff3b30; }
         .empty-state { text-align:center; color:var(--hint); padding:40px 20px; }
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); z-index:999; align-items:flex-end; justify-content:center; }
+
+        .modal {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,.4); z-index:999; align-items:flex-end; justify-content:center;
+        }
         .modal.active { display:flex; }
-        .modal-content { background:var(--bg); width:100%; max-width:400px; border-radius:20px 20px 0 0; padding:24px 20px 30px; animation:slideUp .3s ease; color:var(--text); max-height:80vh; overflow-y:auto; }
+        .modal-content {
+            background:var(--bg); width:100%; max-width:400px; border-radius:20px 20px 0 0;
+            padding:24px 20px 30px; animation:slideUp .3s ease; color:var(--text);
+            max-height:80vh; overflow-y:auto;
+        }
         @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
         .modal-title { font-size:20px; font-weight:600; margin-bottom:20px; text-align:center; }
         .form-group { margin-bottom:16px; }
         .form-label { font-size:14px; color:var(--hint); margin-bottom:6px; }
-        .amount-input { width:100%; padding:14px; font-size:24px; font-weight:500; border:2px solid var(--border); border-radius:14px; background:var(--secondary-bg); color:var(--text); text-align:center; outline:none; }
+        .amount-input {
+            width:100%; padding:14px; font-size:24px; font-weight:500;
+            border:2px solid var(--border); border-radius:14px;
+            background:var(--secondary-bg); color:var(--text); text-align:center; outline:none;
+        }
         .category-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-        .category-item { padding:12px 6px; border-radius:12px; background:var(--secondary-bg); text-align:center; font-size:24px; cursor:pointer; transition:.2s; border:2px solid transparent; color:var(--text); }
+        .category-item {
+            padding:12px 6px; border-radius:12px; background:var(--secondary-bg);
+            text-align:center; font-size:24px; cursor:pointer; transition:.2s;
+            border:2px solid transparent; color:var(--text);
+        }
         .category-item.selected { border-color:var(--button); background:rgba(0,122,255,.1); }
         .category-label { font-size:12px; margin-top:4px; }
-        .submit-btn { width:100%; padding:16px; background:var(--button); color:var(--button-text); border:none; border-radius:14px; font-size:18px; font-weight:600; margin-top:20px; cursor:pointer; }
-        .cancel-btn { width:100%; padding:12px; background:transparent; color:var(--hint); border:none; font-size:16px; margin-top:8px; cursor:pointer; }
+        .submit-btn {
+            width:100%; padding:16px; background:var(--button); color:var(--button-text);
+            border:none; border-radius:14px; font-size:18px; font-weight:600; margin-top:20px; cursor:pointer;
+        }
+        .cancel-btn {
+            width:100%; padding:12px; background:transparent; color:var(--hint);
+            border:none; font-size:16px; margin-top:8px; cursor:pointer;
+        }
         .theme-toggle { display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-top:1px solid var(--border); margin-top:16px; }
         .toggle-switch { position:relative; width:52px; height:28px; }
         .toggle-switch input { display:none; }
@@ -105,46 +174,53 @@
         .debt-paid { color:#34c759; }
         .debt-owed { color:#ff3b30; }
         .shop-item { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
-        .admin-section { margin-top:16px; }
-        .admin-user-card { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
-        .admin-user-card .btn { flex:0 0 auto; }
-        .chat-messages { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; padding:10px; background:var(--secondary-bg); border-radius:12px; margin-bottom:10px; }
-        .chat-message { display:flex; flex-direction:column; max-width:80%; }
-        .chat-message.user { align-self:flex-end; }
-        .chat-message.admin { align-self:flex-start; }
-        .chat-bubble { padding:10px; border-radius:12px; font-size:14px; word-wrap:break-word; }
-        .chat-message.user .chat-bubble { background:var(--button); color:#fff; }
-        .chat-message.admin .chat-bubble { background:var(--border); color:var(--text); }
-        .chat-photo { max-width:200px; border-radius:10px; margin-top:4px; }
-        .chat-input-row { display:flex; gap:8px; align-items:center; }
-        .chat-input-row input[type="text"] { flex:1; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--secondary-bg); color:var(--text); }
-        .chat-input-row input[type="file"] { display:none; }
-        .chat-input-row label { padding:10px; background:var(--secondary-bg); border-radius:10px; cursor:pointer; }
-        .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:400px; background:var(--bg); border-top:1px solid var(--border); display:flex; justify-content:space-around; padding:8px 0; z-index:100; }
-        .nav-btn { background:none; border:none; color:var(--hint); font-size:12px; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:6px 10px; border-radius:10px; }
+        .bottom-nav {
+            position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+            width:100%; max-width:400px; background:var(--bg); border-top:1px solid var(--border);
+            display:flex; justify-content:space-around; padding:8px 0; z-index:100;
+        }
+        .nav-btn {
+            background:none; border:none; color:var(--hint); font-size:12px;
+            display:flex; flex-direction:column; align-items:center; gap:4px;
+            cursor:pointer; padding:6px 10px; border-radius:10px;
+        }
         .nav-btn.active { color:var(--button); background:var(--secondary-bg); }
         .screen { display:none; }
         .screen.active { display:block; }
-        .admin-fullscreen { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:1000; overflow-y:auto; padding:20px; display:none; }
-        .admin-fullscreen.active { display:block; }
-        #tab-tools .btn { flex:none; width:100%; margin-bottom:8px; }
+        .referral-block {
+            background:var(--secondary-bg); border-radius:12px; padding:16px;
+            margin-top:16px;
+        }
+        .referral-block .btn { width:100%; margin-top:8px; }
+        .referral-link-box {
+            background:var(--bg); border:1px solid var(--border); border-radius:8px;
+            padding:8px; margin-top:6px; font-size:12px; word-break:break-all;
+            color:var(--hint);
+        }
+        .admin-section { margin-top:16px; }
+        .admin-user-card { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+        .admin-user-card .btn { flex:0 0 auto; }
         .search-box { display:flex; gap:8px; margin-bottom:16px; }
         .search-box input { flex:1; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--secondary-bg); color:var(--text); }
+        .admin-fullscreen {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:var(--bg); z-index:1000; overflow-y:auto;
+            padding:20px; display:none;
+        }
+        .admin-fullscreen.active { display:block; }
         .ticket-create-area { margin-top:16px; border-top:1px solid var(--border); padding-top:16px; }
         .ticket-create-area textarea { width:100%; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--secondary-bg); color:var(--text); resize:vertical; font-size:14px; min-height:80px; margin-bottom:10px; }
-        .referral-block { background:var(--secondary-bg); border-radius:12px; padding:16px; margin-top:16px; }
-        .referral-block .btn { width:100%; margin-top:8px; }
-        .referral-link-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px; margin-top:6px; font-size:12px; word-break:break-all; color:var(--hint); }
     </style>
 </head>
 <body>
+    <!-- ===== ОСНОВНОЙ ЭКРАН ===== -->
     <div id="screen-main" class="screen active">
         <div class="header">
             <div class="user-info">
-                <div class="avatar" id="userAvatar" title="Админ-панель">👤</div>
+                <div class="avatar" id="userAvatar">👤</div>
                 <div>
                     <div class="greeting">Привет,</div>
-                    <div class="name" id="userName">...</div>
+                    <div class="name" id="userName">Пользователь</div>
                 </div>
                 <span class="level-badge" id="levelBadge"></span>
             </div>
@@ -182,11 +258,11 @@
         <div class="section-title-row">
             <div class="section-title">Операции</div>
             <span class="section-link" id="viewAllBtn">Все</span>
-            <span class="section-link" id="openSupportBtn" style="margin-left:10px;">Поддержка</span>
         </div>
         <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
     </div>
 
+    <!-- ===== АНАЛИТИКА ===== -->
     <div id="screen-analytics" class="screen">
         <div class="section-title">📊 Аналитика (PRO)</div>
         <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
@@ -197,11 +273,13 @@
         </div>
     </div>
 
+    <!-- ===== МАГАЗИН ===== -->
     <div id="screen-shop" class="screen">
         <div class="section-title">🛒 Магазин</div>
         <div id="shopList"></div>
     </div>
 
+    <!-- ===== ЕЩЁ ===== -->
     <div id="screen-more" class="screen">
         <div class="tabs" id="featureTabs">
             <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
@@ -229,6 +307,7 @@
         </div>
     </div>
 
+    <!-- ===== НИЖНЕЕ МЕНЮ ===== -->
     <div class="bottom-nav">
         <button class="nav-btn active" data-screen="main">🏠</button>
         <button class="nav-btn" data-screen="analytics">📊</button>
@@ -237,101 +316,76 @@
         <button class="nav-btn" id="adminNavBtn" style="display:none;" data-screen="admin">🛡</button>
     </div>
 
+    <!-- ===== АДМИНКА (заглушка, только для демонстрации) ===== -->
     <div id="adminFullscreen" class="admin-fullscreen">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>🛡 Админ-панель</h2>
+            <h2>🛡 Админ-панель (локальная)</h2>
             <button class="btn btn-danger" id="closeAdminFullscreen" style="flex:none; padding:10px 16px;">Закрыть</button>
         </div>
-        <div class="tabs" id="adminTabs">
-            <button class="tab active" data-atab="users">Пользователи</button>
-            <button class="tab" data-atab="shop">Магазин</button>
-            <button class="tab" data-atab="tickets">Тикеты</button>
-            <button class="tab" data-atab="stats">Статистика</button>
-        </div>
-        <div id="admin-users" class="admin-section">
-            <div class="search-box">
-                <input type="text" id="searchUserId" placeholder="Введите ID пользователя">
-                <button class="btn btn-primary" id="searchUserBtn" style="flex:none; width:auto;">🔍 Найти</button>
-                <button class="btn btn-secondary" id="refreshUsersBtn" style="flex:none; width:auto;">🔄 Все</button>
-            </div>
-            <div id="searchResult"></div>
-            <div id="allUsersList"></div>
-        </div>
-        <div id="admin-shop" class="admin-section" style="display:none;">
-            <div id="adminShopList"></div>
-            <button class="btn btn-primary" id="addShopItemBtn" style="margin-top:10px;">Добавить товар</button>
-        </div>
-        <div id="admin-tickets" class="admin-section" style="display:none;">
-            <div id="adminTicketsList"></div>
-        </div>
-        <div id="admin-stats" class="admin-section" style="display:none;">
-            <div id="adminStatsData"></div>
-        </div>
+        <div id="adminUsersList"><p>Здесь будет список пользователей (в локальной версии только вы).</p></div>
     </div>
 
-    <!-- Модалки -->
+    <!-- ===== МОДАЛКИ ===== -->
     <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
-    <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
+    <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height:60vh; overflow-y:auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
     <div class="modal" id="settingsModal"> <div class="modal-content"> <div class="modal-title">Настройки</div> <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div> <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div> <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div> <button class="submit-btn" id="saveSettings">Сохранить</button> <button class="cancel-btn" id="closeSettings">Отмена</button> </div> </div>
     <div class="modal" id="piggyModal"> <div class="modal-content"> <div class="modal-title">Новая копилка</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="piggyName" placeholder="На отпуск" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (₽)</div><input type="number" class="amount-input" id="piggyTarget" placeholder="50000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Фото (не обязательно)</div><input type="file" accept="image/*" id="piggyPhoto" style="width:100%; padding:10px; background:var(--secondary-bg); border-radius:12px; color:var(--text);"></div> <button class="submit-btn" id="savePiggyBtn">Создать</button> <button class="cancel-btn" id="closePiggyModal">Отмена</button> </div> </div>
     <div class="modal" id="challengeModal"> <div class="modal-content"> <div class="modal-title">Новый челлендж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="challengeName" placeholder="Неделя без доставки" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (дней)</div><input type="number" class="amount-input" id="challengeDays" placeholder="7" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Награда (монет)</div><input type="number" class="amount-input" id="challengeReward" placeholder="50" style="font-size:18px;" value="50"></div> <button class="submit-btn" id="saveChallengeBtn">Создать</button> <button class="cancel-btn" id="closeChallengeModal">Отмена</button> </div> </div>
     <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
-    <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <div class="ticket-create-area"><textarea id="newTicketText" placeholder="Опишите вашу проблему..."></textarea><button class="btn btn-primary" id="createTicketBtn" style="width:100%;">➕ Отправить новый тикет</button></div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
-    <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="pro_forever">PRO навсегда</option><option value="platinum_forever">Platinum навсегда</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
+    <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет (демо)</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат (демо)</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
     <div class="modal" id="customCategoryModal"> <div class="modal-content"> <div class="modal-title" id="customCatModalTitle">Новая категория</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="customCatName" placeholder="Например, Хобби" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Эмодзи</div><input type="text" class="amount-input" id="customCatEmoji" placeholder="🎨" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="customCatType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="expense">Расход</option><option value="income">Доход</option></select></div> <button class="submit-btn" id="saveCustomCatBtn">Сохранить</button> <button class="cancel-btn" id="closeCustomCatModal">Отмена</button> </div> </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // ============================================================
-        //  ПОЛНОСТЬЮ ЛОКАЛЬНАЯ ВЕРСИЯ (без сервера)
-        //  Все данные хранятся в Telegram.CloudStorage
+        //  ПОЛНОСТЬЮ ЛОКАЛЬНАЯ ВЕРСИЯ (без Telegram)
+        //  Все данные в localStorage
         // ============================================================
 
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
-        document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
+        // ------ КОНСТАНТЫ ------
+        const STORAGE_KEY = 'kosh_pro_data';
+        const ADMIN_USERNAMES = ['admin']; // локальный админ (по имени пользователя)
 
-        // Ключи CloudStorage
-        const K = {
-            BAL: 'bal', TX: 'tx', LIM: 'lim', DARK: 'dark',
-            SUB_LVL: 'sub_lvl', SUB_EXP: 'sub_exp', TRIAL: 'trial',
-            PIG: 'pig', ACH: 'ach', CHAL: 'chal', DEBT: 'debt', REG: 'reg',
-            COINS: 'coins', TICKETS: 'tickets', SHOP: 'shop',
-            CUSTOM_CATS: 'custom_cats',
-            REGISTERED: 'registered',
-            LAST_VISIT: 'last_visit',
-            STREAK: 'streak',
-            REFERRER: 'referrer',
-            REGISTERED_AT: 'registered_at'
-        };
+        // ------ ИНИЦИАЛИЗАЦИЯ ДАННЫХ ------
+        let data = loadData();
 
-        // Админы (по username)
-        const ADMIN_USERNAMES = ['ok00112']; // ← добавьте свой username
+        function loadData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try { return JSON.parse(raw); }
+                catch(e) { /* fallback */ }
+            }
+            // Данные по умолчанию
+            return {
+                userId: Date.now(), // уникальный ID
+                userName: 'Пользователь',
+                registered: false,
+                registeredAt: null,
+                lastVisit: null,
+                streak: 0,
+                referrer: null,
+                balance: 0,
+                coins: 0,
+                transactions: [],
+                dailyLimit: 0,
+                isDark: false,
+                subLevel: 'free',
+                subExpiry: null,
+                trialUsed: false,
+                piggyBanks: [],
+                achievements: [],
+                challenges: [],
+                debts: [],
+                regularPayments: [],
+                shopItems: defaultShop(),
+                customCategories: { expense: [], income: [] },
+                tickets: []
+            };
+        }
 
-        function cGet(key) { return new Promise(r => tg.CloudStorage.getItem(key, (e,v) => r(e?null:v))); }
-        function cSet(key, val) { return new Promise(r => tg.CloudStorage.setItem(key, String(val), (e,ok) => r(ok))); }
-
-        // Глобальные состояния
-        let balance = 0, transactions = [], dailyLimit = 0, isDark = false;
-        let subLevel = 'free', subExpiry = null, trialUsed = false;
-        let currentType = 'expense', selectedCategory = null, timerInterval = null;
-        let piggyBanks = [], achievements = [], challenges = [], debts = [], regularPayments = [];
-        let coins = 0, tickets = [], shopItems = [];
-        let customCategories = { expense: [], income: [] };
-        let activeTab = 'tab-piggy', currentChatTicketId = null;
-
-        let registered = false, lastVisit = null, streak = 0, referrer = null, registeredAt = null;
-
-        // Базовые категории
-        const baseExpenseCats = [{emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},{emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}];
-        const proExpenseCats = [{emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},{emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}];
-        const platinumExpenseCats = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
-        const incomeCats = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
 
         function defaultShop() {
             return [
@@ -346,8 +400,25 @@
             ];
         }
 
+        // ------ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ------
+        function getExpenseCategories() {
+            const base = [{emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},{emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}];
+            const pro = [{emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},{emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}];
+            const plat = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
+            let cats = [...base];
+            if (data.subLevel === 'pro' || data.subLevel === 'pro_forever') cats = cats.concat(pro);
+            if (data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') cats = cats.concat(pro, plat);
+            cats = cats.concat(data.customCategories.expense);
+            return cats;
+        }
+
+        function getIncomeCategories() {
+            const inc = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
+            return inc.concat(data.customCategories.income);
+        }
+
         function getUserLevel() {
-            const count = transactions.length;
+            const count = data.transactions.length;
             if (count >= 200) return { name: 'Магнат', emoji: '👑' };
             if (count >= 100) return { name: 'Эксперт', emoji: '🎓' };
             if (count >= 50) return { name: 'Профи', emoji: '💼' };
@@ -355,516 +426,746 @@
             return { name: 'Новичок', emoji: '🌱' };
         }
 
-        function getExpenseCategories() {
-            let cats = [];
-            if (subLevel === 'platinum' || subLevel === 'platinum_forever' || subLevel === 'trial') {
-                cats = [...baseExpenseCats, ...proExpenseCats, ...platinumExpenseCats, ...customCategories.expense];
-            } else if (subLevel === 'pro' || subLevel === 'pro_forever') {
-                cats = [...baseExpenseCats, ...proExpenseCats];
-            } else {
-                cats = [...baseExpenseCats];
-            }
-            return cats;
+        function fmtTime(ms) {
+            if (ms <= 0) return 'Истекла';
+            const d = Math.floor(ms/86400000), h = Math.floor((ms%86400000)/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
+            return `${d?d+'д ':''}${h||d?h+'ч ':''}${m}м ${s}с`;
         }
 
-        function getIncomeCategories() { return [...incomeCats, ...customCategories.income]; }
-
-        // ---- Сохранение ----
-        async function saveFin() { await Promise.all([cSet(K.BAL,balance), cSet(K.TX,JSON.stringify(transactions)), cSet(K.LIM,dailyLimit), cSet(K.DARK,isDark)]); }
-        async function saveSub() { await Promise.all([cSet(K.SUB_LVL,subLevel), cSet(K.SUB_EXP,subExpiry||0), cSet(K.TRIAL,trialUsed)]); }
-        async function savePlat() { await Promise.all([cSet(K.PIG,JSON.stringify(piggyBanks)), cSet(K.ACH,JSON.stringify(achievements)), cSet(K.CHAL,JSON.stringify(challenges)), cSet(K.DEBT,JSON.stringify(debts)), cSet(K.REG,JSON.stringify(regularPayments)), cSet(K.COINS,coins)]); }
-        async function saveTickets() { await cSet(K.TICKETS, JSON.stringify(tickets)); }
-        async function saveShop() { await cSet(K.SHOP, JSON.stringify(shopItems)); }
-        async function saveCustomCategories() { await cSet(K.CUSTOM_CATS, JSON.stringify(customCategories)); }
-        async function saveRegistration() { await Promise.all([cSet(K.REGISTERED, registered), cSet(K.LAST_VISIT, lastVisit||''), cSet(K.STREAK, streak), cSet(K.REFERRER, referrer||''), cSet(K.REGISTERED_AT, registeredAt||'')]); }
-
-        // ---- Загрузка ----
-        async function loadAll() {
-            try {
-                const [b,tx,lim,dark,lvl,exp,trial,pig,ach,chal,debt,reg,c,tic,shop,
-                       regFlag,lastVis,streakVal,ref,regAt] = await Promise.all([
-                    cGet(K.BAL), cGet(K.TX), cGet(K.LIM), cGet(K.DARK),
-                    cGet(K.SUB_LVL), cGet(K.SUB_EXP), cGet(K.TRIAL),
-                    cGet(K.PIG), cGet(K.ACH), cGet(K.CHAL), cGet(K.DEBT), cGet(K.REG),
-                    cGet(K.COINS), cGet(K.TICKETS), cGet(K.SHOP),
-                    cGet(K.REGISTERED), cGet(K.LAST_VISIT), cGet(K.STREAK), cGet(K.REFERRER), cGet(K.REGISTERED_AT)
-                ]);
-                balance = b?+b:0; transactions = tx?JSON.parse(tx):[]; dailyLimit = lim?+lim:0; isDark = dark==='true';
-                if (lvl && exp) { const e=+exp; if(Date.now()<e){subLevel=lvl; subExpiry=e;} else {subLevel='free'; subExpiry=null;} }
-                trialUsed = trial==='true';
-                piggyBanks = pig?JSON.parse(pig):[]; achievements = ach?JSON.parse(ach):[];
-                challenges = chal?JSON.parse(chal):[]; debts = debt?JSON.parse(debt):[];
-                regularPayments = reg?JSON.parse(reg):[]; coins = c?+c:0;
-                tickets = tic?JSON.parse(tic):[];
-                shopItems = shop?JSON.parse(shop):defaultShop();
-                const rawCats = await cGet(K.CUSTOM_CATS);
-                customCategories = rawCats ? JSON.parse(rawCats) : { expense: [], income: [] };
-
-                registered = regFlag === 'true';
-                lastVisit = lastVis || null;
-                streak = +streakVal || 0;
-                referrer = ref || null;
-                registeredAt = regAt || null;
-
-                // Обработка регистрации
-                if (!registered) {
-                    await handleRegistration();
+        // ------ ОСНОВНЫЕ ФУНКЦИИ ------
+        function initUser() {
+            if (!data.registered) {
+                data.registered = true;
+                data.registeredAt = new Date().toISOString();
+                data.coins = 50; // бонус за регистрацию
+                data.streak = 1;
+                data.lastVisit = new Date().toISOString().split('T')[0];
+                // Проверяем реферальный параметр (из URL)
+                const params = new URLSearchParams(window.location.search);
+                const ref = params.get('ref');
+                if (ref && ref !== String(data.userId)) {
+                    data.referrer = ref;
+                    // Начисляем бонус рефереру (имитация через localStorage другого пользователя – нереализуемо локально)
+                    // Поэтому просто уведомляем
+                    alert('🎉 Вы пришли по реферальной ссылке! +50 монет (реферер получит +100, если у него открыто приложение).');
+                    data.coins += 50; // дополнительный бонус
                 } else {
-                    await updateStreak();
+                    alert('🎉 Добро пожаловать! Вы получили 50 монет за регистрацию.');
                 }
-
-                // Сохраняем всё
-                await saveFin(); await saveSub(); await savePlat(); await saveTickets(); await saveShop(); await saveCustomCategories(); await saveRegistration();
-
-                // UI
-                document.getElementById('dailyLimitInput').value = dailyLimit||'';
-                applyTheme(); updateUI(); renderAll();
-                if (subLevel!=='free') updateTimer();
-                if (subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') renderExtra();
-                updateCoinsDisplay(); updateUserLevel(); updateStreakDisplay(); checkRegularPayments();
-                updateReferralLink();
-            } catch(e) {
-                console.error('Ошибка загрузки:', e);
-                tg.showAlert('Ошибка загрузки данных. Проверьте консоль.');
-            }
-        }
-
-        // ---- Регистрация ----
-        async function handleRegistration() {
-            registered = true;
-            registeredAt = new Date().toISOString();
-            const startParam = tg.initDataUnsafe.start_param;
-            let bonus = 0;
-            if (startParam && startParam !== String(tg.initDataUnsafe.user.id)) {
-                // Пытаемся записать реферальный бонус рефереру (но без сервера это не сработает, поэтому просто уведомляем)
-                // В локальной версии реферер не получит бонус, но мы запишем, что пользователь пришёл по рефералу
-                referrer = startParam;
-                // Начисляем новому пользователю 50 монет
-                coins += 50;
-                tg.showAlert('🎉 Вы зарегистрировались по реферальной ссылке! +50 монет.');
-                // Попытаемся отправить бонус рефереру через API (если сервер запущен) – но мы не используем сервер, так что пропускаем
+                saveData();
+                updateUI();
             } else {
-                coins += 50;
-                tg.showAlert('🎉 Добро пожаловать! +50 монет за регистрацию.');
+                // Обновляем стрик
+                updateStreak();
             }
-            streak = 1;
-            lastVisit = new Date().toISOString().split('T')[0];
-            await saveRegistration();
-            updateCoinsDisplay();
         }
 
-        // ---- Стрик ----
-        async function updateStreak() {
+        function updateStreak() {
             const today = new Date().toISOString().split('T')[0];
-            if (lastVisit === today) return;
-            if (lastVisit) {
-                const diff = Math.floor((Date.now() - new Date(lastVisit).getTime()) / 86400000);
-                if (diff >= 2) streak = 0;
-                else if (diff === 1) streak += 1;
+            if (data.lastVisit === today) return;
+            if (data.lastVisit) {
+                const diff = Math.floor((Date.now() - new Date(data.lastVisit).getTime()) / 86400000);
+                if (diff >= 2) data.streak = 0;
+                else if (diff === 1) data.streak += 1;
             } else {
-                streak = 1;
+                data.streak = 1;
             }
-            lastVisit = today;
-            await saveRegistration();
+            data.lastVisit = today;
+            saveData();
             updateStreakDisplay();
         }
 
-        // ---- UI ----
         function updateStreakDisplay() {
-            document.getElementById('streakDisplay').textContent = '🔥 ' + streak + ' дн.';
-            document.getElementById('streakDisplay2').textContent = streak;
+            document.getElementById('streakDisplay').textContent = '🔥 ' + data.streak + ' дн.';
+            document.getElementById('streakDisplay2').textContent = data.streak;
         }
 
         function updateReferralLink() {
             const container = document.getElementById('referralLinkDisplay');
             if (!container) return;
-            const uid = tg.initDataUnsafe.user.id;
-            const botName = 'YourBot'; // замените на имя вашего бота
-            const link = `https://t.me/${botName}?startapp=${uid}`;
+            const link = window.location.origin + window.location.pathname + '?ref=' + data.userId;
             container.innerHTML = `Ваша реферальная ссылка:<br><span style="font-size:12px;">${link}</span>`;
         }
 
-        function updateCoinsDisplay() { document.getElementById('coinsDisplay').textContent = `🪙 ${coins}`; const e=document.getElementById('coinsBalance'); if(e)e.textContent=coins; }
-        function addCoins(n) { coins += n; updateCoinsDisplay(); savePlat(); }
-        function spendCoins(n) { if (coins < n) { tg.showAlert('Недостаточно монет'); return false; } coins -= n; updateCoinsDisplay(); savePlat(); return true; }
+        function updateCoinsDisplay() {
+            document.getElementById('coinsDisplay').textContent = '🪙 ' + data.coins;
+            const el = document.getElementById('coinsBalance');
+            if (el) el.textContent = data.coins;
+        }
 
         function updateUserLevel() {
             const level = getUserLevel();
             document.getElementById('levelBox').textContent = `${level.emoji} ${level.name}`;
         }
 
-        function applyTheme() { if(isDark) document.body.classList.add('dark-theme'); else document.body.classList.remove('dark-theme'); document.getElementById('themeToggle').checked=isDark; }
-
-        async function setSub(lvl,dur) {
-            subLevel=lvl; subExpiry=Date.now()+dur;
-            if(lvl==='trial') trialUsed=true;
-            await saveSub();
-            updateUI(); renderAll(); updateTimer();
-            if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') renderExtra();
+        function applyTheme() {
+            if (data.isDark) document.body.classList.add('dark-theme');
+            else document.body.classList.remove('dark-theme');
+            document.getElementById('themeToggle').checked = data.isDark;
         }
 
-        function fmtTime(ms) { if(ms<=0) return 'Истекла'; const d=Math.floor(ms/86400000), h=Math.floor((ms%86400000)/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000); return `${d?d+'д ':''}${h||d?h+'ч ':''}${m}м ${s}с`; }
-        function updateTimer() {
-            if(timerInterval) clearInterval(timerInterval);
-            const box=document.getElementById('timerBox'), lab=document.getElementById('timerLabel'), val=document.getElementById('timerValue');
-            box.className='timer-box';
-            if(subLevel==='trial'){box.classList.add('trial','active');lab.textContent='Пробный Platinum';}
-            else if(subLevel==='pro'){box.classList.add('pro','active');lab.textContent='PRO подписка';}
-            else if(subLevel==='platinum'){box.classList.add('platinum','active');lab.textContent='Platinum подписка';}
-            else if(subLevel==='pro_forever'||subLevel==='platinum_forever'){box.classList.add('forever','active');lab.textContent='Вечная подписка';}
-            else{box.classList.remove('active');return;}
-            const tick=()=>{
-                const rem=subExpiry-Date.now();
-                if(rem<=0){clearInterval(timerInterval);subLevel='free';subExpiry=null;saveSub();updateUI();renderAll();tg.showAlert('⏰ Подписка истекла');return;}
-                val.textContent=fmtTime(rem);
-            };
-            tick(); timerInterval=setInterval(tick,1000);
+        function renderAll() {
+            document.getElementById('balanceDisplay').textContent = data.balance.toLocaleString() + ' ₽';
+            const today = new Date().toISOString().split('T')[0];
+            const todayExp = data.transactions.filter(t => t.type === 'expense' && t.date === today).reduce((s,t) => s + t.amount, 0);
+            document.getElementById('limitText').textContent = data.dailyLimit ? `Дневной лимит: ${data.dailyLimit} ₽` : 'Дневной лимит: не задан';
+            document.getElementById('limitStatus').style.display = (data.dailyLimit && todayExp > data.dailyLimit) ? 'inline' : 'none';
+            renderTxList('transactionList', data.transactions.slice(0,5));
+            renderTxList('allTransactionList', data.transactions);
+            if (data.subLevel !== 'free') { drawChart(); updateCatStats(); updateAdvStats(); }
+            if (data.subLevel === 'pro' || data.subLevel === 'pro_forever' || data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') renderExtra();
+            updateUI();
+        }
+
+        function renderTxList(id, list) {
+            const ul = document.getElementById(id);
+            if (!ul) return;
+            ul.innerHTML = list.length ? '' : '<li class="empty-state">Нет записей</li>';
+            list.forEach(t => {
+                const li = document.createElement('li');
+                li.className = 'transaction-item';
+                li.innerHTML = `<div class="transaction-left"><span class="transaction-emoji">${t.emoji}</span><div><div class="transaction-category">${t.category}</div><div class="transaction-date">${t.date}</div></div></div><span class="transaction-amount ${t.type === 'income' ? 'income' : 'expense'}">${t.type === 'income' ? '+' : '-'}${t.amount} ₽</span>`;
+                ul.appendChild(li);
+            });
+        }
+
+        function drawChart() {
+            const canvas = document.getElementById('expenseChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const tx = data.transactions.filter(t => t.type === 'expense');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!tx.length) {
+                ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--hint');
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Нет расходов', canvas.width/2, canvas.height/2);
+                return;
+            }
+            const totals = {};
+            tx.forEach(t => {
+                if (!totals[t.category]) totals[t.category] = { emoji: t.emoji, total: 0 };
+                totals[t.category].total += t.amount;
+            });
+            const total = Object.values(totals).reduce((s, c) => s + c.total, 0);
+            const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FF8C00','#A9A9A9'];
+            let start = -Math.PI/2, ci = 0, cx = canvas.width/2, cy = canvas.height/2, r = Math.min(cx, cy) - 10;
+            Object.values(totals).forEach(cat => {
+                const angle = (cat.total / total) * 2 * Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, start, start + angle);
+                ctx.closePath();
+                ctx.fillStyle = colors[ci++ % colors.length];
+                ctx.fill();
+                start += angle;
+            });
+        }
+
+        function updateCatStats() {
+            const c = document.getElementById('categoryStats');
+            if (!c) return;
+            const tx = data.transactions.filter(t => t.type === 'expense');
+            if (!tx.length) { c.innerHTML = ''; return; }
+            const totals = {};
+            tx.forEach(t => {
+                if (!totals[t.category]) totals[t.category] = { emoji: t.emoji, total: 0 };
+                totals[t.category].total += t.amount;
+            });
+            const total = Object.values(totals).reduce((s, c) => s + c.total, 0);
+            c.innerHTML = Object.entries(totals).map(([cat, d]) =>
+                `<div class="stat-item"><div class="stat-value">${d.emoji}</div><div class="stat-label">${Math.round((d.total/total)*100)}%</div></div>`
+            ).join('');
+        }
+
+        function updateAdvStats() {
+            const tx = data.transactions.filter(t => t.type === 'expense');
+            if (!tx.length) {
+                document.getElementById('avgDaily').textContent = '0 ₽';
+                document.getElementById('topCategory').textContent = '-';
+                return;
+            }
+            const days = Math.max(1, Math.ceil((Date.now() - new Date(tx[tx.length-1].date).getTime()) / 86400000));
+            const avg = tx.reduce((s, t) => s + t.amount, 0) / days;
+            document.getElementById('avgDaily').textContent = Math.round(avg) + ' ₽';
+            const cats = {};
+            tx.forEach(t => cats[t.category] = (cats[t.category] || 0) + t.amount);
+            const top = Object.entries(cats).sort((a,b) => b[1] - a[1])[0];
+            document.getElementById('topCategory').textContent = top ? `${top[0]} (${top[1]} ₽)` : '-';
+        }
+
+        function renderExtra() {
+            renderPiggy();
+            renderChallenges();
+            renderShop();
+            if (data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') {
+                renderAchievements();
+                renderDebts();
+                renderRegular();
+                renderCustomCategoriesList();
+            }
+            document.querySelectorAll('.tab-content').forEach(e => e.style.display = 'none');
+            const act = document.getElementById(activeTab);
+            if (act) act.style.display = 'block';
         }
 
         function updateUI() {
-            const badge=document.getElementById('levelBadge'), sub=document.getElementById('subscribeBlock'), tbtn=document.getElementById('trialBtn');
-            badge.className='level-badge';
-            if(subLevel==='pro'){badge.classList.add('pro');badge.textContent='PRO';}
-            else if(subLevel==='pro_forever'){badge.classList.add('forever');badge.textContent='PRO ∞';}
-            else if(subLevel==='platinum'){badge.classList.add('platinum');badge.textContent='PLATINUM';}
-            else if(subLevel==='platinum_forever'){badge.classList.add('forever');badge.textContent='PLATINUM ∞';}
-            else if(subLevel==='trial'){badge.classList.add('trial');badge.textContent='ПРОБНЫЙ';}
-            else badge.style.display='none';
-            document.getElementById('screen-analytics').style.display = (subLevel !== 'free') ? '' : 'none';
-            sub.style.display = subLevel==='free' ? 'block' : 'none';
-            if(subLevel==='free') tbtn.style.display = trialUsed ? 'none' : 'block';
-            const isPlat = (subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial');
-            document.querySelectorAll('.platinum-only').forEach(el=>el.style.display=isPlat?'':'none');
-            const act=document.querySelector(`.tab[data-tab="${activeTab}"]`);
-            if(act&&!isPlat&&act.classList.contains('platinum-only')){activeTab='tab-piggy';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const f=document.querySelector('.tab[data-tab="tab-piggy"]');if(f)f.classList.add('active');}
-            document.getElementById('subscriptionInfo').innerHTML=subLevel==='free'?'❌ Нет подписки':subLevel==='trial'?'🟢 Пробный Platinum (3 дня)':subLevel==='pro'?'⭐ PRO активно':subLevel==='pro_forever'?'⭐ PRO навсегда':subLevel==='platinum'?'💎 Platinum активно':'💎 Platinum навсегда';
+            const badge = document.getElementById('levelBadge');
+            badge.className = 'level-badge';
+            if (data.subLevel === 'pro') { badge.classList.add('pro'); badge.textContent = 'PRO'; }
+            else if (data.subLevel === 'pro_forever') { badge.classList.add('forever'); badge.textContent = 'PRO ∞'; }
+            else if (data.subLevel === 'platinum') { badge.classList.add('platinum'); badge.textContent = 'PLATINUM'; }
+            else if (data.subLevel === 'platinum_forever') { badge.classList.add('forever'); badge.textContent = 'PLATINUM ∞'; }
+            else if (data.subLevel === 'trial') { badge.classList.add('trial'); badge.textContent = 'ПРОБНЫЙ'; }
+            else badge.style.display = 'none';
+
+            document.getElementById('screen-analytics').style.display = (data.subLevel !== 'free') ? '' : 'none';
+            const subBlock = document.getElementById('subscribeBlock');
+            if (subBlock) subBlock.style.display = data.subLevel === 'free' ? 'block' : 'none';
+            const tbtn = document.getElementById('trialBtn');
+            if (tbtn) tbtn.style.display = (data.subLevel === 'free' && !data.trialUsed) ? 'block' : 'none';
+
+            const isPlat = (data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial');
+            document.querySelectorAll('.platinum-only').forEach(el => el.style.display = isPlat ? '' : 'none');
+
+            const act = document.querySelector(`.tab[data-tab="${activeTab}"]`);
+            if (act && !isPlat && act.classList.contains('platinum-only')) {
+                activeTab = 'tab-piggy';
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                const f = document.querySelector('.tab[data-tab="tab-piggy"]');
+                if (f) f.classList.add('active');
+            }
+
+            document.getElementById('subscriptionInfo').innerHTML = data.subLevel === 'free' ? '❌ Нет подписки' :
+                data.subLevel === 'trial' ? '🟢 Пробный Platinum (3 дня)' :
+                data.subLevel === 'pro' ? '⭐ PRO активно' :
+                data.subLevel === 'pro_forever' ? '⭐ PRO навсегда' :
+                data.subLevel === 'platinum' ? '💎 Platinum активно' :
+                '💎 Platinum навсегда';
+
             updateStreakDisplay();
             updateReferralLink();
         }
 
-        function renderAll() {
-            document.getElementById('balanceDisplay').textContent = balance.toLocaleString() + ' ₽';
-            const today = new Date().toISOString().split('T')[0];
-            const todayExp = transactions.filter(t=>t.type==='expense' && t.date===today).reduce((s,t)=>s+t.amount,0);
-            document.getElementById('limitText').textContent = dailyLimit ? `Дневной лимит: ${dailyLimit} ₽` : 'Дневной лимит: не задан';
-            document.getElementById('limitStatus').style.display = (dailyLimit && todayExp > dailyLimit) ? 'inline' : 'none';
-            renderTxList('transactionList', transactions.slice(0,5));
-            renderTxList('allTransactionList', transactions);
-            if(subLevel!=='free'){drawChart();updateCatStats();updateAdvStats();}
-            if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') renderExtra();
-        }
-
-        function renderTxList(id,list) {
-            const ul=document.getElementById(id); if(!ul)return;
-            ul.innerHTML = list.length ? '' : '<li class="empty-state">Нет записей</li>';
-            list.forEach(t=>{const li=document.createElement('li');li.className='transaction-item';li.innerHTML=`<div class="transaction-left"><span class="transaction-emoji">${t.emoji}</span><div><div class="transaction-category">${t.category}</div><div class="transaction-date">${t.date}</div></div></div><span class="transaction-amount ${t.type==='income'?'income':'expense'}">${t.type==='income'?'+':'-'}${t.amount} ₽</span>`;ul.appendChild(li);});
-        }
-
-        function drawChart() { /* ... как раньше ... */ }
-        function updateCatStats() { /* ... */ }
-        function updateAdvStats() { /* ... */ }
-
-        function renderExtra() {
-            renderPiggy(); renderChallenges(); renderShop();
-            if(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial'){ renderAchievements(); renderDebts(); renderRegular(); renderCustomCategoriesList(); }
-            document.querySelectorAll('.tab-content').forEach(e=>e.style.display='none');
-            const act=document.getElementById(activeTab); if(act)act.style.display='block';
-        }
-
-        // ---- Piggy ----
+        // ------ КОПИЛКИ ------
         function renderPiggy() {
-            const c=document.getElementById('piggyList');
-            c.innerHTML = piggyBanks.length ? '' : '<p style="color:var(--hint);">Нет копилок</p>';
-            piggyBanks.forEach((p,i)=>{
-                const pct=Math.min(100, Math.round((p.saved/p.target)*100));
-                const img=p.photo ? `<img src="${p.photo}" class="piggy-image">` : `<span class="piggy-icon">${p.emoji}</span>`;
+            const c = document.getElementById('piggyList');
+            c.innerHTML = data.piggyBanks.length ? '' : '<p style="color:var(--hint);">Нет копилок</p>';
+            data.piggyBanks.forEach((p, i) => {
+                const pct = Math.min(100, Math.round((p.saved / p.target) * 100));
+                const img = p.photo ? `<img src="${p.photo}" class="piggy-image">` : `<span class="piggy-icon">${p.emoji}</span>`;
                 c.innerHTML += `<div class="piggy-card"><div class="piggy-actions"><button onclick="editPiggy(${i})">✏️</button><button onclick="delPiggy(${i})">🗑️</button></div><div class="piggy-header">${img}<div><div class="piggy-name">${p.name}</div><div class="piggy-target">${p.saved}/${p.target} ₽ (${pct}%)</div></div></div><div class="piggy-progress"><div class="piggy-bar" style="width:${pct}%"></div></div><div style="display:flex;gap:8px;margin-top:8px;"><input type="number" id="pa_${i}" placeholder="Сумма" style="flex:1;padding:8px;border-radius:8px;"><button class="btn btn-primary" onclick="addPig(${i})">+</button></div></div>`;
             });
         }
-        window.editPiggy = async function(i) { const n=prompt('Название:',piggyBanks[i].name); if(n){piggyBanks[i].name=n; await savePlat(); renderPiggy();} };
-        window.delPiggy = async function(i) { tg.showConfirm('Удалить?', async (ok) => { if(ok){piggyBanks.splice(i,1); await savePlat(); renderPiggy();} }); };
-        window.addPig = async function(i) {
-            const inp=document.getElementById('pa_'+i);
-            const a=parseFloat(inp.value);
-            if(!a||a<=0) return;
-            if(balance<a) return tg.showAlert('Недостаточно средств');
-            piggyBanks[i].saved += a;
-            balance -= a;
-            transactions.unshift({type:'expense', category:'🐷 Копилка', emoji:piggyBanks[i].emoji, amount:a, date:new Date().toISOString().split('T')[0]});
-            await saveFin(); await savePlat();
-            renderAll(); renderPiggy();
-            inp.value='';
+        window.editPiggy = function(i) {
+            const n = prompt('Название:', data.piggyBanks[i].name);
+            if (n) { data.piggyBanks[i].name = n; saveData(); renderPiggy(); }
         };
-        document.getElementById('addPiggyBtn').addEventListener('click', ()=>document.getElementById('piggyModal').classList.add('active'));
-        document.getElementById('closePiggyModal').addEventListener('click', ()=>document.getElementById('piggyModal').classList.remove('active'));
-        document.getElementById('savePiggyBtn').addEventListener('click', async ()=>{
-            const n=document.getElementById('piggyName').value, t=parseFloat(document.getElementById('piggyTarget').value);
-            if(!n||!t) return tg.showAlert('Заполните поля');
-            let ph=null; const f=document.getElementById('piggyPhoto').files[0];
-            if(f){ph=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(f);});}
-            piggyBanks.push({name:n, target:t, saved:0, emoji:'🐷', photo:ph});
-            await savePlat();
+        window.delPiggy = function(i) {
+            if (confirm('Удалить копилку?')) { data.piggyBanks.splice(i,1); saveData(); renderPiggy(); }
+        };
+        window.addPig = function(i) {
+            const inp = document.getElementById('pa_'+i);
+            const a = parseFloat(inp.value);
+            if (!a || a <= 0) return;
+            if (data.balance < a) return alert('Недостаточно средств');
+            data.piggyBanks[i].saved += a;
+            data.balance -= a;
+            data.transactions.unshift({ type:'expense', category:'🐷 Копилка', emoji:data.piggyBanks[i].emoji, amount:a, date:new Date().toISOString().split('T')[0] });
+            saveData();
+            renderAll();
+            renderPiggy();
+            inp.value = '';
+        };
+
+        document.getElementById('addPiggyBtn').addEventListener('click', () => document.getElementById('piggyModal').classList.add('active'));
+        document.getElementById('closePiggyModal').addEventListener('click', () => document.getElementById('piggyModal').classList.remove('active'));
+        document.getElementById('savePiggyBtn').addEventListener('click', async () => {
+            const n = document.getElementById('piggyName').value;
+            const t = parseFloat(document.getElementById('piggyTarget').value);
+            if (!n || !t) return alert('Заполните поля');
+            let ph = null;
+            const f = document.getElementById('piggyPhoto').files[0];
+            if (f) {
+                ph = await new Promise(r => { const fr = new FileReader(); fr.onload = e => r(e.target.result); fr.readAsDataURL(f); });
+            }
+            data.piggyBanks.push({ name:n, target:t, saved:0, emoji:'🐷', photo:ph });
+            saveData();
             renderPiggy();
             document.getElementById('piggyModal').classList.remove('active');
         });
 
-        // ---- Challenges ----
+        // ------ ЧЕЛЛЕНДЖИ ------
         function renderChallenges() {
-            const c=document.getElementById('challengesList');
-            c.innerHTML = challenges.length ? '' : '<p style="color:var(--hint);">Нет челленджей</p>';
-            challenges.forEach((ch,i)=>{
-                const left=ch.days-ch.progress;
+            const c = document.getElementById('challengesList');
+            c.innerHTML = data.challenges.length ? '' : '<p style="color:var(--hint);">Нет челленджей</p>';
+            data.challenges.forEach((ch, i) => {
+                const left = ch.days - ch.progress;
                 c.innerHTML += `<div class="challenge-card"><div>🎯 <b>${ch.name}</b> — награда ${ch.reward}🪙</div><div style="font-size:13px;">День ${ch.progress}/${ch.days} ${left>0?'('+left+' осталось)':'✅ Завершён!'}</div><div class="achievement-progress" style="margin-top:6px;"><div class="achievement-progress-bar" style="width:${(ch.progress/ch.days)*100}%;background:gold;"></div></div>${left>0?`<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="progChal(${i})">Отметить день</button>`:''}${!left&&!ch.completed?`<button class="btn btn-gold" style="width:100%;margin-top:8px;" onclick="claimChal(${i})">Получить награду</button>`:''}</div>`;
             });
         }
-        window.progChal = async function(i) { if(challenges[i].progress<challenges[i].days){challenges[i].progress++; await savePlat(); renderChallenges();} };
-        window.claimChal = async function(i) { if(!challenges[i].completed){challenges[i].completed=true; addCoins(challenges[i].reward); await savePlat(); renderChallenges(); tg.showAlert(`+${challenges[i].reward}🪙`);} };
-        document.getElementById('addChallengeBtn').addEventListener('click', ()=>document.getElementById('challengeModal').classList.add('active'));
-        document.getElementById('closeChallengeModal').addEventListener('click', ()=>document.getElementById('challengeModal').classList.remove('active'));
-        document.getElementById('saveChallengeBtn').addEventListener('click', async ()=>{
-            const n=document.getElementById('challengeName').value, d=parseInt(document.getElementById('challengeDays').value), rw=parseInt(document.getElementById('challengeReward').value)||50;
-            if(!n||!d) return tg.showAlert('Заполните поля');
-            challenges.push({name:n, days:d, progress:0, reward:rw, completed:false});
-            await savePlat();
+        window.progChal = function(i) {
+            if (data.challenges[i].progress < data.challenges[i].days) {
+                data.challenges[i].progress++;
+                saveData();
+                renderChallenges();
+            }
+        };
+        window.claimChal = function(i) {
+            if (!data.challenges[i].completed) {
+                data.challenges[i].completed = true;
+                data.coins += data.challenges[i].reward;
+                saveData();
+                renderChallenges();
+                updateCoinsDisplay();
+                alert(`+${data.challenges[i].reward}🪙`);
+            }
+        };
+
+        document.getElementById('addChallengeBtn').addEventListener('click', () => document.getElementById('challengeModal').classList.add('active'));
+        document.getElementById('closeChallengeModal').addEventListener('click', () => document.getElementById('challengeModal').classList.remove('active'));
+        document.getElementById('saveChallengeBtn').addEventListener('click', () => {
+            const n = document.getElementById('challengeName').value;
+            const d = parseInt(document.getElementById('challengeDays').value);
+            const rw = parseInt(document.getElementById('challengeReward').value) || 50;
+            if (!n || !d) return alert('Заполните поля');
+            data.challenges.push({ name:n, days:d, progress:0, reward:rw, completed:false });
+            saveData();
             renderChallenges();
             document.getElementById('challengeModal').classList.remove('active');
         });
 
-        // ---- Shop ----
+        // ------ МАГАЗИН ------
         function renderShop() {
-            document.getElementById('shopList').innerHTML = shopItems.map(it=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc}</div></div><button class="btn btn-primary" onclick="buy('${it.id}')">🪙 ${it.price}</button></div>`).join('');
+            document.getElementById('shopList').innerHTML = data.shopItems.map(it =>
+                `<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc}</div></div><button class="btn btn-primary" onclick="buy('${it.id}')">🪙 ${it.price}</button></div>`
+            ).join('');
         }
         window.buy = function(id) {
-            const it=shopItems.find(i=>i.id===id); if(!it)return;
-            if(coins<it.price) return tg.showAlert('Недостаточно монет');
-            tg.showConfirm(`Купить "${it.name}"?`, async (ok)=>{
-                if(!ok)return;
-                if(!spendCoins(it.price))return;
-                if(it.action==='pro') await setSub('pro',30*24*60*60*1000);
-                else if(it.action==='pro_forever') await setSub('pro_forever',100*365*24*60*60*1000);
-                else if(it.action==='platinum') await setSub('platinum',30*24*60*60*1000);
-                else if(it.action==='platinum_forever') await setSub('platinum_forever',100*365*24*60*60*1000);
-                else if(it.action==='achievement'){ if(!achievements.find(a=>a.id===it.id)){achievements.push({id:it.id,name:it.name,icon:it.icon,date:Date.now()}); await savePlat(); renderAchievements(); tg.showAlert('Трофей добавлен!');} else tg.showAlert('Уже есть'); }
-                else tg.showAlert('Тема (заглушка)');
-            });
+            const it = data.shopItems.find(i => i.id === id);
+            if (!it) return;
+            if (data.coins < it.price) return alert('Недостаточно монет');
+            if (!confirm(`Купить "${it.name}"?`)) return;
+            data.coins -= it.price;
+            if (it.action === 'pro') { data.subLevel = 'pro'; data.subExpiry = Date.now() + 30*24*60*60*1000; }
+            else if (it.action === 'pro_forever') { data.subLevel = 'pro_forever'; data.subExpiry = Date.now() + 100*365*24*60*60*1000; }
+            else if (it.action === 'platinum') { data.subLevel = 'platinum'; data.subExpiry = Date.now() + 30*24*60*60*1000; }
+            else if (it.action === 'platinum_forever') { data.subLevel = 'platinum_forever'; data.subExpiry = Date.now() + 100*365*24*60*60*1000; }
+            else if (it.action === 'achievement') {
+                if (!data.achievements.find(a => a.id === it.id)) {
+                    data.achievements.push({ id:it.id, name:it.name, icon:it.icon, date:Date.now() });
+                    alert('Трофей добавлен!');
+                } else alert('Уже есть');
+            } else alert('Тема (заглушка)');
+            saveData();
+            updateCoinsDisplay();
+            renderShop();
+            updateUI();
+            if (data.subLevel !== 'free') { renderExtra(); }
         };
 
-        // ---- Achievements ----
+        // ------ ТРОФЕИ ------
         function renderAchievements() {
-            document.getElementById('achievementsList').innerHTML = achievements.map(a=>`<div class="achievement-card"><div class="achievement-icon">${a.icon||'🏆'}</div><div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${new Date(a.date).toLocaleDateString()}</div></div></div>`).join('') || '<p style="color:var(--hint);">Нет трофеев</p>';
+            document.getElementById('achievementsList').innerHTML = data.achievements.map(a =>
+                `<div class="achievement-card"><div class="achievement-icon">${a.icon||'🏆'}</div><div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${new Date(a.date).toLocaleDateString()}</div></div></div>`
+            ).join('') || '<p style="color:var(--hint);">Нет трофеев</p>';
         }
 
-        // ---- Debts ----
+        // ------ ДОЛГИ ------
         function renderDebts() {
-            document.getElementById('debtsList').innerHTML = debts.map((d,i)=>`<div class="debt-card"><div><div>${d.person}</div><div class="debt-amount ${d.type==='owed'?'debt-owed':'debt-paid'}">${d.type==='owed'?'+':'-'}${d.amount} ₽</div></div><button class="btn btn-danger" onclick="delDebt(${i})">✕</button></div>`).join('') || '<p style="color:var(--hint);">Нет долгов</p>';
+            document.getElementById('debtsList').innerHTML = data.debts.map((d,i) =>
+                `<div class="debt-card"><div><div>${d.person}</div><div class="debt-amount ${d.type==='owed'?'debt-owed':'debt-paid'}">${d.type==='owed'?'+':'-'}${d.amount} ₽</div></div><button class="btn btn-danger" onclick="delDebt(${i})">✕</button></div>`
+            ).join('') || '<p style="color:var(--hint);">Нет долгов</p>';
         }
-        window.delDebt = async function(i){ debts.splice(i,1); await savePlat(); renderDebts(); };
-        document.getElementById('addDebtBtn').addEventListener('click', ()=>document.getElementById('debtModal').classList.add('active'));
-        document.getElementById('closeDebtModal').addEventListener('click', ()=>document.getElementById('debtModal').classList.remove('active'));
-        document.getElementById('saveDebtBtn').addEventListener('click', async ()=>{
-            const p=document.getElementById('debtPerson').value, a=parseFloat(document.getElementById('debtAmount').value), t=document.getElementById('debtType').value;
-            if(!p||!a) return tg.showAlert('Заполните поля');
-            debts.push({person:p, amount:a, type:t});
-            await savePlat();
+        window.delDebt = function(i) { data.debts.splice(i,1); saveData(); renderDebts(); };
+
+        document.getElementById('addDebtBtn').addEventListener('click', () => document.getElementById('debtModal').classList.add('active'));
+        document.getElementById('closeDebtModal').addEventListener('click', () => document.getElementById('debtModal').classList.remove('active'));
+        document.getElementById('saveDebtBtn').addEventListener('click', () => {
+            const p = document.getElementById('debtPerson').value;
+            const a = parseFloat(document.getElementById('debtAmount').value);
+            const t = document.getElementById('debtType').value;
+            if (!p || !a) return alert('Заполните поля');
+            data.debts.push({ person:p, amount:a, type:t });
+            saveData();
             renderDebts();
             document.getElementById('debtModal').classList.remove('active');
         });
 
-        // ---- Regular ----
+        // ------ РЕГУЛЯРНЫЕ ПЛАТЕЖИ ------
         function renderRegular() {
-            document.getElementById('regularPaymentsList').innerHTML = regularPayments.length ? regularPayments.map((p,i)=>`<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;"><div><div>${p.name}</div><div style="font-size:13px;">${p.amount} ₽ · ${p.period==='weekly'?'Раз в неделю':'Раз в месяц'}</div></div><button class="btn btn-danger" onclick="delReg(${i})">✕</button></div>`).join('') : '';
+            document.getElementById('regularPaymentsList').innerHTML = data.regularPayments.length ?
+                data.regularPayments.map((p,i) =>
+                    `<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;"><div><div>${p.name}</div><div style="font-size:13px;">${p.amount} ₽ · ${p.period==='weekly'?'Раз в неделю':'Раз в месяц'}</div></div><button class="btn btn-danger" onclick="delReg(${i})">✕</button></div>`
+                ).join('') : '';
         }
-        window.delReg = async function(i){ regularPayments.splice(i,1); await savePlat(); renderRegular(); };
-        document.getElementById('addRegularPaymentBtn').addEventListener('click', ()=>document.getElementById('regularModal').classList.add('active'));
-        document.getElementById('closeRegularModal').addEventListener('click', ()=>document.getElementById('regularModal').classList.remove('active'));
-        document.getElementById('saveRegularBtn').addEventListener('click', async ()=>{
-            const n=document.getElementById('regularName').value, a=parseFloat(document.getElementById('regularAmount').value), p=document.getElementById('regularPeriod').value;
-            if(!n||!a) return tg.showAlert('Заполните поля');
-            regularPayments.push({name:n, amount:a, period:p});
-            await savePlat();
+        window.delReg = function(i) { data.regularPayments.splice(i,1); saveData(); renderRegular(); };
+
+        document.getElementById('addRegularPaymentBtn').addEventListener('click', () => document.getElementById('regularModal').classList.add('active'));
+        document.getElementById('closeRegularModal').addEventListener('click', () => document.getElementById('regularModal').classList.remove('active'));
+        document.getElementById('saveRegularBtn').addEventListener('click', () => {
+            const n = document.getElementById('regularName').value;
+            const a = parseFloat(document.getElementById('regularAmount').value);
+            const p = document.getElementById('regularPeriod').value;
+            if (!n || !a) return alert('Заполните поля');
+            data.regularPayments.push({ name:n, amount:a, period:p });
+            saveData();
             renderRegular();
             document.getElementById('regularModal').classList.remove('active');
         });
-        function checkRegularPayments() { /* как раньше */ }
 
-        // ---- Custom categories ----
-        function renderCustomCategoriesList() { /* ... */ }
-        window.deleteCustomCat = async function(type, index) { customCategories[type].splice(index,1); await saveCustomCategories(); renderCustomCategoriesList(); };
-        document.getElementById('addCustomCategoryBtn').addEventListener('click', ()=>document.getElementById('customCategoryModal').classList.add('active'));
-        document.getElementById('closeCustomCatModal').addEventListener('click', ()=>document.getElementById('customCategoryModal').classList.remove('active'));
-        document.getElementById('saveCustomCatBtn').addEventListener('click', async ()=>{
-            const name=document.getElementById('customCatName').value.trim(), emoji=document.getElementById('customCatEmoji').value.trim()||'📌', type=document.getElementById('customCatType').value;
-            if(!name) return tg.showAlert('Введите название');
-            customCategories[type].push({name, emoji});
-            await saveCustomCategories();
+        // ------ СВОИ КАТЕГОРИИ ------
+        function renderCustomCategoriesList() {
+            const container = document.getElementById('customCategoriesList');
+            let html = '<div class="section-title">Расходы</div>';
+            data.customCategories.expense.forEach((cat, i) => {
+                html += `<div class="shop-item"><div>${cat.emoji} ${cat.name}</div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteCustomCat('expense',${i})">✕</button></div>`;
+            });
+            html += '<div class="section-title">Доходы</div>';
+            data.customCategories.income.forEach((cat, i) => {
+                html += `<div class="shop-item"><div>${cat.emoji} ${cat.name}</div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteCustomCat('income',${i})">✕</button></div>`;
+            });
+            container.innerHTML = html || '<p style="color:var(--hint);">Нет своих категорий</p>';
+        }
+        window.deleteCustomCat = function(type, index) {
+            data.customCategories[type].splice(index, 1);
+            saveData();
+            renderCustomCategoriesList();
+        };
+
+        document.getElementById('addCustomCategoryBtn').addEventListener('click', () => {
+            document.getElementById('customCatModalTitle').textContent = 'Новая категория';
+            document.getElementById('customCatName').value = '';
+            document.getElementById('customCatEmoji').value = '';
+            document.getElementById('customCatType').value = 'expense';
+            document.getElementById('customCategoryModal').classList.add('active');
+        });
+        document.getElementById('closeCustomCatModal').addEventListener('click', () => document.getElementById('customCategoryModal').classList.remove('active'));
+        document.getElementById('saveCustomCatBtn').addEventListener('click', () => {
+            const name = document.getElementById('customCatName').value.trim();
+            const emoji = document.getElementById('customCatEmoji').value.trim() || '📌';
+            const type = document.getElementById('customCatType').value;
+            if (!name) return alert('Введите название');
+            data.customCategories[type].push({ name, emoji });
+            saveData();
             renderCustomCategoriesList();
             document.getElementById('customCategoryModal').classList.remove('active');
         });
 
-        // ---- Tickets ----
-        // (опущены для краткости, но они есть в полной версии)
-
-        // ---- Admin (локальная версия, только для отображения) ----
-        function isAdmin() { const u=tg.initDataUnsafe.user.username; return u && ADMIN_USERNAMES.includes(u.toLowerCase()); }
-        // ... админские функции (без сервера они не работают, но мы их оставим заглушками)
-
-        // ---- Обработчики ----
-        document.getElementById('openExpenseModal').addEventListener('click', ()=>openAdd('expense'));
-        document.getElementById('openIncomeModal').addEventListener('click', ()=>openAdd('income'));
-        document.getElementById('closeModal').addEventListener('click', ()=>document.getElementById('addModal').classList.remove('active'));
-        document.getElementById('submitTransaction').addEventListener('click', async ()=>{
-            const a=parseFloat(document.getElementById('amountInput').value);
-            if(!a||a<=0) return tg.showAlert('Введите сумму');
-            if(!selectedCategory) return tg.showAlert('Выберите категорию');
-            transactions.unshift({type:currentType, category:selectedCategory.name, emoji:selectedCategory.emoji, amount:a, date:new Date().toISOString().split('T')[0]});
-            balance += currentType==='income' ? a : -a;
-            await saveFin();
-            renderAll(); updateUserLevel();
-            document.getElementById('addModal').classList.remove('active');
+        // ------ ИНСТРУМЕНТЫ (заглушки) ------
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            let csv = 'Тип,Категория,Сумма,Дата\n';
+            data.transactions.forEach(t => csv += `${t.type},${t.category},${t.amount},${t.date}\n`);
+            const blob = new Blob([csv], {type:'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'transactions.csv';
+            a.click();
         });
-        function openAdd(type) {
-            currentType=type; selectedCategory=null;
-            document.getElementById('modalTitle').textContent = type==='expense' ? 'Добавить расход' : 'Добавить доход';
-            document.getElementById('amountInput').value='';
-            const grid=document.getElementById('categoryGrid'); grid.innerHTML='';
-            const cats = type==='expense' ? getExpenseCategories() : getIncomeCategories();
-            cats.forEach(cat=>{
-                const d=document.createElement('div'); d.className='category-item';
-                d.innerHTML=`${cat.emoji}<div class="category-label">${cat.name}</div>`;
-                d.onclick=()=>{grid.querySelectorAll('.category-item').forEach(e=>e.classList.remove('selected')); d.classList.add('selected'); selectedCategory=cat;};
-                grid.appendChild(d);
-            });
-            document.getElementById('addModal').classList.add('active');
+        document.getElementById('calcCreditBtn').addEventListener('click', () => {
+            const a = prompt('Сумма кредита:','100000'), r = prompt('Ставка %:','15'), m = prompt('Месяцев:','12');
+            if (a && r && m) {
+                const P = +a, R = +r/100/12, N = +m;
+                const pay = (P * R * Math.pow(1+R, N)) / (Math.pow(1+R, N) - 1);
+                alert(`Платёж: ${Math.round(pay)} ₽\nПереплата: ${Math.round(pay*N-P)} ₽`);
+            }
+        });
+        document.getElementById('yearReportBtn').addEventListener('click', () => {
+            const y = new Date(new Date().setFullYear(new Date().getFullYear()-1)).toISOString().split('T')[0];
+            const tx = data.transactions.filter(t => t.date >= y);
+            const inc = tx.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
+            const exp = tx.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+            alert(`📆 Итоги года\nДоходы: +${inc} ₽\nРасходы: -${exp} ₽\nБаланс: ${inc-exp} ₽`);
+        });
+        document.getElementById('forecastBtn').addEventListener('click', () => {
+            const tx = data.transactions.filter(t => t.type === 'expense');
+            if (tx.length < 5) return alert('Мало данных');
+            const days = Math.max(1, Math.ceil((Date.now() - new Date(tx[tx.length-1].date).getTime()) / 86400000));
+            const avg = tx.reduce((s,t) => s + t.amount, 0) / days;
+            alert(`🔮 Прогноз: ~-${Math.round(avg*30)} ₽ в месяц`);
+        });
+
+        // ------ МОНЕТЫ (демо) ------
+        document.getElementById('coinsDisplay').addEventListener('click', openCoins);
+        document.getElementById('closeCoinsModal').addEventListener('click', () => document.getElementById('coinsModal').classList.remove('active'));
+        document.getElementById('startDonateBtn').addEventListener('click', () => {
+            // Демо-пополнение
+            data.coins += 100;
+            saveData();
+            updateCoinsDisplay();
+            document.getElementById('coinsBalance').textContent = data.coins;
+            document.getElementById('donateStatus').textContent = '✅ 100 монет добавлено (демо)';
+            setTimeout(() => document.getElementById('donateStatus').textContent = '', 3000);
+        });
+        function openCoins() {
+            document.getElementById('coinsBalance').textContent = data.coins;
+            document.getElementById('donateStatus').textContent = '';
+            document.getElementById('coinsModal').classList.add('active');
         }
 
-        document.getElementById('viewAllBtn').addEventListener('click', ()=>{
-            renderTxList('allTransactionList', transactions);
-            document.getElementById('allTransactionsModal').classList.add('active');
-        });
-        document.getElementById('closeAllModal').addEventListener('click', ()=>document.getElementById('allTransactionsModal').classList.remove('active'));
-
-        document.getElementById('openSettings').addEventListener('click', ()=>{
-            document.getElementById('dailyLimitInput').value=dailyLimit||'';
-            document.getElementById('settingsModal').classList.add('active');
-        });
-        document.getElementById('closeSettings').addEventListener('click', ()=>document.getElementById('settingsModal').classList.remove('active'));
-        document.getElementById('saveSettings').addEventListener('click', async ()=>{
-            dailyLimit=parseFloat(document.getElementById('dailyLimitInput').value)||0;
-            isDark=document.getElementById('themeToggle').checked;
-            applyTheme();
-            await saveFin();
-            document.getElementById('settingsModal').classList.remove('active');
-            renderAll();
-        });
-
-        // Подписки
-        document.getElementById('trialBtn').addEventListener('click', async ()=>{
-            if(trialUsed) return tg.showAlert('Уже использован');
-            await setSub('trial', 3*24*60*60*1000);
-            tg.showAlert('✅ Пробный Platinum на 3 дня!');
-        });
-        document.getElementById('buyProBtn').addEventListener('click', async ()=>{ await setSub('pro',30*24*60*60*1000); tg.showAlert('✅ PRO на 30 дней!'); });
-        document.getElementById('buyPlatinumBtn').addEventListener('click', async ()=>{ await setSub('platinum',30*24*60*60*1000); tg.showAlert('✅ Platinum на 30 дней!'); });
-        document.getElementById('buyForeverProBtn').addEventListener('click', async ()=>{ await setSub('pro_forever',100*365*24*60*60*1000); tg.showAlert('✅ PRO навсегда!'); });
-        document.getElementById('buyForeverPlatinumBtn').addEventListener('click', async ()=>{ await setSub('platinum_forever',100*365*24*60*60*1000); tg.showAlert('✅ Platinum навсегда!'); });
-
-        // Инструменты
-        document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
-            let csv='Тип,Категория,Сумма,Дата\n';
-            transactions.forEach(t=>csv+=`${t.type},${t.category},${t.amount},${t.date}\n`);
-            const blob=new Blob([csv],{type:'text/csv'});
-            tg.openLink(URL.createObjectURL(blob));
-        });
-        document.getElementById('calcCreditBtn').addEventListener('click', ()=>{
-            const a=prompt('Сумма кредита:','100000'), r=prompt('Ставка %:','15'), m=prompt('Месяцев:','12');
-            if(a&&r&&m){const P=+a,R=+r/100/12,N=+m,pay=(P*R*Math.pow(1+R,N))/(Math.pow(1+R,N)-1); tg.showAlert(`Платёж: ${Math.round(pay)} ₽\nПереплата: ${Math.round(pay*N-P)} ₽`);}
-        });
-        document.getElementById('yearReportBtn').addEventListener('click', ()=>{
-            const y=new Date(new Date().setFullYear(new Date().getFullYear()-1)).toISOString().split('T')[0];
-            const tx=transactions.filter(t=>t.date>=y), inc=tx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0), exp=tx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-            tg.showAlert(`📆 Итоги года\nДоходы: +${inc} ₽\nРасходы: -${exp} ₽\nБаланс: ${inc-exp} ₽`);
-        });
-        document.getElementById('forecastBtn').addEventListener('click', ()=>{
-            const tx=transactions.filter(t=>t.type==='expense');
-            if(tx.length<5) return tg.showAlert('Мало данных');
-            const days=Math.max(1, Math.ceil((Date.now()-new Date(tx[tx.length-1].date).getTime())/86400000));
-            const avg=tx.reduce((s,t)=>s+t.amount,0)/days;
-            tg.showAlert(`🔮 Прогноз: ~-${Math.round(avg*30)} ₽ в месяц`);
-        });
-
-        document.getElementById('resetDataBtn').addEventListener('click', ()=>{
-            tg.showPopup({
-                title:'Сброс',
-                message:'Что сбросить?',
-                buttons:[
-                    {type:'default',text:'Только финансы',id:'fin'},
-                    {type:'destructive',text:'Всё включая подписку',id:'all'},
-                    {type:'cancel',text:'Отмена'}
-                ]
-            }, async (id)=>{
-                if(id==='fin'){ balance=0; transactions=[]; dailyLimit=0; await saveFin(); renderAll(); tg.showAlert('Финансы сброшены'); }
-                else if(id==='all'){ balance=0; transactions=[]; dailyLimit=0; subLevel='free'; subExpiry=null; trialUsed=false; piggyBanks=[]; achievements=[]; challenges=[]; debts=[]; regularPayments=[]; coins=0; customCategories={expense:[],income:[]}; await saveCustomCategories(); await Promise.all([saveFin(), saveSub(), savePlat()]); updateUI(); renderAll(); tg.showAlert('Всё сброшено'); }
+        // ------ РЕФЕРАЛЬНАЯ ССЫЛКА (копирование) ------
+        document.getElementById('inviteFriendBtn').addEventListener('click', () => {
+            const link = window.location.origin + window.location.pathname + '?ref=' + data.userId;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Ссылка скопирована!');
+            }).catch(() => {
+                alert('Скопируйте ссылку вручную:\n' + link);
             });
         });
 
-        // Монеты
-        document.getElementById('coinsDisplay').addEventListener('click', openCoins);
-        document.getElementById('closeCoinsModal').addEventListener('click', ()=>document.getElementById('coinsModal').classList.remove('active'));
-        document.getElementById('startDonateBtn').addEventListener('click', ()=>{
-            const uid=tg.initDataUnsafe.user.id;
-            tg.openLink(`https://dalink.to/hypercore?message=${uid}`);
-            document.getElementById('donateStatus').textContent='⏳ Ожидаем оплату...';
-            startCheck(uid);
-        });
-        function startCheck(uid) { /* как раньше */ }
-        async function checkDonation(uid) { /* ... */ }
-        function openCoins() { document.getElementById('coinsBalance').textContent=coins; document.getElementById('donateStatus').textContent=''; document.getElementById('coinsModal').classList.add('active'); }
-
-        // Реферальная ссылка (копирование)
-        document.getElementById('inviteFriendBtn').addEventListener('click', ()=>{
-            const uid = tg.initDataUnsafe.user.id;
-            const botName = 'YourBot';
-            const link = `https://t.me/${botName}?startapp=${uid}`;
-            tg.showPopup({
-                title: 'Пригласить друга',
-                message: `Отправьте ссылку другу:\n${link}`,
-                buttons: [{ type: 'default', text: 'Скопировать' }]
-            }, async (btn) => {
-                if (btn === 'default') {
-                    try { await navigator.clipboard.writeText(link); tg.showAlert('Ссылка скопирована!'); }
-                    catch(e) { tg.showAlert('Не удалось скопировать, скопируйте вручную:\n' + link); }
-                }
-            });
-        });
-
-        // Навигация
+        // ------ НАВИГАЦИЯ ------
         document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', ()=>{
+            btn.addEventListener('click', () => {
                 const screen = btn.dataset.screen;
-                if (screen === 'admin') { /* открыть админку (заглушка) */ return; }
-                document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+                if (screen === 'admin') { openAdmin(); return; }
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
                 document.getElementById('screen-' + screen).classList.add('active');
-                document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                if (screen === 'analytics' && subLevel !== 'free') { drawChart(); updateCatStats(); updateAdvStats(); }
+                if (screen === 'analytics' && data.subLevel !== 'free') { drawChart(); updateCatStats(); updateAdvStats(); }
                 if (screen === 'shop') renderShop();
                 if (screen === 'more') renderExtra();
             });
         });
 
-        // Админ-кнопка (только для админов)
-        if (isAdmin()) {
-            document.getElementById('adminNavBtn').style.display = 'flex';
-            document.getElementById('adminNavBtn').addEventListener('click', ()=>{
-                // Просто показываем список пользователей (локально только себя)
-                tg.showAlert('Локальная версия: админ-панель доступна только с сервером.\nВаш ID: ' + tg.initDataUnsafe.user.id);
-            });
+        // ------ АДМИНКА (локальная) ------
+        function isAdmin() {
+            // Для простоты админ тот, у кого имя пользователя совпадает с ADMIN_USERNAMES[0]
+            // или если в localStorage есть флаг admin
+            return data.userName === ADMIN_USERNAMES[0] || localStorage.getItem('admin_mode') === 'true';
         }
 
-        // Запуск
-        document.getElementById('userAvatar').textContent = (tg.initDataUnsafe?.user?.first_name||'Г')[0].toUpperCase();
-        document.getElementById('userName').textContent = tg.initDataUnsafe?.user?.first_name || 'Гость';
-        loadAll();
+        function openAdmin() {
+            if (!isAdmin()) {
+                alert('Доступ только для администраторов.');
+                return;
+            }
+            const container = document.getElementById('adminUsersList');
+            container.innerHTML = `
+                <div class="admin-user-card">
+                    <div>
+                        <div>${data.userName} (ID: ${data.userId})</div>
+                        <div style="font-size:12px;">Подписка: ${data.subLevel} | Баланс: ${data.balance} ₽ | Монеты: ${data.coins}</div>
+                        <div style="font-size:11px; color:var(--hint);">Регистрация: ${data.registeredAt ? new Date(data.registeredAt).toLocaleDateString() : '—'} | Стрик: ${data.streak} дн.</div>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins(100)">+100🪙</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('pro')">PRO</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('platinum')">Plat</button>
+                        <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('free')">Сброс</button>
+                    </div>
+                </div>
+                <p style="color:var(--hint); margin-top:12px;">В локальной версии отображаются только ваши данные.</p>
+            `;
+            document.getElementById('adminFullscreen').classList.add('active');
+        }
+
+        window.adminSetSub = function(lvl) {
+            if (lvl === 'free') { data.subLevel = 'free'; data.subExpiry = null; data.trialUsed = false; }
+            else {
+                data.subLevel = lvl;
+                data.subExpiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000;
+                if (lvl === 'trial') data.trialUsed = true;
+            }
+            saveData();
+            updateUI();
+            renderAll();
+            if (data.subLevel !== 'free') renderExtra();
+            openAdmin(); // обновить админку
+        };
+
+        window.adminAddCoins = function(amount) {
+            data.coins += amount;
+            saveData();
+            updateCoinsDisplay();
+            openAdmin();
+        };
+
+        document.getElementById('closeAdminFullscreen').addEventListener('click', () => {
+            document.getElementById('adminFullscreen').classList.remove('active');
+        });
+
+        // Показываем кнопку админа, если админ
+        if (isAdmin()) {
+            document.getElementById('adminNavBtn').style.display = 'flex';
+        }
+
+        // ------ ОБРАБОТЧИКИ ОСНОВНЫХ ДЕЙСТВИЙ ------
+        document.getElementById('openExpenseModal').addEventListener('click', () => openAdd('expense'));
+        document.getElementById('openIncomeModal').addEventListener('click', () => openAdd('income'));
+        document.getElementById('closeModal').addEventListener('click', () => document.getElementById('addModal').classList.remove('active'));
+
+        document.getElementById('submitTransaction').addEventListener('click', () => {
+            const a = parseFloat(document.getElementById('amountInput').value);
+            if (!a || a <= 0) return alert('Введите сумму');
+            if (!selectedCategory) return alert('Выберите категорию');
+            data.transactions.unshift({
+                type: currentType,
+                category: selectedCategory.name,
+                emoji: selectedCategory.emoji,
+                amount: a,
+                date: new Date().toISOString().split('T')[0]
+            });
+            data.balance += currentType === 'income' ? a : -a;
+            saveData();
+            renderAll();
+            updateUserLevel();
+            document.getElementById('addModal').classList.remove('active');
+        });
+
+        let currentType = 'expense', selectedCategory = null;
+
+        function openAdd(type) {
+            currentType = type;
+            selectedCategory = null;
+            document.getElementById('modalTitle').textContent = type === 'expense' ? 'Добавить расход' : 'Добавить доход';
+            document.getElementById('amountInput').value = '';
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+            const cats = type === 'expense' ? getExpenseCategories() : getIncomeCategories();
+            cats.forEach(cat => {
+                const d = document.createElement('div');
+                d.className = 'category-item';
+                d.innerHTML = `${cat.emoji}<div class="category-label">${cat.name}</div>`;
+                d.onclick = () => {
+                    grid.querySelectorAll('.category-item').forEach(e => e.classList.remove('selected'));
+                    d.classList.add('selected');
+                    selectedCategory = cat;
+                };
+                grid.appendChild(d);
+            });
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        document.getElementById('viewAllBtn').addEventListener('click', () => {
+            renderTxList('allTransactionList', data.transactions);
+            document.getElementById('allTransactionsModal').classList.add('active');
+        });
+        document.getElementById('closeAllModal').addEventListener('click', () => document.getElementById('allTransactionsModal').classList.remove('active'));
+
+        document.getElementById('openSettings').addEventListener('click', () => {
+            document.getElementById('dailyLimitInput').value = data.dailyLimit || '';
+            document.getElementById('settingsModal').classList.add('active');
+        });
+        document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
+        document.getElementById('saveSettings').addEventListener('click', () => {
+            data.dailyLimit = parseFloat(document.getElementById('dailyLimitInput').value) || 0;
+            data.isDark = document.getElementById('themeToggle').checked;
+            applyTheme();
+            saveData();
+            document.getElementById('settingsModal').classList.remove('active');
+            renderAll();
+        });
+
+        // ------ ПОДПИСКИ ------
+        document.getElementById('trialBtn').addEventListener('click', () => {
+            if (data.trialUsed) return alert('Уже использован');
+            data.subLevel = 'trial';
+            data.subExpiry = Date.now() + 3*24*60*60*1000;
+            data.trialUsed = true;
+            saveData();
+            updateUI();
+            renderAll();
+            updateTimer();
+            alert('✅ Пробный Platinum на 3 дня!');
+        });
+        document.getElementById('buyProBtn').addEventListener('click', () => {
+            data.subLevel = 'pro';
+            data.subExpiry = Date.now() + 30*24*60*60*1000;
+            saveData();
+            updateUI();
+            renderAll();
+            updateTimer();
+            alert('✅ PRO на 30 дней!');
+        });
+        document.getElementById('buyPlatinumBtn').addEventListener('click', () => {
+            data.subLevel = 'platinum';
+            data.subExpiry = Date.now() + 30*24*60*60*1000;
+            saveData();
+            updateUI();
+            renderAll();
+            updateTimer();
+            alert('✅ Platinum на 30 дней!');
+        });
+        document.getElementById('buyForeverProBtn').addEventListener('click', () => {
+            data.subLevel = 'pro_forever';
+            data.subExpiry = Date.now() + 100*365*24*60*60*1000;
+            saveData();
+            updateUI();
+            renderAll();
+            updateTimer();
+            alert('✅ PRO навсегда!');
+        });
+        document.getElementById('buyForeverPlatinumBtn').addEventListener('click', () => {
+            data.subLevel = 'platinum_forever';
+            data.subExpiry = Date.now() + 100*365*24*60*60*1000;
+            saveData();
+            updateUI();
+            renderAll();
+            updateTimer();
+            alert('✅ Platinum навсегда!');
+        });
+
+        // ------ ТАЙМЕР ПОДПИСКИ ------
+        let timerInterval = null;
+        function updateTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            const box = document.getElementById('timerBox'), lab = document.getElementById('timerLabel'), val = document.getElementById('timerValue');
+            box.className = 'timer-box';
+            if (data.subLevel === 'trial') { box.classList.add('trial','active'); lab.textContent = 'Пробный Platinum'; }
+            else if (data.subLevel === 'pro') { box.classList.add('pro','active'); lab.textContent = 'PRO подписка'; }
+            else if (data.subLevel === 'platinum') { box.classList.add('platinum','active'); lab.textContent = 'Platinum подписка'; }
+            else if (data.subLevel === 'pro_forever' || data.subLevel === 'platinum_forever') { box.classList.add('forever','active'); lab.textContent = 'Вечная подписка'; }
+            else { box.classList.remove('active'); return; }
+            const tick = () => {
+                const rem = data.subExpiry - Date.now();
+                if (rem <= 0) {
+                    clearInterval(timerInterval);
+                    data.subLevel = 'free';
+                    data.subExpiry = null;
+                    saveData();
+                    updateUI();
+                    renderAll();
+                    alert('⏰ Подписка истекла');
+                    return;
+                }
+                val.textContent = fmtTime(rem);
+            };
+            tick();
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        // ------ СБРОС ------
+        document.getElementById('resetDataBtn').addEventListener('click', () => {
+            if (confirm('Сбросить все финансовые данные?')) {
+                data.balance = 0;
+                data.transactions = [];
+                data.dailyLimit = 0;
+                saveData();
+                renderAll();
+                alert('Финансы сброшены.');
+            }
+        });
+
+        // ======== ЗАПУСК ========
+        initUser();
+        applyTheme();
+        updateCoinsDisplay();
+        updateUserLevel();
+        updateStreakDisplay();
+        updateReferralLink();
+        renderAll();
+        if (data.subLevel !== 'free') updateTimer();
+        if (data.subLevel === 'pro' || data.subLevel === 'pro_forever' || data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') renderExtra();
+
+        // Вывод имени пользователя
+        document.getElementById('userName').textContent = data.userName;
+        document.getElementById('userAvatar').textContent = data.userName[0].toUpperCase();
+
+        // Для демонстрации админки: если имя "admin" – показываем кнопку
+        if (isAdmin()) {
+            document.getElementById('adminNavBtn').style.display = 'flex';
+        }
     </script>
 </body>
 </html>
