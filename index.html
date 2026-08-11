@@ -488,8 +488,8 @@
     <script>
         // ===================== КОНФИГУРАЦИЯ =====================
         const API_URL = 'http://localhost:3000';
-        const ADMIN_USERNAMES = ['ok00112'];
-        const DA_TOKEN = 'qlees6PnNamPz8cFOWW7s1yJJZEaafQ6wCmZelMW';
+        const ADMIN_USERNAMES = ['ok00112']; // ваши админы
+        const DA_TOKEN = 'ваш_токен_донат_алертс'; // замените на реальный
         const DA_LINK = 'https://dalink.to/hypercore';
 
         const tg = window.Telegram.WebApp;
@@ -498,7 +498,7 @@
         const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
         document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
 
-        // Ключи для CloudStorage
+        // Ключи CloudStorage
         const KEY_BAL = 'bal', KEY_TX = 'tx', KEY_LIM = 'lim', KEY_DARK = 'dark';
         const KEY_SUB_LVL = 'sub_lvl', KEY_SUB_EXP = 'sub_exp', KEY_TRIAL = 'trial';
         const KEY_PIG = 'pig', KEY_ACH = 'ach', KEY_CHAL = 'chal', KEY_DEBT = 'debt', KEY_REG = 'reg';
@@ -533,7 +533,7 @@
         const platinumExpenseCats = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
         const incomeCats = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
 
-        // ----- Функции для работы с CloudStorage -----
+        // ----- CloudStorage -----
         function cGet(key) { return new Promise(r => tg.CloudStorage.getItem(key, (e,v) => r(e?null:v))); }
         function cSet(key, val) { return new Promise(r => tg.CloudStorage.setItem(key, String(val), (e,ok) => r(ok))); }
 
@@ -570,7 +570,6 @@
             }
             return cats;
         }
-
         function getIncomeCategories() { return [...incomeCats, ...customCategories.income]; }
 
         async function loadCustomCategories() {
@@ -580,19 +579,23 @@
         }
         async function saveCustomCategories() { await cSet(KEY_CUSTOM_CATS, JSON.stringify(customCategories)); }
 
-        // ===================== API =====================
+        // ----- API (с обработкой ошибок) -----
         async function apiFetch(action, data = null) {
-            const url = new URL(API_URL);
-            url.searchParams.append('action', action);
-            const options = {
-                method: data ? 'POST' : 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            };
-            if (data) options.body = JSON.stringify(data);
-            const response = await fetch(url, options);
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'API error');
-            return result;
+            try {
+                const url = new URL(API_URL);
+                url.searchParams.append('action', action);
+                const options = {
+                    method: data ? 'POST' : 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (data) options.body = JSON.stringify(data);
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return await response.json();
+            } catch(e) {
+                console.warn('API fetch error:', e);
+                return null;
+            }
         }
 
         let syncTimeout = null;
@@ -602,75 +605,70 @@
                 syncTimeout = null;
                 const uid = tg.initDataUnsafe.user.id;
                 const name = tg.initDataUnsafe.user.first_name || 'User';
-                try {
-                    await apiFetch('update_user', {
-                        id: uid,
-                        first_name: name,
-                        balance: balance,
-                        coins: coins,
-                        stars: stars,
-                        sub: subLevel,
-                        sub_expiry: subExpiry ? new Date(subExpiry).toISOString() : null,
-                        trial_used: trialUsed,
-                        registered: registered,
-                        last_visit: lastVisit,
-                        streak: streak,
-                        referrer: referrer,
-                        registered_at: registeredAt,
-                        reward_day: rewardDay,
-                        last_reward: lastRewardDate,
-                        currency: currency
-                    });
-                } catch(e) { console.warn('Sync failed:', e); }
+                const data = {
+                    id: uid,
+                    first_name: name,
+                    balance: balance,
+                    coins: coins,
+                    stars: stars,
+                    sub: subLevel,
+                    sub_expiry: subExpiry ? new Date(subExpiry).toISOString() : null,
+                    trial_used: trialUsed,
+                    registered: registered,
+                    last_visit: lastVisit,
+                    streak: streak,
+                    referrer: referrer,
+                    registered_at: registeredAt,
+                    reward_day: rewardDay,
+                    last_reward: lastRewardDate,
+                    currency: currency
+                };
+                await apiFetch('update_user', data);
             }, 2000);
         }
 
         async function getAllUsers() {
-            try { return await apiFetch('get_users'); } catch(e) { return {}; }
+            const result = await apiFetch('get_users');
+            return result || {};
         }
 
+        // Админские функции
         window.adminSetSub = async function(uid, lvl) {
-            try {
-                await apiFetch('admin_set_sub', { uid, lvl });
-                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
-                    if (lvl === 'free') { subLevel='free'; subExpiry=null; trialUsed=false; }
-                    else {
-                        subLevel=lvl;
-                        subExpiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000;
-                        if (lvl === 'trial') trialUsed=true;
-                    }
-                    await saveSub(); await syncUserToServer();
-                    updateUI(); renderAll(); updateTimer();
+            const result = await apiFetch('admin_set_sub', { uid, lvl });
+            if (result && result.success && String(uid) === String(tg.initDataUnsafe.user.id)) {
+                if (lvl === 'free') { subLevel='free'; subExpiry=null; trialUsed=false; }
+                else {
+                    subLevel=lvl;
+                    subExpiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000;
+                    if (lvl === 'trial') trialUsed=true;
                 }
-                await loadAllUsers();
-            } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
+                await saveSub(); await syncUserToServer();
+                updateUI(); renderAll(); updateTimer();
+            }
+            await loadAllUsers();
         };
 
         window.adminAddCoins = async function(uid, amount) {
-            try {
-                await apiFetch('admin_add_coins', { uid, amount });
-                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
-                    coins += amount;
-                    updateCoinsDisplay();
-                    await savePlat(); await syncUserToServer();
-                }
-                await loadAllUsers();
-            } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
+            const result = await apiFetch('admin_add_coins', { uid, amount });
+            if (result && result.success && String(uid) === String(tg.initDataUnsafe.user.id)) {
+                coins += amount;
+                updateCoinsDisplay();
+                await savePlat(); await syncUserToServer();
+            }
+            await loadAllUsers();
         };
 
         window.adminAddStars = async function(uid, amount) {
-            try {
-                await apiFetch('admin_add_stars', { uid, amount });
-                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
-                    stars += amount;
-                    updateStarsDisplay();
-                    await saveStars(); await syncUserToServer();
-                }
-                await loadAllUsers();
-            } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
+            const result = await apiFetch('admin_add_stars', { uid, amount });
+            if (result && result.success && String(uid) === String(tg.initDataUnsafe.user.id)) {
+                stars += amount;
+                updateStarsDisplay();
+                await saveStars(); await syncUserToServer();
+            }
+            await loadAllUsers();
         };
 
-        // ===== Сохранение =====
+        // ----- Сохранение (с debounce) -----
         let saveTimeout = null;
         function debounceSave(fn) {
             if (saveTimeout) clearTimeout(saveTimeout);
@@ -736,36 +734,35 @@
             lastRewardDate = lastRewardVal || null;
             currency = curr || 'RUB';
 
+            // Серверные данные
             const uid = tg.initDataUnsafe.user.id;
-            try {
-                const allUsers = await getAllUsers();
-                const serverUser = allUsers[uid];
-                if (serverUser) {
-                    balance = serverUser.balance ?? balance;
-                    coins = serverUser.coins ?? coins;
-                    stars = serverUser.stars ?? stars;
-                    if (serverUser.sub && serverUser.sub !== 'free') {
-                        const exp = serverUser.sub_expiry ? new Date(serverUser.sub_expiry).getTime() : null;
-                        if (exp && exp > Date.now()) {
-                            subLevel = serverUser.sub;
-                            subExpiry = exp;
-                            trialUsed = serverUser.trial_used || false;
-                        } else {
-                            subLevel = 'free'; subExpiry = null; trialUsed = false;
-                        }
+            const allUsers = await getAllUsers();
+            const serverUser = allUsers[uid];
+            if (serverUser) {
+                balance = serverUser.balance ?? balance;
+                coins = serverUser.coins ?? coins;
+                stars = serverUser.stars ?? stars;
+                if (serverUser.sub && serverUser.sub !== 'free') {
+                    const exp = serverUser.sub_expiry ? new Date(serverUser.sub_expiry).getTime() : null;
+                    if (exp && exp > Date.now()) {
+                        subLevel = serverUser.sub;
+                        subExpiry = exp;
+                        trialUsed = serverUser.trial_used || false;
                     } else {
                         subLevel = 'free'; subExpiry = null; trialUsed = false;
                     }
-                    if (serverUser.registered !== undefined) registered = serverUser.registered;
-                    if (serverUser.last_visit) lastVisit = serverUser.last_visit;
-                    if (serverUser.streak !== undefined) streak = serverUser.streak;
-                    if (serverUser.referrer) referrer = serverUser.referrer;
-                    if (serverUser.registered_at) registeredAt = serverUser.registered_at;
-                    if (serverUser.reward_day) rewardDay = serverUser.reward_day;
-                    if (serverUser.last_reward) lastRewardDate = serverUser.last_reward;
-                    if (serverUser.currency) currency = serverUser.currency;
+                } else {
+                    subLevel = 'free'; subExpiry = null; trialUsed = false;
                 }
-            } catch(e) {}
+                if (serverUser.registered !== undefined) registered = serverUser.registered;
+                if (serverUser.last_visit) lastVisit = serverUser.last_visit;
+                if (serverUser.streak !== undefined) streak = serverUser.streak;
+                if (serverUser.referrer) referrer = serverUser.referrer;
+                if (serverUser.registered_at) registeredAt = serverUser.registered_at;
+                if (serverUser.reward_day) rewardDay = serverUser.reward_day;
+                if (serverUser.last_reward) lastRewardDate = serverUser.last_reward;
+                if (serverUser.currency) currency = serverUser.currency;
+            }
 
             if (!registered) {
                 await handleRegistration();
@@ -789,15 +786,13 @@
             updateCurrencyUI();
         }
 
-        // ===== Регистрация и стрик =====
+        // ----- Регистрация и стрик -----
         async function handleRegistration() {
             registered = true;
             registeredAt = new Date().toISOString();
             const startParam = tg.initDataUnsafe.start_param;
             if (startParam && startParam !== String(tg.initDataUnsafe.user.id)) {
-                try {
-                    await apiFetch('admin_add_coins', { uid: startParam, amount: 100 });
-                } catch(e) { console.warn('Referral bonus error', e); }
+                await apiFetch('admin_add_coins', { uid: startParam, amount: 100 });
                 coins += 50;
                 updateCoinsDisplay();
                 referrer = startParam;
@@ -964,27 +959,22 @@
             container.innerHTML = `Ваша реферальная ссылка:<br><span style="font-size:12px;">${link}</span>`;
         }
 
-        // ===================== ВАЛЮТА =====================
+        // ===== ВАЛЮТА =====
         function updateCurrencyUI() {
             document.getElementById('currencyBtn').textContent = CURRENCY_SIGNS[currency] || '₽';
         }
-
-        function getRate() {
-            return CURRENCY_RATES[currency] || 1;
-        }
-
+        function getRate() { return CURRENCY_RATES[currency] || 1; }
         function formatCurrency(amountRub) {
             const rate = getRate();
             const sign = CURRENCY_SIGNS[currency] || '₽';
             return (amountRub / rate).toFixed(2) + ' ' + sign;
         }
-
         function parseCurrencyInput(value) {
             const rate = getRate();
             return parseFloat(value) * rate;
         }
 
-        // ===================== UI ОБНОВЛЕНИЯ =====================
+        // ===== UI ОБНОВЛЕНИЯ =====
         function updateCoinsDisplay() { document.getElementById('coinsDisplay').textContent = `🪙 ${coins}`; const e=document.getElementById('coinsBalance'); if(e)e.textContent=coins; }
         function updateStarsDisplay() { document.getElementById('starsDisplay').textContent = `⭐ ${stars}`; }
         function addCoins(n) { coins+=n; updateCoinsDisplay(); savePlat(); syncUserToServer(); }
@@ -1470,49 +1460,17 @@
         async function loadAllUsers() {
             const container = document.getElementById('allUsersList');
             container.innerHTML = '<p>Загрузка...</p>';
-            try {
-                const allUsers = await getAllUsers();
-                const entries = Object.entries(allUsers);
-                if (entries.length === 0) {
-                    const uid = tg.initDataUnsafe.user.id;
-                    const name = tg.initDataUnsafe.user.first_name || 'User';
-                    container.innerHTML = `
-                        <div class="section-title">Пользователи (только вы)</div>
-                        <div class="admin-user-card">
-                            <div>
-                                <div>${name} (ID: ${uid})</div>
-                                <div style="font-size:12px;">Подписка: ${subLevel} | Баланс: ${balance} ₽ | Монеты: ${coins} | ⭐${stars}</div>
-                            </div>
-                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat 30д</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','pro_forever')">PRO ∞</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button>
-                                <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button>
-                                <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${uid}',200)">+200⭐</button>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-                entries.sort((a,b) => {
-                    const da = a[1].registered_at ? new Date(a[1].registered_at).getTime() : 0;
-                    const db = b[1].registered_at ? new Date(b[1].registered_at).getTime() : 0;
-                    return db - da;
-                });
-                container.innerHTML = '<div class="section-title">Все пользователи (' + entries.length + ')</div>';
-                entries.forEach(([uid, u]) => {
-                    const regDate = u.registered_at ? new Date(u.registered_at).toLocaleDateString() : '—';
-                    const ref = u.referrer || '—';
-                    const strk = u.streak !== undefined ? u.streak : '—';
-                    const starsVal = u.stars || 0;
-                    const cur = u.currency || 'RUB';
-                    container.innerHTML += `<div class="admin-user-card">
+            const allUsers = await getAllUsers();
+            const entries = Object.entries(allUsers);
+            if (entries.length === 0) {
+                const uid = tg.initDataUnsafe.user.id;
+                const name = tg.initDataUnsafe.user.first_name || 'User';
+                container.innerHTML = `
+                    <div class="section-title">Пользователи (только вы)</div>
+                    <div class="admin-user-card">
                         <div>
-                            <div>${u.first_name} (ID: ${uid})</div>
-                            <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0} | ⭐${starsVal}</div>
-                            <div style="font-size:11px; color:var(--hint);">Регистрация: ${regDate} | Стрик: ${strk} дн. | Реферер: ${ref} | Валюта: ${CURRENCY_SIGNS[cur]||'₽'}</div>
+                            <div>${name} (ID: ${uid})</div>
+                            <div style="font-size:12px;">Подписка: ${subLevel} | Баланс: ${balance} ₽ | Монеты: ${coins} | ⭐${stars}</div>
                         </div>
                         <div style="display:flex;gap:4px;flex-wrap:wrap;">
                             <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button>
@@ -1523,48 +1481,72 @@
                             <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
                             <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${uid}',200)">+200⭐</button>
                         </div>
-                    </div>`;
-                });
-            } catch(e) {
-                container.innerHTML = '<p style="color:red;">Ошибка загрузки пользователей: ' + e.message + '</p>';
+                    </div>
+                `;
+                return;
             }
+            entries.sort((a,b) => {
+                const da = a[1].registered_at ? new Date(a[1].registered_at).getTime() : 0;
+                const db = b[1].registered_at ? new Date(b[1].registered_at).getTime() : 0;
+                return db - da;
+            });
+            container.innerHTML = '<div class="section-title">Все пользователи (' + entries.length + ')</div>';
+            entries.forEach(([uid, u]) => {
+                const regDate = u.registered_at ? new Date(u.registered_at).toLocaleDateString() : '—';
+                const ref = u.referrer || '—';
+                const strk = u.streak !== undefined ? u.streak : '—';
+                const starsVal = u.stars || 0;
+                const cur = u.currency || 'RUB';
+                container.innerHTML += `<div class="admin-user-card">
+                    <div>
+                        <div>${u.first_name} (ID: ${uid})</div>
+                        <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0} | ⭐${starsVal}</div>
+                        <div style="font-size:11px; color:var(--hint);">Регистрация: ${regDate} | Стрик: ${strk} дн. | Реферер: ${ref} | Валюта: ${CURRENCY_SIGNS[cur]||'₽'}</div>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat 30д</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','pro_forever')">PRO ∞</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button>
+                        <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button>
+                        <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
+                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${uid}',200)">+200⭐</button>
+                    </div>
+                </div>`;
+            });
         }
 
         async function searchUserInChannel(userId) {
             const container = document.getElementById('searchResult');
             container.innerHTML = '<p>Поиск...</p>';
-            try {
-                const allUsers = await getAllUsers();
-                const user = allUsers[userId];
-                if (user) {
-                    const regDate = user.registered_at ? new Date(user.registered_at).toLocaleDateString() : '—';
-                    const ref = user.referrer || '—';
-                    const strk = user.streak !== undefined ? user.streak : '—';
-                    const starsVal = user.stars || 0;
-                    const cur = user.currency || 'RUB';
-                    container.innerHTML = `
-                        <div class="admin-user-card">
-                            <div>
-                                <div>${user.first_name} (ID: ${userId})</div>
-                                <div style="font-size:12px;">Подписка: ${user.sub||'free'} | Баланс: ${user.balance||0} ₽ | Монеты: ${user.coins||0} | ⭐${starsVal}</div>
-                                <div style="font-size:11px; color:var(--hint);">Регистрация: ${regDate} | Стрик: ${strk} дн. | Реферер: ${ref} | Валюта: ${CURRENCY_SIGNS[cur]||'₽'}</div>
-                            </div>
-                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','pro')">PRO 30д</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','platinum')">Plat 30д</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${userId}','pro_forever')">PRO ∞</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${userId}','platinum_forever')">Plat ∞</button>
-                                <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','free')">Сброс</button>
-                                <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${userId}',500)">+500🪙</button>
-                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${userId}',200)">+200⭐</button>
-                            </div>
+            const allUsers = await getAllUsers();
+            const user = allUsers[userId];
+            if (user) {
+                const regDate = user.registered_at ? new Date(user.registered_at).toLocaleDateString() : '—';
+                const ref = user.referrer || '—';
+                const strk = user.streak !== undefined ? user.streak : '—';
+                const starsVal = user.stars || 0;
+                const cur = user.currency || 'RUB';
+                container.innerHTML = `
+                    <div class="admin-user-card">
+                        <div>
+                            <div>${user.first_name} (ID: ${userId})</div>
+                            <div style="font-size:12px;">Подписка: ${user.sub||'free'} | Баланс: ${user.balance||0} ₽ | Монеты: ${user.coins||0} | ⭐${starsVal}</div>
+                            <div style="font-size:11px; color:var(--hint);">Регистрация: ${regDate} | Стрик: ${strk} дн. | Реферер: ${ref} | Валюта: ${CURRENCY_SIGNS[cur]||'₽'}</div>
                         </div>
-                    `;
-                } else {
-                    container.innerHTML = '<p style="color:var(--hint);">Пользователь не найден</p>';
-                }
-            } catch(e) {
-                container.innerHTML = '<p style="color:red;">Ошибка поиска</p>';
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','pro')">PRO 30д</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','platinum')">Plat 30д</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${userId}','pro_forever')">PRO ∞</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${userId}','platinum_forever')">Plat ∞</button>
+                            <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','free')">Сброс</button>
+                            <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${userId}',500)">+500🪙</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${userId}',200)">+200⭐</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '<p style="color:var(--hint);">Пользователь не найден</p>';
             }
         }
 
@@ -1610,7 +1592,6 @@
             const t=tickets.find(x=>x.id===tid); if(t){t.status='closed'; await saveTickets(); renderAdminTickets();}
         };
 
-        // ----- ДОНАТЫ (админка) -----
         async function loadDonations() {
             const container = document.getElementById('donationsList');
             container.innerHTML = '<p>Загрузка...</p>';
@@ -1637,38 +1618,19 @@
             }
         }
 
-        // ----- Админ-разделы -----
-        document.querySelectorAll('#adminTabs .tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const section = tab.dataset.atab;
-                document.querySelectorAll('#adminTabs .tab').forEach(t=>t.classList.remove('active'));
-                tab.classList.add('active');
-                document.querySelectorAll('#adminFullscreen .admin-section').forEach(s=>s.style.display='none');
-                document.getElementById('admin-' + section).style.display='block';
-                if (section === 'stats') renderAdminStats();
-                if (section === 'donations') loadDonations();
-            });
-        });
-
-        document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
-
         async function renderAdminStats() {
-            try {
-                const allUsers = await getAllUsers();
-                const entries = Object.entries(allUsers);
-                const total = entries.length;
-                const bal = entries.reduce((s, [_, u]) => s + (u.balance||0), 0);
-                const co = entries.reduce((s, [_, u]) => s + (u.coins||0), 0);
-                const st = entries.reduce((s, [_, u]) => s + (u.stars||0), 0);
-                document.getElementById('adminStatsData').innerHTML = `
-                    <div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">Пользователей</div></div>
-                    <div class="stat-item"><div class="stat-value">${bal} ₽</div><div class="stat-label">Общий баланс</div></div>
-                    <div class="stat-item"><div class="stat-value">${co} 🪙</div><div class="stat-label">Монет выпущено</div></div>
-                    <div class="stat-item"><div class="stat-value">${st} ⭐</div><div class="stat-label">Звёзд выпущено</div></div>
-                `;
-            } catch(e) {
-                document.getElementById('adminStatsData').innerHTML = '<p style="color:red;">Ошибка загрузки статистики</p>';
-            }
+            const allUsers = await getAllUsers();
+            const entries = Object.entries(allUsers);
+            const total = entries.length;
+            const bal = entries.reduce((s, [_, u]) => s + (u.balance||0), 0);
+            const co = entries.reduce((s, [_, u]) => s + (u.coins||0), 0);
+            const st = entries.reduce((s, [_, u]) => s + (u.stars||0), 0);
+            document.getElementById('adminStatsData').innerHTML = `
+                <div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">Пользователей</div></div>
+                <div class="stat-item"><div class="stat-value">${bal} ₽</div><div class="stat-label">Общий баланс</div></div>
+                <div class="stat-item"><div class="stat-value">${co} 🪙</div><div class="stat-label">Монет выпущено</div></div>
+                <div class="stat-item"><div class="stat-value">${st} ⭐</div><div class="stat-label">Звёзд выпущено</div></div>
+            `;
         }
 
         // ----- ОБЩИЕ ОБРАБОТЧИКИ -----
@@ -1707,6 +1669,19 @@
         document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
         document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()) openAdminFullscreen(); });
 
+        document.querySelectorAll('#adminTabs .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const section = tab.dataset.atab;
+                document.querySelectorAll('#adminTabs .tab').forEach(t=>t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('#adminFullscreen .admin-section').forEach(s=>s.style.display='none');
+                document.getElementById('admin-' + section).style.display='block';
+                if (section === 'stats') renderAdminStats();
+                if (section === 'donations') loadDonations();
+            });
+        });
+
+        document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
         document.getElementById('searchUserBtn').addEventListener('click', () => {
             const userId = document.getElementById('searchUserId').value.trim();
             if (userId) searchUserInChannel(userId);
@@ -1771,7 +1746,6 @@
             renderAll();
         });
 
-        // Пробная подписка
         document.getElementById('trialBtn').addEventListener('click', async () => {
             if(trialUsed) return tg.showAlert('Уже использован');
             await setSub('trial', 3*24*60*60*1000);
@@ -1803,7 +1777,6 @@
             tg.showAlert(`🔮 Прогноз: ~-${formatCurrency(avg*30)} в месяц`);
         });
 
-        // Сброс финансов
         document.getElementById('resetDataBtn').addEventListener('click', ()=>{
             tg.showConfirm('Очистить все операции и обнулить баланс? Подписка, монеты и звёзды останутся.', async (ok) => {
                 if (!ok) return;
@@ -1818,7 +1791,7 @@
             });
         });
 
-        // Монеты (донат) — 199 монет
+        // Монеты (донат)
         document.getElementById('coinsDisplay').addEventListener('click', openCoins);
         document.getElementById('closeCoinsModal').addEventListener('click', ()=>document.getElementById('coinsModal').classList.remove('active'));
         document.getElementById('startDonateBtn').addEventListener('click', ()=>{
@@ -1882,7 +1855,6 @@
             document.getElementById('coinsModal').classList.add('active');
         }
 
-        // Реферальная ссылка
         document.getElementById('inviteFriendBtn').addEventListener('click', ()=>{
             const uid = tg.initDataUnsafe.user.id;
             const botName = 'YourBot';
