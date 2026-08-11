@@ -2,352 +2,224 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Кошелёк PRO (локальная версия)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кошелёк PRO</title>
     <style>
-        /* ===== БАЗОВЫЕ СТИЛИ (без Telegram) ===== */
-        :root {
-            --bg: #fff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff;
-            --button-text: #fff; --secondary-bg: #f2f2f7; --border: #e5e5ea;
-            --safe-top: 20px;
-        }
-        .dark-theme {
-            --bg: #1c1c1e; --text: #fff; --hint: #8e8e93; --button: #0a84ff;
-            --button-text: #fff; --secondary-bg: #2c2c2e; --border: #3a3a3c;
-        }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: var(--text); padding:16px;
-            padding-top: var(--safe-top); padding-bottom:70px;
-            max-width:400px; margin:0 auto; min-height:100vh;
-            transition: background .3s, color .3s;
-        }
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:6px; }
-        .user-info { display:flex; align-items:center; gap:12px; }
-        .avatar {
-            width:44px; height:44px; border-radius:50%; background:var(--button);
-            color:#fff; display:flex; align-items:center; justify-content:center;
-            font-size:20px; font-weight:500; cursor:pointer;
-        }
-        .greeting { font-size:14px; color:var(--hint); }
-        .name { font-size:18px; font-weight:600; }
-        .level-badge {
-            color:#000; font-size:11px; padding:2px 8px; border-radius:10px;
-            margin-left:8px; display:none; font-weight:bold;
-        }
-        .level-badge.pro { background:gold; display:inline-block; }
-        .level-badge.platinum { background:linear-gradient(135deg,#e0e0e0,#f5f5f5,#b0b0b0); color:#333; display:inline-block; }
-        .level-badge.trial { background:#34c759; color:#fff; display:inline-block; }
-        .level-badge.forever { background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; display:inline-block; }
-        .coins-display {
-            background:gold; color:#000; padding:4px 10px; border-radius:12px;
-            font-weight:bold; font-size:14px; display:flex; align-items:center; gap:4px;
-            margin-left:auto; margin-right:10px; cursor:pointer;
-        }
-        .streak-display {
-            background:#ff6b6b; color:#fff; padding:4px 8px; border-radius:12px;
-            font-weight:bold; font-size:13px; display:flex; align-items:center; gap:4px;
-            margin-right:6px;
-        }
-        .balance-card {
-            background:linear-gradient(135deg,#007aff,#5856d6); border-radius:20px;
-            padding:24px; color:#fff; margin-bottom:12px;
-            box-shadow:0 8px 24px rgba(0,122,255,.2);
-        }
-        .balance-label { font-size:14px; opacity:.9; }
-        .balance-amount { font-size:36px; font-weight:bold; margin-top:6px; }
-        .daily-limit-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:14px; opacity:.9; }
-        .timer-box {
-            background:var(--secondary-bg); border-radius:12px; padding:10px 16px;
-            margin-bottom:12px; text-align:center; font-size:14px; font-weight:500;
-            display:none;
-        }
-        .timer-box.active { display:block; }
-        .timer-box.trial { background:#34c759; color:#fff; }
-        .timer-box.pro { background:gold; color:#000; }
-        .timer-box.platinum { background:linear-gradient(135deg,#c0c0c0,#e8e8e8); color:#333; }
-        .timer-box.forever { background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; }
-        .level-box {
-            background:var(--secondary-bg); border-radius:12px; padding:8px 16px;
-            margin-bottom:12px; text-align:center; font-size:13px;
-        }
-        .actions { display:flex; gap:12px; margin-bottom:8px; }
-        .btn {
-            flex:1; padding:14px 10px; border:none; border-radius:14px; font-size:14px;
-            font-weight:500; cursor:pointer; display:flex; align-items:center;
-            justify-content:center; gap:6px; background:var(--secondary-bg);
-            color:var(--text); transition:opacity .2s;
-        }
-        .btn:active { opacity:.7; }
-        .btn-primary { background:var(--button); color:var(--button-text); }
-        .btn-danger { background:transparent; color:#ff3b30; border:1px solid #ff3b30; margin-top:8px; width:100%; }
-        .btn-gold { background:gold; color:#000; }
-        .section-title { font-size:18px; font-weight:600; margin:20px 0 12px; display:flex; justify-content:space-between; align-items:center; }
-        .section-link { font-size:14px; color:var(--button); cursor:pointer; }
-        .transaction-list { list-style:none; }
-        .transaction-item {
-            display:flex; justify-content:space-between; align-items:center;
-            padding:14px 0; border-bottom:1px solid var(--border);
-        }
-        .transaction-left { display:flex; align-items:center; gap:14px; }
-        .transaction-emoji { font-size:28px; width:40px; text-align:center; }
-        .transaction-category { font-size:16px; font-weight:500; }
-        .transaction-date { font-size:13px; color:var(--hint); }
-        .transaction-amount { font-weight:600; font-size:16px; }
-        .income { color:#34c759; } .expense { color:#ff3b30; }
-        .empty-state { text-align:center; color:var(--hint); padding:40px 20px; }
+        body { font-family: -apple-system, sans-serif; background: #f2f2f7; padding: 20px; max-width: 420px; margin: 0 auto; }
+        .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .btn { padding: 10px 16px; border: none; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; background: #e5e5ea; color: #1a1a1a; transition: opacity .2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: #007aff; color: #fff; }
+        .btn-danger { background: #ff3b30; color: #fff; }
+        .btn-gold { background: #ffd700; color: #000; }
+        .btn:active { opacity: .7; }
+        .input-field { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e5e5ea; font-size: 16px; margin-bottom: 12px; background: #fff; }
+        .flex { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-8 { margin-top: 8px; }
+        .mb-8 { margin-bottom: 8px; }
 
-        .modal {
-            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,.4); z-index:999; align-items:flex-end; justify-content:center;
-        }
-        .modal.active { display:flex; }
-        .modal-content {
-            background:var(--bg); width:100%; max-width:400px; border-radius:20px 20px 0 0;
-            padding:24px 20px 30px; animation:slideUp .3s ease; color:var(--text);
-            max-height:80vh; overflow-y:auto;
-        }
-        @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
-        .modal-title { font-size:20px; font-weight:600; margin-bottom:20px; text-align:center; }
-        .form-group { margin-bottom:16px; }
-        .form-label { font-size:14px; color:var(--hint); margin-bottom:6px; }
-        .amount-input {
-            width:100%; padding:14px; font-size:24px; font-weight:500;
-            border:2px solid var(--border); border-radius:14px;
-            background:var(--secondary-bg); color:var(--text); text-align:center; outline:none;
-        }
-        .category-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-        .category-item {
-            padding:12px 6px; border-radius:12px; background:var(--secondary-bg);
-            text-align:center; font-size:24px; cursor:pointer; transition:.2s;
-            border:2px solid transparent; color:var(--text);
-        }
-        .category-item.selected { border-color:var(--button); background:rgba(0,122,255,.1); }
-        .category-label { font-size:12px; margin-top:4px; }
-        .submit-btn {
-            width:100%; padding:16px; background:var(--button); color:var(--button-text);
-            border:none; border-radius:14px; font-size:18px; font-weight:600; margin-top:20px; cursor:pointer;
-        }
-        .cancel-btn {
-            width:100%; padding:12px; background:transparent; color:var(--hint);
-            border:none; font-size:16px; margin-top:8px; cursor:pointer;
-        }
-        .theme-toggle { display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-top:1px solid var(--border); margin-top:16px; }
-        .toggle-switch { position:relative; width:52px; height:28px; }
-        .toggle-switch input { display:none; }
-        .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--secondary-bg); border-radius:28px; transition:.2s; border:1px solid var(--border); }
-        .slider:before { position:absolute; content:""; height:24px; width:24px; left:2px; bottom:2px; background:var(--button); border-radius:50%; transition:.2s; }
-        input:checked + .slider:before { transform:translateX(22px); }
-        .chart-container { margin:20px 0; display:flex; justify-content:center; }
-        canvas { max-width:100%; }
-        .stats-row { display:flex; justify-content:space-around; margin:12px 0 20px; }
-        .stat-item { text-align:center; }
-        .stat-value { font-size:20px; font-weight:600; }
-        .stat-label { font-size:13px; color:var(--hint); }
-        .buy-btn { font-weight:bold; border:none; border-radius:12px; padding:10px 16px; font-size:14px; cursor:pointer; width:100%; margin-top:6px; }
-        .buy-pro { background:gold; color:#000; }
-        .buy-platinum { background:linear-gradient(135deg,#c0c0c0,#e8e8e8); color:#333; border:1px solid #999; }
-        .trial-btn { background:#34c759; color:#fff; font-weight:bold; border:none; border-radius:12px; padding:10px 16px; font-size:14px; cursor:pointer; width:100%; margin-top:6px; }
-        .forever-btn { background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; font-weight:bold; border:none; border-radius:12px; padding:10px 16px; font-size:14px; cursor:pointer; width:100%; margin-top:6px; }
-        .tabs { display:flex; gap:4px; margin-bottom:16px; overflow-x:auto; }
-        .tab { padding:8px 14px; background:var(--secondary-bg); border:none; border-radius:20px; font-size:13px; cursor:pointer; color:var(--text); white-space:nowrap; }
-        .tab.active { background:var(--button); color:var(--button-text); }
-        .achievement-card { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
-        .achievement-icon { font-size:32px; }
-        .achievement-info { flex:1; }
-        .achievement-name { font-weight:600; }
-        .achievement-desc { font-size:13px; color:var(--hint); }
-        .piggy-card { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; position:relative; }
-        .piggy-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-        .piggy-icon { font-size:36px; }
-        .piggy-image { width:60px; height:60px; object-fit:cover; border-radius:10px; }
-        .piggy-name { font-weight:600; }
-        .piggy-target { font-size:13px; color:var(--hint); }
-        .piggy-progress { height:8px; background:var(--border); border-radius:4px; }
-        .piggy-bar { height:100%; border-radius:4px; background:#34c759; }
-        .piggy-actions { position:absolute; top:8px; right:8px; display:flex; gap:4px; }
-        .piggy-actions button { background:none; border:none; cursor:pointer; font-size:18px; color:var(--hint); }
-        .challenge-card { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; }
-        .debt-card { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
-        .debt-amount { font-weight:600; }
-        .debt-paid { color:#34c759; }
-        .debt-owed { color:#ff3b30; }
-        .shop-item { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
-        .bottom-nav {
-            position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-            width:100%; max-width:400px; background:var(--bg); border-top:1px solid var(--border);
-            display:flex; justify-content:space-around; padding:8px 0; z-index:100;
-        }
-        .nav-btn {
-            background:none; border:none; color:var(--hint); font-size:12px;
-            display:flex; flex-direction:column; align-items:center; gap:4px;
-            cursor:pointer; padding:6px 10px; border-radius:10px;
-        }
-        .nav-btn.active { color:var(--button); background:var(--secondary-bg); }
-        .screen { display:none; }
-        .screen.active { display:block; }
-        .referral-block {
-            background:var(--secondary-bg); border-radius:12px; padding:16px;
-            margin-top:16px;
-        }
-        .referral-block .btn { width:100%; margin-top:8px; }
-        .referral-link-box {
-            background:var(--bg); border:1px solid var(--border); border-radius:8px;
-            padding:8px; margin-top:6px; font-size:12px; word-break:break-all;
-            color:var(--hint);
-        }
-        .admin-section { margin-top:16px; }
-        .admin-user-card { background:var(--secondary-bg); border-radius:12px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
-        .admin-user-card .btn { flex:0 0 auto; }
-        .search-box { display:flex; gap:8px; margin-bottom:16px; }
-        .search-box input { flex:1; padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--secondary-bg); color:var(--text); }
-        .admin-fullscreen {
-            position:fixed; top:0; left:0; width:100%; height:100%;
-            background:var(--bg); z-index:1000; overflow-y:auto;
-            padding:20px; display:none;
-        }
-        .admin-fullscreen.active { display:block; }
-        .ticket-create-area { margin-top:16px; border-top:1px solid var(--border); padding-top:16px; }
-        .ticket-create-area textarea { width:100%; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--secondary-bg); color:var(--text); resize:vertical; font-size:14px; min-height:80px; margin-bottom:10px; }
+        .balance-card { background: linear-gradient(135deg, #007aff, #5856d6); color: #fff; border-radius: 20px; padding: 24px; margin-bottom: 16px; }
+        .balance-amount { font-size: 36px; font-weight: bold; }
+
+        .nav { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 16px; }
+        .nav-btn { padding: 8px 14px; border: none; border-radius: 20px; background: #e5e5ea; cursor: pointer; font-size: 13px; }
+        .nav-btn.active { background: #007aff; color: #fff; }
+
+        .transaction-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e5ea; }
+        .empty-state { color: #8e8e93; text-align: center; padding: 20px; }
+
+        .admin-user-card { background: #f2f2f7; border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+        .badge-streak { background: #ff6b6b; color: #fff; }
+        .badge-coins { background: #ffd700; color: #000; }
+        .badge-stars { background: #ffd700; color: #000; }
+
+        .referral-link { background: #f2f2f7; padding: 8px; border-radius: 8px; word-break: break-all; font-size: 12px; margin-top: 6px; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; align-items: flex-end; justify-content: center; }
+        .modal-content { background: #fff; width: 100%; max-width: 420px; border-radius: 20px 20px 0 0; padding: 24px 20px; max-height: 80vh; overflow-y: auto; }
+
+        .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0; }
+        .category-item { text-align: center; padding: 8px; border-radius: 8px; background: #f2f2f7; cursor: pointer; border: 2px solid transparent; }
+        .category-item.selected { border-color: #007aff; background: rgba(0,122,255,0.1); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tabs { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 12px; }
+        .tab { padding: 8px 14px; border: none; border-radius: 20px; background: #e5e5ea; cursor: pointer; font-size: 13px; white-space: nowrap; }
+        .tab.active { background: #007aff; color: #fff; }
+
+        .platinum-only { display: none; }
+        .platinum-only.visible { display: block; }
     </style>
 </head>
 <body>
+
+    <!-- ===== ЭКРАН РЕГИСТРАЦИИ ===== -->
+    <div id="registerScreen">
+        <div class="card" style="max-width:360px;margin:40px auto;">
+            <h2 class="text-center">📝 Регистрация</h2>
+            <input type="email" id="regEmail" class="input-field" placeholder="Email">
+            <input type="text" id="regUsername" class="input-field" placeholder="Telegram username (без @)">
+            <button id="registerBtn" class="btn btn-primary" style="width:100%;">Зарегистрироваться</button>
+            <div id="regError" style="color:#ff3b30; margin-top:10px; text-align:center;"></div>
+        </div>
+    </div>
+
     <!-- ===== ОСНОВНОЙ ЭКРАН ===== -->
-    <div id="screen-main" class="screen active">
-        <div class="header">
-            <div class="user-info">
-                <div class="avatar" id="userAvatar">👤</div>
+    <div id="mainScreen" class="hidden">
+        <!-- Шапка -->
+        <div class="flex" style="justify-content:space-between; margin-bottom:12px;">
+            <div class="flex">
+                <div id="userAvatar" style="width:44px;height:44px;border-radius:50%;background:#007aff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;">U</div>
                 <div>
-                    <div class="greeting">Привет,</div>
-                    <div class="name" id="userName">Пользователь</div>
+                    <div id="userName" style="font-weight:600;"></div>
+                    <div id="userEmail" style="font-size:12px;color:#8e8e93;"></div>
                 </div>
-                <span class="level-badge" id="levelBadge"></span>
             </div>
-            <div class="streak-display" id="streakDisplay">🔥 0</div>
-            <div class="coins-display" id="coinsDisplay">🪙 0</div>
-            <div style="font-size:24px; cursor:pointer;" id="openSettings">⚙️</div>
+            <div class="flex">
+                <span class="badge badge-streak" id="streakDisplay">🔥 0</span>
+                <span class="badge badge-coins" id="coinsDisplay">🪙 0</span>
+                <span class="badge badge-stars" id="starsDisplay">⭐ 0</span>
+                <button class="btn" id="settingsBtn" style="padding:4px 8px;">⚙️</button>
+            </div>
         </div>
+
+        <!-- Баланс -->
         <div class="balance-card">
-            <div class="balance-label">Остаток на месяц</div>
+            <div style="font-size:14px;opacity:.8;">Остаток</div>
             <div class="balance-amount" id="balanceDisplay">0 ₽</div>
-            <div class="daily-limit-row">
-                <span id="limitText">Дневной лимит: не задан</span>
-                <span id="limitStatus" style="display:none;">⚠️ Превышен</span>
+            <div class="flex" style="justify-content:space-between; margin-top:12px; font-size:14px;">
+                <span id="limitText">Лимит: не задан</span>
+                <span id="limitStatus" style="display:none;color:#ff6b6b;">⚠️ Превышен</span>
             </div>
         </div>
-        <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
-        <div class="level-box" id="levelBox">🌱 Новичок</div>
-        <div class="actions">
-            <button class="btn btn-primary" id="openExpenseModal">➖ Расход</button>
-            <button class="btn" id="openIncomeModal">➕ Доход</button>
-        </div>
-        <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
 
-        <!-- РЕФЕРАЛЬНЫЙ БЛОК -->
-        <div class="referral-block">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span>🔥 Ваш стрик: <strong id="streakDisplay2">0</strong> дней</span>
-                <span style="font-size:12px; color:var(--hint);">(сброс при пропуске 2+ дней)</span>
+        <!-- Подписка -->
+        <div class="card" id="subscriptionBox">
+            <div id="subInfo">❌ Нет подписки</div>
+            <div id="subTimer" style="font-size:13px;color:#8e8e93;"></div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="flex" style="margin-bottom:8px;">
+            <button class="btn btn-primary" id="expenseBtn" style="flex:1;">➖ Расход</button>
+            <button class="btn btn-primary" id="incomeBtn" style="flex:1;">➕ Доход</button>
+        </div>
+        <button class="btn btn-danger" id="resetBtn" style="width:100%;">🗑 Сбросить финансы</button>
+
+        <!-- Реферальный блок -->
+        <div class="card">
+            <div class="flex" style="justify-content:space-between;">
+                <span>🔥 Ваш стрик: <strong id="streakDisplay2">0</strong> дн.</span>
+                <span style="font-size:12px;color:#8e8e93;">(сброс через 2 дня)</span>
             </div>
-            <button class="btn btn-primary" id="inviteFriendBtn">📨 Пригласить друга</button>
-            <div id="referralLinkDisplay" class="referral-link-box">Ссылка загружается...</div>
-            <div style="font-size:12px; color:var(--hint); margin-top:4px;">За регистрацию по ссылке вы получите 100🪙, друг — 50🪙</div>
+            <button class="btn btn-primary" id="inviteBtn" style="width:100%;margin:8px 0;">📨 Пригласить друга</button>
+            <div class="referral-link" id="referralLink">Ссылка загружается...</div>
+            <div style="font-size:12px;color:#8e8e93;margin-top:4px;">За регистрацию по ссылке вы получите 100⭐, друг — 50🪙 + 50⭐</div>
         </div>
 
-        <div class="section-title-row">
-            <div class="section-title">Операции</div>
-            <span class="section-link" id="viewAllBtn">Все</span>
+        <!-- Навигация -->
+        <div class="nav">
+            <button class="nav-btn active" data-screen="transactions">📋 Операции</button>
+            <button class="nav-btn" data-screen="analytics">📊 Аналитика</button>
+            <button class="nav-btn" data-screen="shop">🛒 Магазин</button>
+            <button class="nav-btn" data-screen="more">📦 Ещё</button>
+            <button class="nav-btn" id="adminNavBtn" style="display:none;" data-screen="admin">🛡</button>
         </div>
-        <ul class="transaction-list" id="transactionList"><li class="empty-state">Нет записей</li></ul>
+
+        <!-- Экраны -->
+        <div id="screen-transactions" class="screen">
+            <div id="transactionList"></div>
+            <button class="btn" id="viewAllBtn" style="width:100%;margin-top:8px;">Показать все</button>
+        </div>
+
+        <div id="screen-analytics" class="screen hidden">
+            <div style="font-weight:600;margin-bottom:12px;">📊 Аналитика (PRO)</div>
+            <canvas id="expenseChart" width="240" height="240" style="display:block;margin:0 auto;"></canvas>
+            <div id="categoryStats" class="flex" style="justify-content:center;gap:16px;margin:12px 0;"></div>
+            <div class="card">
+                <div>Средний расход в день: <span id="avgDaily">0 ₽</span></div>
+                <div>Топ категория: <span id="topCategory">-</span></div>
+            </div>
+        </div>
+
+        <div id="screen-shop" class="screen hidden">
+            <div style="font-weight:600;margin-bottom:12px;">🛒 Магазин</div>
+            <div id="shopList"></div>
+        </div>
+
+        <div id="screen-more" class="screen hidden">
+            <div class="tabs">
+                <button class="tab active" data-tab="piggy">🐷 Копилки</button>
+                <button class="tab" data-tab="challenges">🎯 Челленджи</button>
+                <button class="tab platinum-tab" data-tab="achievements">🏆 Трофеи</button>
+                <button class="tab platinum-tab" data-tab="debts">💸 Долги</button>
+                <button class="tab platinum-tab" data-tab="tools">🧮 Инструменты</button>
+                <button class="tab platinum-tab" data-tab="categories">📁 Категории</button>
+            </div>
+            <div id="tab-piggy" class="tab-content active"><div id="piggyList"></div><button class="btn btn-primary" id="addPiggyBtn" style="width:100%;margin-top:8px;">+ Создать копилку</button></div>
+            <div id="tab-challenges" class="tab-content"><div id="challengesList"></div><button class="btn btn-primary" id="addChallengeBtn" style="width:100%;margin-top:8px;">+ Создать челлендж</button></div>
+            <div id="tab-achievements" class="tab-content platinum-only"><div id="achievementsList"></div></div>
+            <div id="tab-debts" class="tab-content platinum-only"><div id="debtsList"></div><button class="btn btn-primary" id="addDebtBtn" style="width:100%;margin-top:8px;">+ Добавить долг</button></div>
+            <div id="tab-tools" class="tab-content platinum-only">
+                <button class="btn" id="exportBtn" style="width:100%;margin-bottom:8px;">📥 Экспорт CSV</button>
+                <button class="btn" id="creditBtn" style="width:100%;margin-bottom:8px;">🧮 Кредитный калькулятор</button>
+                <button class="btn" id="yearBtn" style="width:100%;margin-bottom:8px;">📆 Итоги года</button>
+                <button class="btn" id="forecastBtn" style="width:100%;margin-bottom:8px;">🔮 Прогноз расходов</button>
+                <div id="regularList"></div>
+                <button class="btn btn-primary" id="addRegularBtn" style="width:100%;margin-top:8px;">+ Регулярный платёж</button>
+            </div>
+            <div id="tab-categories" class="tab-content platinum-only"><div id="customCatsList"></div><button class="btn btn-primary" id="addCatBtn" style="width:100%;margin-top:8px;">+ Добавить категорию</button></div>
+        </div>
+
+        <!-- Админ-панель -->
+        <div id="screen-admin" class="screen hidden">
+            <div class="flex" style="justify-content:space-between;margin-bottom:12px;">
+                <h2>🛡 Админ-панель</h2>
+                <button class="btn btn-danger" id="closeAdminBtn">Закрыть</button>
+            </div>
+            <div id="adminUserList"></div>
+        </div>
     </div>
 
-    <!-- ===== АНАЛИТИКА ===== -->
-    <div id="screen-analytics" class="screen">
-        <div class="section-title">📊 Аналитика (PRO)</div>
-        <div class="chart-container"><canvas id="expenseChart" width="240" height="240"></canvas></div>
-        <div id="categoryStats" class="stats-row"></div>
-        <div style="margin-top:8px; background:var(--secondary-bg); border-radius:12px; padding:12px;">
-            <div>Средний расход в день: <span id="avgDaily">0 ₽</span></div>
-            <div>Топ категория: <span id="topCategory">-</span></div>
+    <!-- ===== МОДАЛКА ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <div id="modalBody"></div>
+            <button class="btn" id="modalCloseBtn" style="width:100%;margin-top:12px;">Закрыть</button>
         </div>
     </div>
-
-    <!-- ===== МАГАЗИН ===== -->
-    <div id="screen-shop" class="screen">
-        <div class="section-title">🛒 Магазин</div>
-        <div id="shopList"></div>
-    </div>
-
-    <!-- ===== ЕЩЁ ===== -->
-    <div id="screen-more" class="screen">
-        <div class="tabs" id="featureTabs">
-            <button class="tab active" data-tab="tab-piggy">🐷 Копилки</button>
-            <button class="tab" data-tab="tab-challenges">🎯 Челленджи</button>
-            <button class="tab platinum-only" data-tab="tab-achievements">🏆 Трофеи</button>
-            <button class="tab platinum-only" data-tab="tab-debts">💸 Долги</button>
-            <button class="tab platinum-only" data-tab="tab-tools">🧮 Инструменты</button>
-            <button class="tab platinum-only" data-tab="tab-categories">📁 Свои категории</button>
-        </div>
-        <div id="tab-piggy" class="tab-content"><div id="piggyList"></div><button class="btn btn-primary" id="addPiggyBtn" style="width:100%;margin-top:8px;">+ Создать копилку</button></div>
-        <div id="tab-challenges" class="tab-content" style="display:none;"><div id="challengesList"></div><button class="btn btn-primary" id="addChallengeBtn" style="width:100%;margin-top:8px;">+ Создать челлендж</button></div>
-        <div id="tab-achievements" class="tab-content platinum-only" style="display:none;"><div id="achievementsList"></div></div>
-        <div id="tab-debts" class="tab-content platinum-only" style="display:none;"><div id="debtsList"></div><button class="btn btn-primary" id="addDebtBtn" style="width:100%;margin-top:8px;">+ Добавить долг</button></div>
-        <div id="tab-tools" class="tab-content platinum-only" style="display:none;">
-            <button class="btn btn-primary" id="exportCsvBtn" style="flex:none; width:100%; margin-bottom:8px;">📥 Экспорт в CSV</button>
-            <button class="btn btn-primary" id="calcCreditBtn" style="flex:none; width:100%; margin-bottom:8px;">🧮 Кредитный калькулятор</button>
-            <button class="btn btn-primary" id="yearReportBtn" style="flex:none; width:100%; margin-bottom:8px;">📆 Итоги года</button>
-            <button class="btn btn-primary" id="forecastBtn" style="flex:none; width:100%; margin-bottom:8px;">🔮 Прогноз расходов</button>
-            <div id="regularPaymentsList" style="margin-top:12px;"></div>
-            <button class="btn btn-primary" id="addRegularPaymentBtn" style="width:100%;margin-top:8px;">+ Регулярный платёж</button>
-        </div>
-        <div id="tab-categories" class="tab-content platinum-only" style="display:none;">
-            <div id="customCategoriesList"></div>
-            <button class="btn btn-primary" id="addCustomCategoryBtn" style="width:100%;margin-top:8px;">+ Добавить категорию</button>
-        </div>
-    </div>
-
-    <!-- ===== НИЖНЕЕ МЕНЮ ===== -->
-    <div class="bottom-nav">
-        <button class="nav-btn active" data-screen="main">🏠</button>
-        <button class="nav-btn" data-screen="analytics">📊</button>
-        <button class="nav-btn" data-screen="shop">🛒</button>
-        <button class="nav-btn" data-screen="more">📦</button>
-        <button class="nav-btn" id="adminNavBtn" style="display:none;" data-screen="admin">🛡</button>
-    </div>
-
-    <!-- ===== АДМИНКА (заглушка, только для демонстрации) ===== -->
-    <div id="adminFullscreen" class="admin-fullscreen">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>🛡 Админ-панель (локальная)</h2>
-            <button class="btn btn-danger" id="closeAdminFullscreen" style="flex:none; padding:10px 16px;">Закрыть</button>
-        </div>
-        <div id="adminUsersList"><p>Здесь будет список пользователей (в локальной версии только вы).</p></div>
-    </div>
-
-    <!-- ===== МОДАЛКИ ===== -->
-    <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
-    <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height:60vh; overflow-y:auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
-    <div class="modal" id="settingsModal"> <div class="modal-content"> <div class="modal-title">Настройки</div> <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div> <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div> <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div> <button class="submit-btn" id="saveSettings">Сохранить</button> <button class="cancel-btn" id="closeSettings">Отмена</button> </div> </div>
-    <div class="modal" id="piggyModal"> <div class="modal-content"> <div class="modal-title">Новая копилка</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="piggyName" placeholder="На отпуск" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (₽)</div><input type="number" class="amount-input" id="piggyTarget" placeholder="50000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Фото (не обязательно)</div><input type="file" accept="image/*" id="piggyPhoto" style="width:100%; padding:10px; background:var(--secondary-bg); border-radius:12px; color:var(--text);"></div> <button class="submit-btn" id="savePiggyBtn">Создать</button> <button class="cancel-btn" id="closePiggyModal">Отмена</button> </div> </div>
-    <div class="modal" id="challengeModal"> <div class="modal-content"> <div class="modal-title">Новый челлендж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="challengeName" placeholder="Неделя без доставки" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цель (дней)</div><input type="number" class="amount-input" id="challengeDays" placeholder="7" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Награда (монет)</div><input type="number" class="amount-input" id="challengeReward" placeholder="50" style="font-size:18px;" value="50"></div> <button class="submit-btn" id="saveChallengeBtn">Создать</button> <button class="cancel-btn" id="closeChallengeModal">Отмена</button> </div> </div>
-    <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
-    <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
-    <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (99₽) = 100 монет (демо)</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат (демо)</button> <p id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></p> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="customCategoryModal"> <div class="modal-content"> <div class="modal-title" id="customCatModalTitle">Новая категория</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="customCatName" placeholder="Например, Хобби" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Эмодзи</div><input type="text" class="amount-input" id="customCatEmoji" placeholder="🎨" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="customCatType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="expense">Расход</option><option value="income">Доход</option></select></div> <button class="submit-btn" id="saveCustomCatBtn">Сохранить</button> <button class="cancel-btn" id="closeCustomCatModal">Отмена</button> </div> </div>
 
     <script>
         // ============================================================
-        //  ПОЛНОСТЬЮ ЛОКАЛЬНАЯ ВЕРСИЯ (без Telegram)
-        //  Все данные в localStorage
+        //  ПОЛНОСТЬЮ ЛОКАЛЬНАЯ ВЕРСИЯ (localStorage)
+        //  БЕЗ СЕРВЕРА
         // ============================================================
 
-        // ------ КОНСТАНТЫ ------
-        const STORAGE_KEY = 'kosh_pro_data';
-        const ADMIN_USERNAMES = ['admin']; // локальный админ (по имени пользователя)
+        // --- ДАННЫЕ ---
+        let currentUser = null;
+        let transactions = [];
+        let piggyBanks = [];
+        let challenges = [];
+        let achievements = [];
+        let debts = [];
+        let regularPayments = [];
+        let customCategories = { expense: [], income: [] };
+        let shopItems = [
+            { id: 'pro', name: '⭐ PRO (30 дней)', price: 500, action: 'pro', duration: 30 },
+            { id: 'platinum', name: '💎 Platinum (30 дней)', price: 1000, action: 'platinum', duration: 30 },
+            { id: 'pro_forever', name: '⭐ PRO навсегда', price: 1500, action: 'pro_forever', duration: 36500 },
+            { id: 'platinum_forever', name: '💎 Platinum навсегда', price: 2500, action: 'platinum_forever', duration: 36500 },
+            { id: 'stars_100', name: '⭐ 100 звёзд', price: 200, action: 'stars', amount: 100 },
+        ];
+        let selectedCategory = null;
+        let currentType = 'expense';
+        let timerInterval = null;
 
-        // ------ ИНИЦИАЛИЗАЦИЯ ДАННЫХ ------
-        let data = loadData();
+        const STORAGE_KEY = 'kosh_pro_data';
 
         function loadData() {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -355,199 +227,252 @@
                 try { return JSON.parse(raw); }
                 catch(e) { /* fallback */ }
             }
-            // Данные по умолчанию
             return {
-                userId: Date.now(), // уникальный ID
-                userName: 'Пользователь',
-                registered: false,
-                registeredAt: null,
-                lastVisit: null,
-                streak: 0,
-                referrer: null,
-                balance: 0,
-                coins: 0,
-                transactions: [],
-                dailyLimit: 0,
-                isDark: false,
-                subLevel: 'free',
-                subExpiry: null,
-                trialUsed: false,
-                piggyBanks: [],
-                achievements: [],
-                challenges: [],
-                debts: [],
-                regularPayments: [],
-                shopItems: defaultShop(),
-                customCategories: { expense: [], income: [] },
-                tickets: []
+                users: {}
             };
         }
 
-        function saveData() {
+        function saveData(data) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
-        function defaultShop() {
-            return [
-                {id:'sub_pro', name:'Подписка PRO (30 дней)', desc:'Аналитика и PRO-категории', price:500, action:'pro'},
-                {id:'sub_platinum', name:'Подписка Platinum (30 дней)', desc:'Все функции', price:1000, action:'platinum'},
-                {id:'sub_pro_forever', name:'PRO навсегда', desc:'PRO без ограничений', price:1500, action:'pro_forever'},
-                {id:'sub_platinum_forever', name:'Platinum навсегда', desc:'Все функции навсегда', price:2500, action:'platinum_forever'},
-                {id:'ach_bronze', name:'Трофей "Бронзовый инвестор"', desc:'Красивый бейдж', price:200, icon:'🥉', action:'achievement'},
-                {id:'ach_silver', name:'Трофей "Серебряный магнат"', desc:'Престижный бейдж', price:500, icon:'🥈', action:'achievement'},
-                {id:'ach_gold', name:'Трофей "Золотой олигарх"', desc:'Элитный бейдж', price:1000, icon:'🥇', action:'achievement'},
-                {id:'theme_custom', name:'Уникальная тема', desc:'Эксклюзивная тёмная тема', price:300, action:'theme'}
-            ];
+        function getUsers() {
+            const data = loadData();
+            return data.users || {};
         }
 
-        // ------ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ------
-        function getExpenseCategories() {
-            const base = [{emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},{emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}];
-            const pro = [{emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},{emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}];
-            const plat = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
-            let cats = [...base];
-            if (data.subLevel === 'pro' || data.subLevel === 'pro_forever') cats = cats.concat(pro);
-            if (data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') cats = cats.concat(pro, plat);
-            cats = cats.concat(data.customCategories.expense);
-            return cats;
+        function saveUsers(users) {
+            const data = loadData();
+            data.users = users;
+            saveData(data);
         }
 
-        function getIncomeCategories() {
-            const inc = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
-            return inc.concat(data.customCategories.income);
+        // --- ТЕКУЩИЙ ПОЛЬЗОВАТЕЛЬ ---
+        function getCurrentUser() {
+            const id = localStorage.getItem('currentUserId');
+            if (!id) return null;
+            const users = getUsers();
+            return users[id] || null;
         }
 
-        function getUserLevel() {
-            const count = data.transactions.length;
-            if (count >= 200) return { name: 'Магнат', emoji: '👑' };
-            if (count >= 100) return { name: 'Эксперт', emoji: '🎓' };
-            if (count >= 50) return { name: 'Профи', emoji: '💼' };
-            if (count >= 10) return { name: 'Любитель', emoji: '⭐' };
-            return { name: 'Новичок', emoji: '🌱' };
+        function setCurrentUser(user) {
+            localStorage.setItem('currentUserId', user.id);
+            currentUser = user;
         }
 
-        function fmtTime(ms) {
-            if (ms <= 0) return 'Истекла';
-            const d = Math.floor(ms/86400000), h = Math.floor((ms%86400000)/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
-            return `${d?d+'д ':''}${h||d?h+'ч ':''}${m}м ${s}с`;
-        }
-
-        // ------ ОСНОВНЫЕ ФУНКЦИИ ------
-        function initUser() {
-            if (!data.registered) {
-                data.registered = true;
-                data.registeredAt = new Date().toISOString();
-                data.coins = 50; // бонус за регистрацию
-                data.streak = 1;
-                data.lastVisit = new Date().toISOString().split('T')[0];
-                // Проверяем реферальный параметр (из URL)
-                const params = new URLSearchParams(window.location.search);
-                const ref = params.get('ref');
-                if (ref && ref !== String(data.userId)) {
-                    data.referrer = ref;
-                    // Начисляем бонус рефереру (имитация через localStorage другого пользователя – нереализуемо локально)
-                    // Поэтому просто уведомляем
-                    alert('🎉 Вы пришли по реферальной ссылке! +50 монет (реферер получит +100, если у него открыто приложение).');
-                    data.coins += 50; // дополнительный бонус
-                } else {
-                    alert('🎉 Добро пожаловать! Вы получили 50 монет за регистрацию.');
+        // --- РЕГИСТРАЦИЯ ---
+        function registerUser(email, username, ref) {
+            const users = getUsers();
+            // Проверка уникальности
+            for (let id in users) {
+                if (users[id].email === email) return { error: 'Email уже используется' };
+                if (users[id].username === username) return { error: 'Username уже используется' };
+            }
+            const id = Date.now().toString();
+            const refCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const newUser = {
+                id,
+                email,
+                username,
+                balance: 50,
+                stars: 0,
+                streak: 1,
+                lastVisit: new Date().toISOString().split('T')[0],
+                refCode,
+                referrer: null,
+                subLevel: 'free',
+                subExpiry: null,
+                registeredAt: new Date().toISOString(),
+            };
+            // Реферал
+            if (ref) {
+                const referrerUser = Object.values(users).find(u => u.refCode === ref);
+                if (referrerUser) {
+                    newUser.referrer = referrerUser.id;
+                    referrerUser.stars = (referrerUser.stars || 0) + 100;
+                    newUser.balance += 50; // дополнительный бонус
+                    if (!referrerUser.referrals) referrerUser.referrals = [];
+                    referrerUser.referrals.push(id);
                 }
-                saveData();
-                updateUI();
-            } else {
-                // Обновляем стрик
-                updateStreak();
             }
+            users[id] = newUser;
+            saveUsers(users);
+            setCurrentUser(newUser);
+            return { success: true, user: newUser };
         }
 
-        function updateStreak() {
+        function loginUser(username) {
+            const users = getUsers();
+            const user = Object.values(users).find(u => u.username === username);
+            if (!user) return { error: 'Пользователь не найден' };
+            // Обновляем стрик
+            updateStreak(user);
+            saveUsers(users);
+            setCurrentUser(user);
+            return { success: true, user };
+        }
+
+        function updateStreak(user) {
             const today = new Date().toISOString().split('T')[0];
-            if (data.lastVisit === today) return;
-            if (data.lastVisit) {
-                const diff = Math.floor((Date.now() - new Date(data.lastVisit).getTime()) / 86400000);
-                if (diff >= 2) data.streak = 0;
-                else if (diff === 1) data.streak += 1;
-            } else {
-                data.streak = 1;
+            if (!user.lastVisit) {
+                user.streak = 1;
+            } else if (user.lastVisit !== today) {
+                const diff = Math.floor((Date.now() - new Date(user.lastVisit).getTime()) / 86400000);
+                if (diff >= 2) {
+                    user.streak = 0;
+                } else if (diff === 1) {
+                    user.streak += 1;
+                }
+                user.lastVisit = today;
             }
-            data.lastVisit = today;
-            saveData();
-            updateStreakDisplay();
         }
 
-        function updateStreakDisplay() {
-            document.getElementById('streakDisplay').textContent = '🔥 ' + data.streak + ' дн.';
-            document.getElementById('streakDisplay2').textContent = data.streak;
+        function updateUserOnServer(user) {
+            const users = getUsers();
+            users[user.id] = user;
+            saveUsers(users);
+            setCurrentUser(user);
         }
 
-        function updateReferralLink() {
-            const container = document.getElementById('referralLinkDisplay');
-            if (!container) return;
-            const link = window.location.origin + window.location.pathname + '?ref=' + data.userId;
-            container.innerHTML = `Ваша реферальная ссылка:<br><span style="font-size:12px;">${link}</span>`;
+        // --- ЗАГРУЗКА ЛОКАЛЬНЫХ ДАННЫХ ПОЛЬЗОВАТЕЛЯ ---
+        function loadUserLocalData() {
+            if (!currentUser) return;
+            const prefix = currentUser.id + '_';
+            transactions = JSON.parse(localStorage.getItem(prefix + 'transactions') || '[]');
+            piggyBanks = JSON.parse(localStorage.getItem(prefix + 'piggy') || '[]');
+            challenges = JSON.parse(localStorage.getItem(prefix + 'challenges') || '[]');
+            achievements = JSON.parse(localStorage.getItem(prefix + 'achievements') || '[]');
+            debts = JSON.parse(localStorage.getItem(prefix + 'debts') || '[]');
+            regularPayments = JSON.parse(localStorage.getItem(prefix + 'regular') || '[]');
+            const cats = localStorage.getItem(prefix + 'customCats');
+            customCategories = cats ? JSON.parse(cats) : { expense: [], income: [] };
         }
 
-        function updateCoinsDisplay() {
-            document.getElementById('coinsDisplay').textContent = '🪙 ' + data.coins;
-            const el = document.getElementById('coinsBalance');
-            if (el) el.textContent = data.coins;
+        function saveUserLocalData() {
+            if (!currentUser) return;
+            const prefix = currentUser.id + '_';
+            localStorage.setItem(prefix + 'transactions', JSON.stringify(transactions));
+            localStorage.setItem(prefix + 'piggy', JSON.stringify(piggyBanks));
+            localStorage.setItem(prefix + 'challenges', JSON.stringify(challenges));
+            localStorage.setItem(prefix + 'achievements', JSON.stringify(achievements));
+            localStorage.setItem(prefix + 'debts', JSON.stringify(debts));
+            localStorage.setItem(prefix + 'regular', JSON.stringify(regularPayments));
+            localStorage.setItem(prefix + 'customCats', JSON.stringify(customCategories));
         }
 
-        function updateUserLevel() {
-            const level = getUserLevel();
-            document.getElementById('levelBox').textContent = `${level.emoji} ${level.name}`;
+        // --- UI ---
+        function updateUI() {
+            if (!currentUser) return;
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('userAvatar').textContent = currentUser.username[0].toUpperCase();
+            document.getElementById('streakDisplay').textContent = '🔥 ' + currentUser.streak;
+            document.getElementById('streakDisplay2').textContent = currentUser.streak;
+            document.getElementById('coinsDisplay').textContent = '🪙 ' + currentUser.balance;
+            document.getElementById('starsDisplay').textContent = '⭐ ' + (currentUser.stars || 0);
+            document.getElementById('balanceDisplay').textContent = currentUser.balance.toLocaleString() + ' ₽';
+
+            // Подписка
+            const subInfo = document.getElementById('subInfo');
+            if (currentUser.subLevel === 'free') {
+                subInfo.textContent = '❌ Нет подписки';
+            } else if (currentUser.subLevel === 'trial') {
+                subInfo.textContent = '🟢 Пробный Platinum (3 дня)';
+            } else if (currentUser.subLevel === 'pro') {
+                subInfo.textContent = '⭐ PRO';
+            } else if (currentUser.subLevel === 'pro_forever') {
+                subInfo.textContent = '⭐ PRO навсегда';
+            } else if (currentUser.subLevel === 'platinum') {
+                subInfo.textContent = '💎 Platinum';
+            } else if (currentUser.subLevel === 'platinum_forever') {
+                subInfo.textContent = '💎 Platinum навсегда';
+            }
+
+            // Реферальная ссылка
+            const link = window.location.origin + window.location.pathname + '?ref=' + currentUser.refCode;
+            document.getElementById('referralLink').innerHTML = 'Ваша ссылка:<br><span style="font-size:12px;">' + link + '</span>';
+
+            // Дневной лимит
+            const limit = parseInt(localStorage.getItem('dailyLimit_' + currentUser.id)) || 0;
+            const today = new Date().toISOString().split('T')[0];
+            const todayExp = transactions.filter(t => t.type === 'expense' && t.date === today).reduce((s, t) => s + t.amount, 0);
+            document.getElementById('limitText').textContent = limit ? 'Лимит: ' + limit + ' ₽' : 'Лимит: не задан';
+            document.getElementById('limitStatus').style.display = (limit && todayExp > limit) ? 'inline' : 'none';
+
+            // Обновляем таймер подписки
+            updateTimer();
         }
 
-        function applyTheme() {
-            if (data.isDark) document.body.classList.add('dark-theme');
-            else document.body.classList.remove('dark-theme');
-            document.getElementById('themeToggle').checked = data.isDark;
+        function updateTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            const el = document.getElementById('subTimer');
+            if (!currentUser.subExpiry) {
+                el.textContent = '';
+                return;
+            }
+            const tick = () => {
+                const rem = new Date(currentUser.subExpiry).getTime() - Date.now();
+                if (rem <= 0) {
+                    currentUser.subLevel = 'free';
+                    currentUser.subExpiry = null;
+                    updateUserOnServer(currentUser);
+                    el.textContent = 'Подписка истекла';
+                    clearInterval(timerInterval);
+                    updateUI();
+                    return;
+                }
+                const d = Math.floor(rem/86400000);
+                const h = Math.floor((rem%86400000)/3600000);
+                const m = Math.floor((rem%3600000)/60000);
+                const s = Math.floor((rem%60000)/1000);
+                el.textContent = `Осталось: ${d}д ${h}ч ${m}м ${s}с`;
+            };
+            tick();
+            timerInterval = setInterval(tick, 1000);
         }
 
         function renderAll() {
-            document.getElementById('balanceDisplay').textContent = data.balance.toLocaleString() + ' ₽';
-            const today = new Date().toISOString().split('T')[0];
-            const todayExp = data.transactions.filter(t => t.type === 'expense' && t.date === today).reduce((s,t) => s + t.amount, 0);
-            document.getElementById('limitText').textContent = data.dailyLimit ? `Дневной лимит: ${data.dailyLimit} ₽` : 'Дневной лимит: не задан';
-            document.getElementById('limitStatus').style.display = (data.dailyLimit && todayExp > data.dailyLimit) ? 'inline' : 'none';
-            renderTxList('transactionList', data.transactions.slice(0,5));
-            renderTxList('allTransactionList', data.transactions);
-            if (data.subLevel !== 'free') { drawChart(); updateCatStats(); updateAdvStats(); }
-            if (data.subLevel === 'pro' || data.subLevel === 'pro_forever' || data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') renderExtra();
-            updateUI();
+            renderTransactions();
+            renderAnalytics();
+            renderShop();
+            renderPiggy();
+            renderChallenges();
+            renderAchievements();
+            renderDebts();
+            renderRegular();
+            renderCustomCategories();
         }
 
-        function renderTxList(id, list) {
-            const ul = document.getElementById(id);
-            if (!ul) return;
-            ul.innerHTML = list.length ? '' : '<li class="empty-state">Нет записей</li>';
-            list.forEach(t => {
-                const li = document.createElement('li');
-                li.className = 'transaction-item';
-                li.innerHTML = `<div class="transaction-left"><span class="transaction-emoji">${t.emoji}</span><div><div class="transaction-category">${t.category}</div><div class="transaction-date">${t.date}</div></div></div><span class="transaction-amount ${t.type === 'income' ? 'income' : 'expense'}">${t.type === 'income' ? '+' : '-'}${t.amount} ₽</span>`;
-                ul.appendChild(li);
-            });
-        }
-
-        function drawChart() {
-            const canvas = document.getElementById('expenseChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const tx = data.transactions.filter(t => t.type === 'expense');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (!tx.length) {
-                ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--hint');
-                ctx.font = '14px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Нет расходов', canvas.width/2, canvas.height/2);
+        function renderTransactions() {
+            const container = document.getElementById('transactionList');
+            if (transactions.length === 0) {
+                container.innerHTML = '<div class="empty-state">Нет записей</div>';
                 return;
             }
+            container.innerHTML = transactions.slice(0, 10).map(t =>
+                `<div class="transaction-item"><span>${t.emoji} ${t.category}</span><span style="color:${t.type==='income'?'#34c759':'#ff3b30'};">${t.type==='income'?'+':'-'}${t.amount} ₽</span></div>`
+            ).join('');
+        }
+
+        function renderAnalytics() {
+            if (currentUser.subLevel === 'free') return;
+            const tx = transactions.filter(t => t.type === 'expense');
+            if (tx.length === 0) {
+                document.getElementById('categoryStats').innerHTML = '';
+                document.getElementById('avgDaily').textContent = '0 ₽';
+                document.getElementById('topCategory').textContent = '-';
+                return;
+            }
+            // График (простой canvas)
+            const canvas = document.getElementById('expenseChart');
+            const ctx = canvas.getContext('2d');
             const totals = {};
             tx.forEach(t => {
                 if (!totals[t.category]) totals[t.category] = { emoji: t.emoji, total: 0 };
                 totals[t.category].total += t.amount;
             });
             const total = Object.values(totals).reduce((s, c) => s + c.total, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FF8C00','#A9A9A9'];
             let start = -Math.PI/2, ci = 0, cx = canvas.width/2, cy = canvas.height/2, r = Math.min(cx, cy) - 10;
             Object.values(totals).forEach(cat => {
@@ -560,612 +485,592 @@
                 ctx.fill();
                 start += angle;
             });
-        }
 
-        function updateCatStats() {
-            const c = document.getElementById('categoryStats');
-            if (!c) return;
-            const tx = data.transactions.filter(t => t.type === 'expense');
-            if (!tx.length) { c.innerHTML = ''; return; }
-            const totals = {};
-            tx.forEach(t => {
-                if (!totals[t.category]) totals[t.category] = { emoji: t.emoji, total: 0 };
-                totals[t.category].total += t.amount;
-            });
-            const total = Object.values(totals).reduce((s, c) => s + c.total, 0);
-            c.innerHTML = Object.entries(totals).map(([cat, d]) =>
-                `<div class="stat-item"><div class="stat-value">${d.emoji}</div><div class="stat-label">${Math.round((d.total/total)*100)}%</div></div>`
+            // Статистика
+            document.getElementById('categoryStats').innerHTML = Object.entries(totals).map(([cat, d]) =>
+                `<div>${d.emoji} ${Math.round((d.total/total)*100)}%</div>`
             ).join('');
-        }
 
-        function updateAdvStats() {
-            const tx = data.transactions.filter(t => t.type === 'expense');
-            if (!tx.length) {
-                document.getElementById('avgDaily').textContent = '0 ₽';
-                document.getElementById('topCategory').textContent = '-';
-                return;
-            }
             const days = Math.max(1, Math.ceil((Date.now() - new Date(tx[tx.length-1].date).getTime()) / 86400000));
             const avg = tx.reduce((s, t) => s + t.amount, 0) / days;
             document.getElementById('avgDaily').textContent = Math.round(avg) + ' ₽';
-            const cats = {};
-            tx.forEach(t => cats[t.category] = (cats[t.category] || 0) + t.amount);
-            const top = Object.entries(cats).sort((a,b) => b[1] - a[1])[0];
-            document.getElementById('topCategory').textContent = top ? `${top[0]} (${top[1]} ₽)` : '-';
+            const top = Object.entries(totals).sort((a,b) => b[1].total - a[1].total)[0];
+            document.getElementById('topCategory').textContent = top ? `${top[0]} (${top[1].total} ₽)` : '-';
         }
 
-        function renderExtra() {
-            renderPiggy();
-            renderChallenges();
-            renderShop();
-            if (data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') {
-                renderAchievements();
-                renderDebts();
-                renderRegular();
-                renderCustomCategoriesList();
-            }
-            document.querySelectorAll('.tab-content').forEach(e => e.style.display = 'none');
-            const act = document.getElementById(activeTab);
-            if (act) act.style.display = 'block';
-        }
-
-        function updateUI() {
-            const badge = document.getElementById('levelBadge');
-            badge.className = 'level-badge';
-            if (data.subLevel === 'pro') { badge.classList.add('pro'); badge.textContent = 'PRO'; }
-            else if (data.subLevel === 'pro_forever') { badge.classList.add('forever'); badge.textContent = 'PRO ∞'; }
-            else if (data.subLevel === 'platinum') { badge.classList.add('platinum'); badge.textContent = 'PLATINUM'; }
-            else if (data.subLevel === 'platinum_forever') { badge.classList.add('forever'); badge.textContent = 'PLATINUM ∞'; }
-            else if (data.subLevel === 'trial') { badge.classList.add('trial'); badge.textContent = 'ПРОБНЫЙ'; }
-            else badge.style.display = 'none';
-
-            document.getElementById('screen-analytics').style.display = (data.subLevel !== 'free') ? '' : 'none';
-            const subBlock = document.getElementById('subscribeBlock');
-            if (subBlock) subBlock.style.display = data.subLevel === 'free' ? 'block' : 'none';
-            const tbtn = document.getElementById('trialBtn');
-            if (tbtn) tbtn.style.display = (data.subLevel === 'free' && !data.trialUsed) ? 'block' : 'none';
-
-            const isPlat = (data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial');
-            document.querySelectorAll('.platinum-only').forEach(el => el.style.display = isPlat ? '' : 'none');
-
-            const act = document.querySelector(`.tab[data-tab="${activeTab}"]`);
-            if (act && !isPlat && act.classList.contains('platinum-only')) {
-                activeTab = 'tab-piggy';
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                const f = document.querySelector('.tab[data-tab="tab-piggy"]');
-                if (f) f.classList.add('active');
-            }
-
-            document.getElementById('subscriptionInfo').innerHTML = data.subLevel === 'free' ? '❌ Нет подписки' :
-                data.subLevel === 'trial' ? '🟢 Пробный Platinum (3 дня)' :
-                data.subLevel === 'pro' ? '⭐ PRO активно' :
-                data.subLevel === 'pro_forever' ? '⭐ PRO навсегда' :
-                data.subLevel === 'platinum' ? '💎 Platinum активно' :
-                '💎 Platinum навсегда';
-
-            updateStreakDisplay();
-            updateReferralLink();
-        }
-
-        // ------ КОПИЛКИ ------
-        function renderPiggy() {
-            const c = document.getElementById('piggyList');
-            c.innerHTML = data.piggyBanks.length ? '' : '<p style="color:var(--hint);">Нет копилок</p>';
-            data.piggyBanks.forEach((p, i) => {
-                const pct = Math.min(100, Math.round((p.saved / p.target) * 100));
-                const img = p.photo ? `<img src="${p.photo}" class="piggy-image">` : `<span class="piggy-icon">${p.emoji}</span>`;
-                c.innerHTML += `<div class="piggy-card"><div class="piggy-actions"><button onclick="editPiggy(${i})">✏️</button><button onclick="delPiggy(${i})">🗑️</button></div><div class="piggy-header">${img}<div><div class="piggy-name">${p.name}</div><div class="piggy-target">${p.saved}/${p.target} ₽ (${pct}%)</div></div></div><div class="piggy-progress"><div class="piggy-bar" style="width:${pct}%"></div></div><div style="display:flex;gap:8px;margin-top:8px;"><input type="number" id="pa_${i}" placeholder="Сумма" style="flex:1;padding:8px;border-radius:8px;"><button class="btn btn-primary" onclick="addPig(${i})">+</button></div></div>`;
-            });
-        }
-        window.editPiggy = function(i) {
-            const n = prompt('Название:', data.piggyBanks[i].name);
-            if (n) { data.piggyBanks[i].name = n; saveData(); renderPiggy(); }
-        };
-        window.delPiggy = function(i) {
-            if (confirm('Удалить копилку?')) { data.piggyBanks.splice(i,1); saveData(); renderPiggy(); }
-        };
-        window.addPig = function(i) {
-            const inp = document.getElementById('pa_'+i);
-            const a = parseFloat(inp.value);
-            if (!a || a <= 0) return;
-            if (data.balance < a) return alert('Недостаточно средств');
-            data.piggyBanks[i].saved += a;
-            data.balance -= a;
-            data.transactions.unshift({ type:'expense', category:'🐷 Копилка', emoji:data.piggyBanks[i].emoji, amount:a, date:new Date().toISOString().split('T')[0] });
-            saveData();
-            renderAll();
-            renderPiggy();
-            inp.value = '';
-        };
-
-        document.getElementById('addPiggyBtn').addEventListener('click', () => document.getElementById('piggyModal').classList.add('active'));
-        document.getElementById('closePiggyModal').addEventListener('click', () => document.getElementById('piggyModal').classList.remove('active'));
-        document.getElementById('savePiggyBtn').addEventListener('click', async () => {
-            const n = document.getElementById('piggyName').value;
-            const t = parseFloat(document.getElementById('piggyTarget').value);
-            if (!n || !t) return alert('Заполните поля');
-            let ph = null;
-            const f = document.getElementById('piggyPhoto').files[0];
-            if (f) {
-                ph = await new Promise(r => { const fr = new FileReader(); fr.onload = e => r(e.target.result); fr.readAsDataURL(f); });
-            }
-            data.piggyBanks.push({ name:n, target:t, saved:0, emoji:'🐷', photo:ph });
-            saveData();
-            renderPiggy();
-            document.getElementById('piggyModal').classList.remove('active');
-        });
-
-        // ------ ЧЕЛЛЕНДЖИ ------
-        function renderChallenges() {
-            const c = document.getElementById('challengesList');
-            c.innerHTML = data.challenges.length ? '' : '<p style="color:var(--hint);">Нет челленджей</p>';
-            data.challenges.forEach((ch, i) => {
-                const left = ch.days - ch.progress;
-                c.innerHTML += `<div class="challenge-card"><div>🎯 <b>${ch.name}</b> — награда ${ch.reward}🪙</div><div style="font-size:13px;">День ${ch.progress}/${ch.days} ${left>0?'('+left+' осталось)':'✅ Завершён!'}</div><div class="achievement-progress" style="margin-top:6px;"><div class="achievement-progress-bar" style="width:${(ch.progress/ch.days)*100}%;background:gold;"></div></div>${left>0?`<button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="progChal(${i})">Отметить день</button>`:''}${!left&&!ch.completed?`<button class="btn btn-gold" style="width:100%;margin-top:8px;" onclick="claimChal(${i})">Получить награду</button>`:''}</div>`;
-            });
-        }
-        window.progChal = function(i) {
-            if (data.challenges[i].progress < data.challenges[i].days) {
-                data.challenges[i].progress++;
-                saveData();
-                renderChallenges();
-            }
-        };
-        window.claimChal = function(i) {
-            if (!data.challenges[i].completed) {
-                data.challenges[i].completed = true;
-                data.coins += data.challenges[i].reward;
-                saveData();
-                renderChallenges();
-                updateCoinsDisplay();
-                alert(`+${data.challenges[i].reward}🪙`);
-            }
-        };
-
-        document.getElementById('addChallengeBtn').addEventListener('click', () => document.getElementById('challengeModal').classList.add('active'));
-        document.getElementById('closeChallengeModal').addEventListener('click', () => document.getElementById('challengeModal').classList.remove('active'));
-        document.getElementById('saveChallengeBtn').addEventListener('click', () => {
-            const n = document.getElementById('challengeName').value;
-            const d = parseInt(document.getElementById('challengeDays').value);
-            const rw = parseInt(document.getElementById('challengeReward').value) || 50;
-            if (!n || !d) return alert('Заполните поля');
-            data.challenges.push({ name:n, days:d, progress:0, reward:rw, completed:false });
-            saveData();
-            renderChallenges();
-            document.getElementById('challengeModal').classList.remove('active');
-        });
-
-        // ------ МАГАЗИН ------
         function renderShop() {
-            document.getElementById('shopList').innerHTML = data.shopItems.map(it =>
-                `<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc}</div></div><button class="btn btn-primary" onclick="buy('${it.id}')">🪙 ${it.price}</button></div>`
+            const container = document.getElementById('shopList');
+            container.innerHTML = shopItems.map(item =>
+                `<div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div><b>${item.name}</b><br><span style="font-size:12px;color:#8e8e93;">${item.price} 🪙</span></div>
+                    <button class="btn btn-primary" onclick="buyItem('${item.id}')">Купить</button>
+                </div>`
             ).join('');
         }
-        window.buy = function(id) {
-            const it = data.shopItems.find(i => i.id === id);
-            if (!it) return;
-            if (data.coins < it.price) return alert('Недостаточно монет');
-            if (!confirm(`Купить "${it.name}"?`)) return;
-            data.coins -= it.price;
-            if (it.action === 'pro') { data.subLevel = 'pro'; data.subExpiry = Date.now() + 30*24*60*60*1000; }
-            else if (it.action === 'pro_forever') { data.subLevel = 'pro_forever'; data.subExpiry = Date.now() + 100*365*24*60*60*1000; }
-            else if (it.action === 'platinum') { data.subLevel = 'platinum'; data.subExpiry = Date.now() + 30*24*60*60*1000; }
-            else if (it.action === 'platinum_forever') { data.subLevel = 'platinum_forever'; data.subExpiry = Date.now() + 100*365*24*60*60*1000; }
-            else if (it.action === 'achievement') {
-                if (!data.achievements.find(a => a.id === it.id)) {
-                    data.achievements.push({ id:it.id, name:it.name, icon:it.icon, date:Date.now() });
-                    alert('Трофей добавлен!');
-                } else alert('Уже есть');
-            } else alert('Тема (заглушка)');
-            saveData();
-            updateCoinsDisplay();
-            renderShop();
-            updateUI();
-            if (data.subLevel !== 'free') { renderExtra(); }
-        };
 
-        // ------ ТРОФЕИ ------
-        function renderAchievements() {
-            document.getElementById('achievementsList').innerHTML = data.achievements.map(a =>
-                `<div class="achievement-card"><div class="achievement-icon">${a.icon||'🏆'}</div><div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${new Date(a.date).toLocaleDateString()}</div></div></div>`
-            ).join('') || '<p style="color:var(--hint);">Нет трофеев</p>';
-        }
-
-        // ------ ДОЛГИ ------
-        function renderDebts() {
-            document.getElementById('debtsList').innerHTML = data.debts.map((d,i) =>
-                `<div class="debt-card"><div><div>${d.person}</div><div class="debt-amount ${d.type==='owed'?'debt-owed':'debt-paid'}">${d.type==='owed'?'+':'-'}${d.amount} ₽</div></div><button class="btn btn-danger" onclick="delDebt(${i})">✕</button></div>`
-            ).join('') || '<p style="color:var(--hint);">Нет долгов</p>';
-        }
-        window.delDebt = function(i) { data.debts.splice(i,1); saveData(); renderDebts(); };
-
-        document.getElementById('addDebtBtn').addEventListener('click', () => document.getElementById('debtModal').classList.add('active'));
-        document.getElementById('closeDebtModal').addEventListener('click', () => document.getElementById('debtModal').classList.remove('active'));
-        document.getElementById('saveDebtBtn').addEventListener('click', () => {
-            const p = document.getElementById('debtPerson').value;
-            const a = parseFloat(document.getElementById('debtAmount').value);
-            const t = document.getElementById('debtType').value;
-            if (!p || !a) return alert('Заполните поля');
-            data.debts.push({ person:p, amount:a, type:t });
-            saveData();
-            renderDebts();
-            document.getElementById('debtModal').classList.remove('active');
-        });
-
-        // ------ РЕГУЛЯРНЫЕ ПЛАТЕЖИ ------
-        function renderRegular() {
-            document.getElementById('regularPaymentsList').innerHTML = data.regularPayments.length ?
-                data.regularPayments.map((p,i) =>
-                    `<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;"><div><div>${p.name}</div><div style="font-size:13px;">${p.amount} ₽ · ${p.period==='weekly'?'Раз в неделю':'Раз в месяц'}</div></div><button class="btn btn-danger" onclick="delReg(${i})">✕</button></div>`
-                ).join('') : '';
-        }
-        window.delReg = function(i) { data.regularPayments.splice(i,1); saveData(); renderRegular(); };
-
-        document.getElementById('addRegularPaymentBtn').addEventListener('click', () => document.getElementById('regularModal').classList.add('active'));
-        document.getElementById('closeRegularModal').addEventListener('click', () => document.getElementById('regularModal').classList.remove('active'));
-        document.getElementById('saveRegularBtn').addEventListener('click', () => {
-            const n = document.getElementById('regularName').value;
-            const a = parseFloat(document.getElementById('regularAmount').value);
-            const p = document.getElementById('regularPeriod').value;
-            if (!n || !a) return alert('Заполните поля');
-            data.regularPayments.push({ name:n, amount:a, period:p });
-            saveData();
-            renderRegular();
-            document.getElementById('regularModal').classList.remove('active');
-        });
-
-        // ------ СВОИ КАТЕГОРИИ ------
-        function renderCustomCategoriesList() {
-            const container = document.getElementById('customCategoriesList');
-            let html = '<div class="section-title">Расходы</div>';
-            data.customCategories.expense.forEach((cat, i) => {
-                html += `<div class="shop-item"><div>${cat.emoji} ${cat.name}</div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteCustomCat('expense',${i})">✕</button></div>`;
-            });
-            html += '<div class="section-title">Доходы</div>';
-            data.customCategories.income.forEach((cat, i) => {
-                html += `<div class="shop-item"><div>${cat.emoji} ${cat.name}</div><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteCustomCat('income',${i})">✕</button></div>`;
-            });
-            container.innerHTML = html || '<p style="color:var(--hint);">Нет своих категорий</p>';
-        }
-        window.deleteCustomCat = function(type, index) {
-            data.customCategories[type].splice(index, 1);
-            saveData();
-            renderCustomCategoriesList();
-        };
-
-        document.getElementById('addCustomCategoryBtn').addEventListener('click', () => {
-            document.getElementById('customCatModalTitle').textContent = 'Новая категория';
-            document.getElementById('customCatName').value = '';
-            document.getElementById('customCatEmoji').value = '';
-            document.getElementById('customCatType').value = 'expense';
-            document.getElementById('customCategoryModal').classList.add('active');
-        });
-        document.getElementById('closeCustomCatModal').addEventListener('click', () => document.getElementById('customCategoryModal').classList.remove('active'));
-        document.getElementById('saveCustomCatBtn').addEventListener('click', () => {
-            const name = document.getElementById('customCatName').value.trim();
-            const emoji = document.getElementById('customCatEmoji').value.trim() || '📌';
-            const type = document.getElementById('customCatType').value;
-            if (!name) return alert('Введите название');
-            data.customCategories[type].push({ name, emoji });
-            saveData();
-            renderCustomCategoriesList();
-            document.getElementById('customCategoryModal').classList.remove('active');
-        });
-
-        // ------ ИНСТРУМЕНТЫ (заглушки) ------
-        document.getElementById('exportCsvBtn').addEventListener('click', () => {
-            let csv = 'Тип,Категория,Сумма,Дата\n';
-            data.transactions.forEach(t => csv += `${t.type},${t.category},${t.amount},${t.date}\n`);
-            const blob = new Blob([csv], {type:'text/csv'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'transactions.csv';
-            a.click();
-        });
-        document.getElementById('calcCreditBtn').addEventListener('click', () => {
-            const a = prompt('Сумма кредита:','100000'), r = prompt('Ставка %:','15'), m = prompt('Месяцев:','12');
-            if (a && r && m) {
-                const P = +a, R = +r/100/12, N = +m;
-                const pay = (P * R * Math.pow(1+R, N)) / (Math.pow(1+R, N) - 1);
-                alert(`Платёж: ${Math.round(pay)} ₽\nПереплата: ${Math.round(pay*N-P)} ₽`);
+        window.buyItem = function(id) {
+            const item = shopItems.find(i => i.id === id);
+            if (!item) return;
+            if (currentUser.balance < item.price) return alert('Недостаточно монет');
+            if (!confirm(`Купить "${item.name}"?`)) return;
+            currentUser.balance -= item.price;
+            if (item.action === 'stars') {
+                currentUser.stars = (currentUser.stars || 0) + item.amount;
+            } else {
+                const duration = item.duration || 30;
+                currentUser.subLevel = item.action;
+                const now = Date.now();
+                currentUser.subExpiry = now + duration * 24 * 60 * 60 * 1000;
+                if (item.action === 'pro_forever' || item.action === 'platinum_forever') {
+                    currentUser.subExpiry = now + 100 * 365 * 24 * 60 * 60 * 1000;
+                }
             }
-        });
-        document.getElementById('yearReportBtn').addEventListener('click', () => {
-            const y = new Date(new Date().setFullYear(new Date().getFullYear()-1)).toISOString().split('T')[0];
-            const tx = data.transactions.filter(t => t.date >= y);
-            const inc = tx.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
-            const exp = tx.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
-            alert(`📆 Итоги года\nДоходы: +${inc} ₽\nРасходы: -${exp} ₽\nБаланс: ${inc-exp} ₽`);
-        });
-        document.getElementById('forecastBtn').addEventListener('click', () => {
-            const tx = data.transactions.filter(t => t.type === 'expense');
-            if (tx.length < 5) return alert('Мало данных');
-            const days = Math.max(1, Math.ceil((Date.now() - new Date(tx[tx.length-1].date).getTime()) / 86400000));
-            const avg = tx.reduce((s,t) => s + t.amount, 0) / days;
-            alert(`🔮 Прогноз: ~-${Math.round(avg*30)} ₽ в месяц`);
-        });
+            updateUserOnServer(currentUser);
+            updateUI();
+            renderShop();
+            if (currentUser.subLevel !== 'free') renderAnalytics();
+            alert('Покупка совершена!');
+        };
 
-        // ------ МОНЕТЫ (демо) ------
-        document.getElementById('coinsDisplay').addEventListener('click', openCoins);
-        document.getElementById('closeCoinsModal').addEventListener('click', () => document.getElementById('coinsModal').classList.remove('active'));
-        document.getElementById('startDonateBtn').addEventListener('click', () => {
-            // Демо-пополнение
-            data.coins += 100;
-            saveData();
-            updateCoinsDisplay();
-            document.getElementById('coinsBalance').textContent = data.coins;
-            document.getElementById('donateStatus').textContent = '✅ 100 монет добавлено (демо)';
-            setTimeout(() => document.getElementById('donateStatus').textContent = '', 3000);
-        });
-        function openCoins() {
-            document.getElementById('coinsBalance').textContent = data.coins;
-            document.getElementById('donateStatus').textContent = '';
-            document.getElementById('coinsModal').classList.add('active');
+        // --- КОПИЛКИ ---
+        function renderPiggy() {
+            const container = document.getElementById('piggyList');
+            if (piggyBanks.length === 0) {
+                container.innerHTML = '<div class="empty-state">Нет копилок</div>';
+                return;
+            }
+            container.innerHTML = piggyBanks.map((p, i) => {
+                const pct = Math.min(100, Math.round((p.saved / p.target) * 100));
+                return `<div class="card">
+                    <div style="display:flex;justify-content:space-between;">
+                        <b>${p.name}</b>
+                        <div>
+                            <button class="btn" onclick="editPiggy(${i})">✏️</button>
+                            <button class="btn btn-danger" onclick="delPiggy(${i})">🗑️</button>
+                        </div>
+                    </div>
+                    <div>${p.saved} / ${p.target} ₽ (${pct}%)</div>
+                    <div style="height:8px;background:#e5e5ea;border-radius:4px;">
+                        <div style="width:${pct}%;height:100%;background:#34c759;border-radius:4px;"></div>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:8px;">
+                        <input type="number" id="piggy_input_${i}" placeholder="Сумма" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e5e5ea;">
+                        <button class="btn btn-primary" onclick="addPiggy(${i})">+</button>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
-        // ------ РЕФЕРАЛЬНАЯ ССЫЛКА (копирование) ------
-        document.getElementById('inviteFriendBtn').addEventListener('click', () => {
-            const link = window.location.origin + window.location.pathname + '?ref=' + data.userId;
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Ссылка скопирована!');
-            }).catch(() => {
-                alert('Скопируйте ссылку вручную:\n' + link);
+        window.editPiggy = function(i) {
+            const n = prompt('Название:', piggyBanks[i].name);
+            if (n) { piggyBanks[i].name = n; saveUserLocalData(); renderPiggy(); }
+        };
+        window.delPiggy = function(i) {
+            if (confirm('Удалить?')) { piggyBanks.splice(i,1); saveUserLocalData(); renderPiggy(); }
+        };
+        window.addPiggy = function(i) {
+            const inp = document.getElementById('piggy_input_' + i);
+            const amount = parseFloat(inp.value);
+            if (!amount || amount <= 0) return alert('Введите сумму');
+            if (currentUser.balance < amount) return alert('Недостаточно средств');
+            piggyBanks[i].saved += amount;
+            currentUser.balance -= amount;
+            transactions.unshift({ type:'expense', category:'🐷 Копилка', emoji:'🐷', amount, date:new Date().toISOString().split('T')[0] });
+            updateUserOnServer(currentUser);
+            saveUserLocalData();
+            renderAll();
+            inp.value = '';
+        };
+        document.getElementById('addPiggyBtn').addEventListener('click', () => {
+            openModal(`
+                <div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">Новая копилка</div>
+                <input type="text" id="newPiggyName" class="input-field" placeholder="Название">
+                <input type="number" id="newPiggyTarget" class="input-field" placeholder="Цель (₽)">
+                <button class="btn btn-primary" id="savePiggyBtn" style="width:100%;">Создать</button>
+            `);
+            document.getElementById('savePiggyBtn').addEventListener('click', () => {
+                const name = document.getElementById('newPiggyName').value;
+                const target = parseFloat(document.getElementById('newPiggyTarget').value);
+                if (!name || !target) return alert('Заполните поля');
+                piggyBanks.push({ name, target, saved: 0, emoji: '🐷' });
+                saveUserLocalData();
+                renderPiggy();
+                closeModal();
             });
         });
 
-        // ------ НАВИГАЦИЯ ------
+        // --- ЧЕЛЛЕНДЖИ ---
+        function renderChallenges() {
+            const container = document.getElementById('challengesList');
+            if (challenges.length === 0) {
+                container.innerHTML = '<div class="empty-state">Нет челленджей</div>';
+                return;
+            }
+            container.innerHTML = challenges.map((ch, i) => {
+                const left = ch.days - ch.progress;
+                return `<div class="card">
+                    <b>${ch.name}</b> — награда ${ch.reward}🪙<br>
+                    День ${ch.progress}/${ch.days} ${left>0?'('+left+' осталось)':'✅ Завершён!'}
+                    <div style="height:6px;background:#e5e5ea;border-radius:3px;margin:6px 0;">
+                        <div style="width:${(ch.progress/ch.days)*100}%;height:100%;background:gold;border-radius:3px;"></div>
+                    </div>
+                    ${left>0 ? `<button class="btn btn-primary" onclick="progressChallenge(${i})">Отметить день</button>` : ''}
+                    ${!left && !ch.completed ? `<button class="btn btn-gold" onclick="claimChallenge(${i})">Получить награду</button>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        window.progressChallenge = function(i) {
+            if (challenges[i].progress < challenges[i].days) {
+                challenges[i].progress++;
+                saveUserLocalData();
+                renderChallenges();
+            }
+        };
+        window.claimChallenge = function(i) {
+            if (!challenges[i].completed) {
+                challenges[i].completed = true;
+                currentUser.balance += challenges[i].reward;
+                updateUserOnServer(currentUser);
+                saveUserLocalData();
+                renderChallenges();
+                updateUI();
+                alert(`+${challenges[i].reward}🪙`);
+            }
+        };
+        document.getElementById('addChallengeBtn').addEventListener('click', () => {
+            openModal(`
+                <div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">Новый челлендж</div>
+                <input type="text" id="newChalName" class="input-field" placeholder="Название">
+                <input type="number" id="newChalDays" class="input-field" placeholder="Дней">
+                <input type="number" id="newChalReward" class="input-field" placeholder="Награда (монет)" value="50">
+                <button class="btn btn-primary" id="saveChalBtn" style="width:100%;">Создать</button>
+            `);
+            document.getElementById('saveChalBtn').addEventListener('click', () => {
+                const name = document.getElementById('newChalName').value;
+                const days = parseInt(document.getElementById('newChalDays').value);
+                const reward = parseInt(document.getElementById('newChalReward').value) || 50;
+                if (!name || !days) return alert('Заполните поля');
+                challenges.push({ name, days, progress: 0, reward, completed: false });
+                saveUserLocalData();
+                renderChallenges();
+                closeModal();
+            });
+        });
+
+        // --- ТРОФЕИ ---
+        function renderAchievements() {
+            const container = document.getElementById('achievementsList');
+            if (achievements.length === 0) {
+                container.innerHTML = '<div class="empty-state">Нет трофеев</div>';
+                return;
+            }
+            container.innerHTML = achievements.map(a =>
+                `<div class="card">${a.icon||'🏆'} ${a.name} (${new Date(a.date).toLocaleDateString()})</div>`
+            ).join('');
+        }
+
+        // --- ДОЛГИ ---
+        function renderDebts() {
+            const container = document.getElementById('debtsList');
+            if (debts.length === 0) {
+                container.innerHTML = '<div class="empty-state">Нет долгов</div>';
+                return;
+            }
+            container.innerHTML = debts.map((d,i) =>
+                `<div class="card" style="display:flex;justify-content:space-between;">
+                    <span>${d.person} ${d.type==='owed'?'должен мне':'я должен'} ${d.amount} ₽</span>
+                    <button class="btn btn-danger" onclick="deleteDebt(${i})">✕</button>
+                </div>`
+            ).join('');
+        }
+        window.deleteDebt = function(i) { debts.splice(i,1); saveUserLocalData(); renderDebts(); };
+        document.getElementById('addDebtBtn').addEventListener('click', () => {
+            openModal(`
+                <div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">Добавить долг</div>
+                <input type="text" id="newDebtPerson" class="input-field" placeholder="Кому/От кого">
+                <input type="number" id="newDebtAmount" class="input-field" placeholder="Сумма">
+                <select id="newDebtType" class="input-field">
+                    <option value="owed">Мне должны</option>
+                    <option value="paid">Я должен</option>
+                </select>
+                <button class="btn btn-primary" id="saveDebtBtn" style="width:100%;">Добавить</button>
+            `);
+            document.getElementById('saveDebtBtn').addEventListener('click', () => {
+                const person = document.getElementById('newDebtPerson').value;
+                const amount = parseFloat(document.getElementById('newDebtAmount').value);
+                const type = document.getElementById('newDebtType').value;
+                if (!person || !amount) return alert('Заполните поля');
+                debts.push({ person, amount, type });
+                saveUserLocalData();
+                renderDebts();
+                closeModal();
+            });
+        });
+
+        // --- РЕГУЛЯРНЫЕ ПЛАТЕЖИ ---
+        function renderRegular() {
+            const container = document.getElementById('regularList');
+            if (regularPayments.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = regularPayments.map((p,i) =>
+                `<div class="card" style="display:flex;justify-content:space-between;">
+                    <span>${p.name} ${p.amount} ₽ (${p.period==='weekly'?'еженедельно':'ежемесячно'})</span>
+                    <button class="btn btn-danger" onclick="deleteRegular(${i})">✕</button>
+                </div>`
+            ).join('');
+        }
+        window.deleteRegular = function(i) { regularPayments.splice(i,1); saveUserLocalData(); renderRegular(); };
+        document.getElementById('addRegularBtn').addEventListener('click', () => {
+            openModal(`
+                <div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">Регулярный платёж</div>
+                <input type="text" id="newRegName" class="input-field" placeholder="Название">
+                <input type="number" id="newRegAmount" class="input-field" placeholder="Сумма">
+                <select id="newRegPeriod" class="input-field">
+                    <option value="weekly">Раз в неделю</option>
+                    <option value="monthly">Раз в месяц</option>
+                </select>
+                <button class="btn btn-primary" id="saveRegBtn" style="width:100%;">Добавить</button>
+            `);
+            document.getElementById('saveRegBtn').addEventListener('click', () => {
+                const name = document.getElementById('newRegName').value;
+                const amount = parseFloat(document.getElementById('newRegAmount').value);
+                const period = document.getElementById('newRegPeriod').value;
+                if (!name || !amount) return alert('Заполните поля');
+                regularPayments.push({ name, amount, period });
+                saveUserLocalData();
+                renderRegular();
+                closeModal();
+            });
+        });
+
+        // --- СВОИ КАТЕГОРИИ ---
+        function renderCustomCategories() {
+            const container = document.getElementById('customCatsList');
+            let html = '<div style="font-weight:600;">Расходы</div>';
+            customCategories.expense.forEach((cat, i) => {
+                html += `<div class="card" style="display:flex;justify-content:space-between;"><span>${cat.emoji} ${cat.name}</span><button class="btn btn-danger" onclick="deleteCustomCat('expense',${i})">✕</button></div>`;
+            });
+            html += '<div style="font-weight:600;margin-top:12px;">Доходы</div>';
+            customCategories.income.forEach((cat, i) => {
+                html += `<div class="card" style="display:flex;justify-content:space-between;"><span>${cat.emoji} ${cat.name}</span><button class="btn btn-danger" onclick="deleteCustomCat('income',${i})">✕</button></div>`;
+            });
+            container.innerHTML = html || '<div class="empty-state">Нет своих категорий</div>';
+        }
+        window.deleteCustomCat = function(type, i) {
+            customCategories[type].splice(i,1);
+            saveUserLocalData();
+            renderCustomCategories();
+        };
+        document.getElementById('addCatBtn').addEventListener('click', () => {
+            openModal(`
+                <div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">Новая категория</div>
+                <input type="text" id="newCatName" class="input-field" placeholder="Название">
+                <input type="text" id="newCatEmoji" class="input-field" placeholder="Эмодзи (например, 🎨)">
+                <select id="newCatType" class="input-field">
+                    <option value="expense">Расход</option>
+                    <option value="income">Доход</option>
+                </select>
+                <button class="btn btn-primary" id="saveCatBtn" style="width:100%;">Добавить</button>
+            `);
+            document.getElementById('saveCatBtn').addEventListener('click', () => {
+                const name = document.getElementById('newCatName').value;
+                const emoji = document.getElementById('newCatEmoji').value || '📌';
+                const type = document.getElementById('newCatType').value;
+                if (!name) return alert('Введите название');
+                customCategories[type].push({ name, emoji });
+                saveUserLocalData();
+                renderCustomCategories();
+                closeModal();
+            });
+        });
+
+        // --- МОДАЛКИ ---
+        function openModal(html) {
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+        document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+        // --- ДОБАВЛЕНИЕ ТРАНЗАКЦИИ ---
+        function openAddTransaction(type) {
+            currentType = type;
+            selectedCategory = null;
+            const cats = type === 'expense' ? getExpenseCategories() : getIncomeCategories();
+            let html = `<div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">${type === 'expense' ? 'Расход' : 'Доход'}</div>
+                <input type="number" id="txAmount" class="input-field" placeholder="Сумма">
+                <div class="category-grid">`;
+            cats.forEach(cat => {
+                html += `<div class="category-item" data-cat='${JSON.stringify(cat)}'>${cat.emoji}<br><span style="font-size:12px;">${cat.name}</span></div>`;
+            });
+            html += `</div><button class="btn btn-primary" id="saveTxBtn" style="width:100%;">Добавить</button>`;
+            openModal(html);
+            document.querySelectorAll('.category-item').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.category-item').forEach(e => e.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedCategory = JSON.parse(this.dataset.cat);
+                });
+            });
+            document.getElementById('saveTxBtn').addEventListener('click', () => {
+                const amount = parseFloat(document.getElementById('txAmount').value);
+                if (!amount || amount <= 0) return alert('Введите сумму');
+                if (!selectedCategory) return alert('Выберите категорию');
+                transactions.unshift({
+                    type: currentType,
+                    category: selectedCategory.name,
+                    emoji: selectedCategory.emoji,
+                    amount,
+                    date: new Date().toISOString().split('T')[0]
+                });
+                currentUser.balance += currentType === 'income' ? amount : -amount;
+                updateUserOnServer(currentUser);
+                saveUserLocalData();
+                renderAll();
+                updateUI();
+                closeModal();
+            });
+        }
+
+        function getExpenseCategories() {
+            let cats = [
+                {emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},
+                {emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}
+            ];
+            if (currentUser.subLevel === 'pro' || currentUser.subLevel === 'pro_forever' ||
+                currentUser.subLevel === 'platinum' || currentUser.subLevel === 'platinum_forever' ||
+                currentUser.subLevel === 'trial') {
+                cats = cats.concat([
+                    {emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},
+                    {emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}
+                ]);
+            }
+            if (currentUser.subLevel === 'platinum' || currentUser.subLevel === 'platinum_forever' || currentUser.subLevel === 'trial') {
+                cats = cats.concat([
+                    {emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}
+                ]);
+            }
+            cats = cats.concat(customCategories.expense);
+            return cats;
+        }
+
+        function getIncomeCategories() {
+            const inc = [
+                {emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},
+                {emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}
+            ];
+            return inc.concat(customCategories.income);
+        }
+
+        // --- АДМИН-ПАНЕЛЬ ---
+        function renderAdminPanel() {
+            const users = getUsers();
+            const list = document.getElementById('adminUserList');
+            list.innerHTML = Object.values(users).map(u =>
+                `<div class="admin-user-card">
+                    <div>
+                        <b>${u.username}</b> (${u.email})<br>
+                        🪙${u.balance} ⭐${u.stars||0} | Стрик: ${u.streak} | Подписка: ${u.subLevel}
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button class="btn" onclick="adminGive('${u.id}','coins',100)">+100🪙</button>
+                        <button class="btn" onclick="adminGive('${u.id}','stars',50)">+50⭐</button>
+                        <button class="btn" onclick="adminSub('${u.id}','pro',30)">PRO 30д</button>
+                        <button class="btn" onclick="adminSub('${u.id}','platinum',30)">Plat 30д</button>
+                        <button class="btn btn-danger" onclick="adminSub('${u.id}','free',0)">Сброс</button>
+                    </div>
+                </div>`
+            ).join('') || '<div class="empty-state">Нет пользователей</div>';
+        }
+
+        window.adminGive = function(uid, type, amount) {
+            const users = getUsers();
+            const user = users[uid];
+            if (!user) return alert('Пользователь не найден');
+            if (type === 'coins') user.balance += amount;
+            else if (type === 'stars') user.stars = (user.stars || 0) + amount;
+            saveUsers(users);
+            if (uid === currentUser.id) {
+                currentUser = user;
+                updateUI();
+            }
+            renderAdminPanel();
+        };
+
+        window.adminSub = function(uid, level, duration) {
+            const users = getUsers();
+            const user = users[uid];
+            if (!user) return alert('Пользователь не найден');
+            if (level === 'free') {
+                user.subLevel = 'free';
+                user.subExpiry = null;
+            } else {
+                user.subLevel = level;
+                const now = Date.now();
+                user.subExpiry = now + duration * 24 * 60 * 60 * 1000;
+            }
+            saveUsers(users);
+            if (uid === currentUser.id) {
+                currentUser = user;
+                updateUI();
+            }
+            renderAdminPanel();
+        };
+
+        // --- НАСТРОЙКИ ---
+        function openSettings() {
+            const limit = localStorage.getItem('dailyLimit_' + currentUser.id) || 0;
+            openModal(`
+                <div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">⚙️ Настройки</div>
+                <label>Дневной лимит расходов</label>
+                <input type="number" id="settingsLimit" class="input-field" value="${limit}">
+                <button class="btn btn-primary" id="saveSettingsBtn" style="width:100%;">Сохранить</button>
+            `);
+            document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+                const val = parseFloat(document.getElementById('settingsLimit').value) || 0;
+                localStorage.setItem('dailyLimit_' + currentUser.id, val);
+                updateUI();
+                closeModal();
+            });
+        }
+
+        // --- ОБРАБОТЧИКИ ---
+        document.getElementById('registerBtn').addEventListener('click', () => {
+            const email = document.getElementById('regEmail').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            if (!email || !username) {
+                document.getElementById('regError').textContent = 'Заполните все поля';
+                return;
+            }
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref') || '';
+            const result = registerUser(email, username, ref);
+            if (result.error) {
+                document.getElementById('regError').textContent = result.error;
+                return;
+            }
+            // Успешно
+            document.getElementById('regError').textContent = '';
+            startApp();
+        });
+
+        function startApp() {
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+            loadUserLocalData();
+            updateUI();
+            renderAll();
+            // Показать platinum-вкладки, если есть подписка
+            const isPlat = currentUser.subLevel === 'platinum' || currentUser.subLevel === 'platinum_forever' || currentUser.subLevel === 'trial';
+            document.querySelectorAll('.platinum-only').forEach(el => {
+                el.style.display = isPlat ? 'block' : 'none';
+            });
+            document.querySelectorAll('.platinum-tab').forEach(el => {
+                el.style.display = isPlat ? 'inline-block' : 'none';
+            });
+            // Админ-кнопка
+            if (currentUser.username === 'admin') {
+                document.getElementById('adminNavBtn').style.display = 'inline-block';
+            }
+            // Таймер
+            updateTimer();
+        }
+
+        // --- НАВИГАЦИЯ ---
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const screen = btn.dataset.screen;
-                if (screen === 'admin') { openAdmin(); return; }
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.getElementById('screen-' + screen).classList.add('active');
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                if (screen === 'analytics' && data.subLevel !== 'free') { drawChart(); updateCatStats(); updateAdvStats(); }
+                document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+                document.getElementById('screen-' + screen).classList.remove('hidden');
+                if (screen === 'analytics') renderAnalytics();
                 if (screen === 'shop') renderShop();
-                if (screen === 'more') renderExtra();
-            });
-        });
-
-        // ------ АДМИНКА (локальная) ------
-        function isAdmin() {
-            // Для простоты админ тот, у кого имя пользователя совпадает с ADMIN_USERNAMES[0]
-            // или если в localStorage есть флаг admin
-            return data.userName === ADMIN_USERNAMES[0] || localStorage.getItem('admin_mode') === 'true';
-        }
-
-        function openAdmin() {
-            if (!isAdmin()) {
-                alert('Доступ только для администраторов.');
-                return;
-            }
-            const container = document.getElementById('adminUsersList');
-            container.innerHTML = `
-                <div class="admin-user-card">
-                    <div>
-                        <div>${data.userName} (ID: ${data.userId})</div>
-                        <div style="font-size:12px;">Подписка: ${data.subLevel} | Баланс: ${data.balance} ₽ | Монеты: ${data.coins}</div>
-                        <div style="font-size:11px; color:var(--hint);">Регистрация: ${data.registeredAt ? new Date(data.registeredAt).toLocaleDateString() : '—'} | Стрик: ${data.streak} дн.</div>
-                    </div>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins(100)">+100🪙</button>
-                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('pro')">PRO</button>
-                        <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('platinum')">Plat</button>
-                        <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('free')">Сброс</button>
-                    </div>
-                </div>
-                <p style="color:var(--hint); margin-top:12px;">В локальной версии отображаются только ваши данные.</p>
-            `;
-            document.getElementById('adminFullscreen').classList.add('active');
-        }
-
-        window.adminSetSub = function(lvl) {
-            if (lvl === 'free') { data.subLevel = 'free'; data.subExpiry = null; data.trialUsed = false; }
-            else {
-                data.subLevel = lvl;
-                data.subExpiry = lvl.includes('forever') ? Date.now() + 100*365*24*60*60*1000 : Date.now() + 30*24*60*60*1000;
-                if (lvl === 'trial') data.trialUsed = true;
-            }
-            saveData();
-            updateUI();
-            renderAll();
-            if (data.subLevel !== 'free') renderExtra();
-            openAdmin(); // обновить админку
-        };
-
-        window.adminAddCoins = function(amount) {
-            data.coins += amount;
-            saveData();
-            updateCoinsDisplay();
-            openAdmin();
-        };
-
-        document.getElementById('closeAdminFullscreen').addEventListener('click', () => {
-            document.getElementById('adminFullscreen').classList.remove('active');
-        });
-
-        // Показываем кнопку админа, если админ
-        if (isAdmin()) {
-            document.getElementById('adminNavBtn').style.display = 'flex';
-        }
-
-        // ------ ОБРАБОТЧИКИ ОСНОВНЫХ ДЕЙСТВИЙ ------
-        document.getElementById('openExpenseModal').addEventListener('click', () => openAdd('expense'));
-        document.getElementById('openIncomeModal').addEventListener('click', () => openAdd('income'));
-        document.getElementById('closeModal').addEventListener('click', () => document.getElementById('addModal').classList.remove('active'));
-
-        document.getElementById('submitTransaction').addEventListener('click', () => {
-            const a = parseFloat(document.getElementById('amountInput').value);
-            if (!a || a <= 0) return alert('Введите сумму');
-            if (!selectedCategory) return alert('Выберите категорию');
-            data.transactions.unshift({
-                type: currentType,
-                category: selectedCategory.name,
-                emoji: selectedCategory.emoji,
-                amount: a,
-                date: new Date().toISOString().split('T')[0]
-            });
-            data.balance += currentType === 'income' ? a : -a;
-            saveData();
-            renderAll();
-            updateUserLevel();
-            document.getElementById('addModal').classList.remove('active');
-        });
-
-        let currentType = 'expense', selectedCategory = null;
-
-        function openAdd(type) {
-            currentType = type;
-            selectedCategory = null;
-            document.getElementById('modalTitle').textContent = type === 'expense' ? 'Добавить расход' : 'Добавить доход';
-            document.getElementById('amountInput').value = '';
-            const grid = document.getElementById('categoryGrid');
-            grid.innerHTML = '';
-            const cats = type === 'expense' ? getExpenseCategories() : getIncomeCategories();
-            cats.forEach(cat => {
-                const d = document.createElement('div');
-                d.className = 'category-item';
-                d.innerHTML = `${cat.emoji}<div class="category-label">${cat.name}</div>`;
-                d.onclick = () => {
-                    grid.querySelectorAll('.category-item').forEach(e => e.classList.remove('selected'));
-                    d.classList.add('selected');
-                    selectedCategory = cat;
-                };
-                grid.appendChild(d);
-            });
-            document.getElementById('addModal').classList.add('active');
-        }
-
-        document.getElementById('viewAllBtn').addEventListener('click', () => {
-            renderTxList('allTransactionList', data.transactions);
-            document.getElementById('allTransactionsModal').classList.add('active');
-        });
-        document.getElementById('closeAllModal').addEventListener('click', () => document.getElementById('allTransactionsModal').classList.remove('active'));
-
-        document.getElementById('openSettings').addEventListener('click', () => {
-            document.getElementById('dailyLimitInput').value = data.dailyLimit || '';
-            document.getElementById('settingsModal').classList.add('active');
-        });
-        document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('active'));
-        document.getElementById('saveSettings').addEventListener('click', () => {
-            data.dailyLimit = parseFloat(document.getElementById('dailyLimitInput').value) || 0;
-            data.isDark = document.getElementById('themeToggle').checked;
-            applyTheme();
-            saveData();
-            document.getElementById('settingsModal').classList.remove('active');
-            renderAll();
-        });
-
-        // ------ ПОДПИСКИ ------
-        document.getElementById('trialBtn').addEventListener('click', () => {
-            if (data.trialUsed) return alert('Уже использован');
-            data.subLevel = 'trial';
-            data.subExpiry = Date.now() + 3*24*60*60*1000;
-            data.trialUsed = true;
-            saveData();
-            updateUI();
-            renderAll();
-            updateTimer();
-            alert('✅ Пробный Platinum на 3 дня!');
-        });
-        document.getElementById('buyProBtn').addEventListener('click', () => {
-            data.subLevel = 'pro';
-            data.subExpiry = Date.now() + 30*24*60*60*1000;
-            saveData();
-            updateUI();
-            renderAll();
-            updateTimer();
-            alert('✅ PRO на 30 дней!');
-        });
-        document.getElementById('buyPlatinumBtn').addEventListener('click', () => {
-            data.subLevel = 'platinum';
-            data.subExpiry = Date.now() + 30*24*60*60*1000;
-            saveData();
-            updateUI();
-            renderAll();
-            updateTimer();
-            alert('✅ Platinum на 30 дней!');
-        });
-        document.getElementById('buyForeverProBtn').addEventListener('click', () => {
-            data.subLevel = 'pro_forever';
-            data.subExpiry = Date.now() + 100*365*24*60*60*1000;
-            saveData();
-            updateUI();
-            renderAll();
-            updateTimer();
-            alert('✅ PRO навсегда!');
-        });
-        document.getElementById('buyForeverPlatinumBtn').addEventListener('click', () => {
-            data.subLevel = 'platinum_forever';
-            data.subExpiry = Date.now() + 100*365*24*60*60*1000;
-            saveData();
-            updateUI();
-            renderAll();
-            updateTimer();
-            alert('✅ Platinum навсегда!');
-        });
-
-        // ------ ТАЙМЕР ПОДПИСКИ ------
-        let timerInterval = null;
-        function updateTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            const box = document.getElementById('timerBox'), lab = document.getElementById('timerLabel'), val = document.getElementById('timerValue');
-            box.className = 'timer-box';
-            if (data.subLevel === 'trial') { box.classList.add('trial','active'); lab.textContent = 'Пробный Platinum'; }
-            else if (data.subLevel === 'pro') { box.classList.add('pro','active'); lab.textContent = 'PRO подписка'; }
-            else if (data.subLevel === 'platinum') { box.classList.add('platinum','active'); lab.textContent = 'Platinum подписка'; }
-            else if (data.subLevel === 'pro_forever' || data.subLevel === 'platinum_forever') { box.classList.add('forever','active'); lab.textContent = 'Вечная подписка'; }
-            else { box.classList.remove('active'); return; }
-            const tick = () => {
-                const rem = data.subExpiry - Date.now();
-                if (rem <= 0) {
-                    clearInterval(timerInterval);
-                    data.subLevel = 'free';
-                    data.subExpiry = null;
-                    saveData();
-                    updateUI();
-                    renderAll();
-                    alert('⏰ Подписка истекла');
-                    return;
+                if (screen === 'more') {
+                    // показать активную вкладку
+                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                    const activeTab = document.querySelector('.tab.active');
+                    if (activeTab) {
+                        document.getElementById('tab-' + activeTab.dataset.tab).classList.add('active');
+                    }
                 }
-                val.textContent = fmtTime(rem);
-            };
-            tick();
-            timerInterval = setInterval(tick, 1000);
-        }
-
-        // ------ СБРОС ------
-        document.getElementById('resetDataBtn').addEventListener('click', () => {
-            if (confirm('Сбросить все финансовые данные?')) {
-                data.balance = 0;
-                data.transactions = [];
-                data.dailyLimit = 0;
-                saveData();
-                renderAll();
-                alert('Финансы сброшены.');
-            }
+                if (screen === 'admin') renderAdminPanel();
+            });
         });
 
-        // ======== ЗАПУСК ========
-        initUser();
-        applyTheme();
-        updateCoinsDisplay();
-        updateUserLevel();
-        updateStreakDisplay();
-        updateReferralLink();
-        renderAll();
-        if (data.subLevel !== 'free') updateTimer();
-        if (data.subLevel === 'pro' || data.subLevel === 'pro_forever' || data.subLevel === 'platinum' || data.subLevel === 'platinum_forever' || data.subLevel === 'trial') renderExtra();
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                // Обновить контент вкладок
+                if (tab.dataset.tab === 'piggy') renderPiggy();
+                if (tab.dataset.tab === 'challenges') renderChallenges();
+                if (tab.dataset.tab === 'achievements') renderAchievements();
+                if (tab.dataset.tab === 'debts') renderDebts();
+                if (tab.dataset.tab === 'tools') renderRegular();
+                if (tab.dataset.tab === 'categories') renderCustomCategories();
+            });
+        });
 
-        // Вывод имени пользователя
-        document.getElementById('userName').textContent = data.userName;
-        document.getElementById('userAvatar').textContent = data.userName[0].toUpperCase();
+        document.getElementById('expenseBtn').addEventListener('click', () => openAddTransaction('expense'));
+        document.getElementById('incomeBtn').addEventListener('click', () => openAddTransaction('income'));
+        document.getElementById('settingsBtn').addEventListener('click', openSettings);
+        document.getElementById('inviteBtn').addEventListener('click', () => {
+            const link = window.location.origin + window.location.pathname + '?ref=' + currentUser.refCode;
+            navigator.clipboard.writeText(link).then(() => alert('Ссылка скопирована!')).catch(() => alert('Скопируйте вручную: ' + link));
+        });
+        document.getElementById('closeAdminBtn').addEventListener('click', () => {
+            document.querySelector('.nav-btn[data-screen="transactions"]').click();
+        });
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('Сбросить все финансовые данные?')) {
+                transactions = [];
+                currentUser.balance = 0;
+                saveUserLocalData();
+                updateUserOnServer(currentUser);
+                renderAll();
+                updateUI();
+                alert('Сброшено');
+            }
+        });
+        document.getElementById('viewAllBtn').addEventListener('click', () => {
+            openModal(`<div class="text-center" style="font-weight:600;font-size:18px;margin-bottom:12px;">Все операции</div><div id="allTxList"></div>`);
+            const container = document.getElementById('allTxList');
+            container.innerHTML = transactions.map(t =>
+                `<div class="transaction-item"><span>${t.emoji} ${t.category}</span><span style="color:${t.type==='income'?'#34c759':'#ff3b30'};">${t.type==='income'?'+':'-'}${t.amount} ₽</span></div>`
+            ).join('') || '<div class="empty-state">Нет записей</div>';
+        });
 
-        // Для демонстрации админки: если имя "admin" – показываем кнопку
-        if (isAdmin()) {
-            document.getElementById('adminNavBtn').style.display = 'flex';
-        }
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        (function init() {
+            const savedUser = getCurrentUser();
+            if (savedUser) {
+                currentUser = savedUser;
+                // Обновляем стрик
+                updateStreak(currentUser);
+                updateUserOnServer(currentUser);
+                startApp();
+            } else {
+                document.getElementById('registerScreen').classList.remove('hidden');
+                document.getElementById('mainScreen').classList.add('hidden');
+                // Проверка реферального параметра
+                const params = new URLSearchParams(window.location.search);
+                const ref = params.get('ref');
+                if (ref) {
+                    // можно показать сообщение
+                    console.log('Реферальный код:', ref);
+                }
+            }
+        })();
+
+        console.log('✅ Приложение запущено!');
     </script>
 </body>
 </html>
