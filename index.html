@@ -276,7 +276,6 @@
         .currency-option .label { font-size: 14px; font-weight: 500; }
         .currency-option .sign { font-size: 20px; }
 
-        /* Компактная кнопка закрытия в админ-панели */
         .admin-close-btn {
             background: var(--secondary-bg); color: var(--text);
             border: 1px solid var(--border); border-radius: 20px;
@@ -329,7 +328,7 @@
             <button class="btn btn-primary" id="openExpenseModal">➖ Расход</button>
             <button class="btn" id="openIncomeModal">➕ Доход</button>
         </div>
-        <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
+        <button class="btn btn-danger" id="resetDataBtn">🗑 Очистить операции</button>
         <!-- Пробная версия остаётся -->
         <div style="margin:12px 0;" id="trialBlock">
             <button class="trial-btn" id="trialBtn">🎁 Пробный Platinum на 3 дня</button>
@@ -605,29 +604,35 @@
             return result;
         }
 
+        // Оптимизированная синхронизация – вызывается редко
+        let syncTimeout = null;
         async function syncUserToServer() {
-            const uid = tg.initDataUnsafe.user.id;
-            const name = tg.initDataUnsafe.user.first_name || 'User';
-            try {
-                await apiFetch('update_user', {
-                    id: uid,
-                    first_name: name,
-                    balance: balance,
-                    coins: coins,
-                    stars: stars,
-                    sub: subLevel,
-                    sub_expiry: subExpiry ? new Date(subExpiry).toISOString() : null,
-                    trial_used: trialUsed,
-                    registered: registered,
-                    last_visit: lastVisit,
-                    streak: streak,
-                    referrer: referrer,
-                    registered_at: registeredAt,
-                    reward_day: rewardDay,
-                    last_reward: lastRewardDate,
-                    currency: currency
-                });
-            } catch(e) { console.warn('Sync failed:', e); }
+            if (syncTimeout) return; // уже запланирована
+            syncTimeout = setTimeout(async () => {
+                syncTimeout = null;
+                const uid = tg.initDataUnsafe.user.id;
+                const name = tg.initDataUnsafe.user.first_name || 'User';
+                try {
+                    await apiFetch('update_user', {
+                        id: uid,
+                        first_name: name,
+                        balance: balance,
+                        coins: coins,
+                        stars: stars,
+                        sub: subLevel,
+                        sub_expiry: subExpiry ? new Date(subExpiry).toISOString() : null,
+                        trial_used: trialUsed,
+                        registered: registered,
+                        last_visit: lastVisit,
+                        streak: streak,
+                        referrer: referrer,
+                        registered_at: registeredAt,
+                        reward_day: rewardDay,
+                        last_reward: lastRewardDate,
+                        currency: currency
+                    });
+                } catch(e) { console.warn('Sync failed:', e); }
+            }, 2000);
         }
 
         async function getAllUsers() {
@@ -676,7 +681,16 @@
             } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
         };
 
-        // ----- Сохранение локальных данных -----
+        // ----- Сохранение локальных данных (с debounce) -----
+        let saveTimeout = null;
+        function debounceSave(fn) {
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                saveTimeout = null;
+                await fn();
+            }, 500);
+        }
+
         async function saveFin() { await Promise.all([cSet(KEY_BAL,balance),cSet(KEY_TX,JSON.stringify(transactions)),cSet(KEY_LIM,dailyLimit),cSet(KEY_DARK,isDark)]); }
         async function saveSub() { await Promise.all([cSet(KEY_SUB_LVL,subLevel),cSet(KEY_SUB_EXP,subExpiry||0),cSet(KEY_TRIAL,trialUsed)]); }
         async function savePlat() { await Promise.all([cSet(KEY_PIG,JSON.stringify(piggyBanks)),cSet(KEY_ACH,JSON.stringify(achievements)),cSet(KEY_CHAL,JSON.stringify(challenges)),cSet(KEY_DEBT,JSON.stringify(debts)),cSet(KEY_REG,JSON.stringify(regularPayments)),cSet(KEY_COINS,coins)]); }
@@ -737,7 +751,7 @@
             lastRewardDate = lastRewardVal || null;
             currency = curr || 'RUB';
 
-            // Получаем данные с сервера
+            // Получаем данные с сервера (фоном)
             const uid = tg.initDataUnsafe.user.id;
             try {
                 const allUsers = await getAllUsers();
@@ -778,8 +792,8 @@
                 await checkStreakAchievements();
             }
 
-            // Сохраняем локально и синхронизируем с сервером
-            await saveFin(); await saveSub(); await savePlat(); await saveTickets(); await saveRegistration(); await saveStars(); await saveCurrency();
+            // Сохраняем локально и синхронизируем с сервером (один раз)
+            await Promise.all([saveFin(), saveSub(), savePlat(), saveTickets(), saveRegistration(), saveStars(), saveCurrency()]);
             await syncUserToServer();
 
             // Отображаем UI
@@ -1471,7 +1485,7 @@
             }
         }, 3000);
 
-        // ----- АДМИН-ПАНЕЛЬ -----
+        // ----- АДМИН-ПАНЕЛЬ (улучшена) -----
         async function loadAllUsers() {
             const container = document.getElementById('allUsersList');
             container.innerHTML = '<p>Загрузка...</p>';
@@ -1479,7 +1493,27 @@
                 const allUsers = await getAllUsers();
                 const entries = Object.entries(allUsers);
                 if (entries.length === 0) {
-                    container.innerHTML = '<p style="color:var(--hint);">Нет пользователей</p>';
+                    // Показываем хотя бы текущего пользователя
+                    const uid = tg.initDataUnsafe.user.id;
+                    const name = tg.initDataUnsafe.user.first_name || 'User';
+                    container.innerHTML = `
+                        <div class="section-title">Пользователи (только вы)</div>
+                        <div class="admin-user-card">
+                            <div>
+                                <div>${name} (ID: ${uid})</div>
+                                <div style="font-size:12px;">Подписка: ${subLevel} | Баланс: ${balance} ₽ | Монеты: ${coins} | ⭐${stars}</div>
+                            </div>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','pro')">PRO 30д</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','platinum')">Plat 30д</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','pro_forever')">PRO ∞</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button>
+                                <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button>
+                                <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${uid}',200)">+200⭐</button>
+                            </div>
+                        </div>
+                    `;
                     return;
                 }
                 entries.sort((a,b) => {
@@ -1648,7 +1682,6 @@
             document.getElementById('admin-users').style.display = 'block';
         }
 
-        // Компактная кнопка закрытия
         document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
         document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()) openAdminFullscreen(); });
 
@@ -1759,18 +1792,18 @@
             tg.showAlert(`🔮 Прогноз: ~-${formatCurrency(avg*30)} в месяц`);
         });
 
+        // Переделана кнопка сброса — только очистка финансов
         document.getElementById('resetDataBtn').addEventListener('click', ()=>{
-            tg.showPopup({
-                title:'Сброс',
-                message:'Что сбросить?',
-                buttons:[
-                    {type:'default',text:'Только финансы',id:'fin'},
-                    {type:'destructive',text:'Всё включая подписку',id:'all'},
-                    {type:'cancel',text:'Отмена'}
-                ]
-            }, async (id)=>{
-                if(id==='fin'){ balance=0; transactions=[]; dailyLimit=0; await saveFin(); await syncUserToServer(); renderAll(); tg.showAlert('Финансы сброшены'); }
-                else if(id==='all'){ balance=0; transactions=[]; dailyLimit=0; subLevel='free'; subExpiry=null; trialUsed=false; piggyBanks=[]; achievements=[]; challenges=[]; debts=[]; regularPayments=[]; coins=0; stars=0; rewardDay=1; lastRewardDate=null; customCategories={expense:[],income:[]}; await saveCustomCategories(); await Promise.all([saveFin(), saveSub(), savePlat(), saveStars()]); await syncUserToServer(); updateUI(); renderAll(); tg.showAlert('Всё сброшено'); }
+            tg.showConfirm('Очистить все операции и обнулить баланс? Подписка, монеты и звёзды останутся.', async (ok) => {
+                if (!ok) return;
+                balance = 0;
+                transactions = [];
+                dailyLimit = 0;
+                await saveFin();
+                await syncUserToServer();
+                renderAll();
+                updateUserLevel();
+                tg.showAlert('Финансы сброшены (операции удалены, баланс обнулён)');
             });
         });
 
