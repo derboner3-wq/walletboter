@@ -275,6 +275,15 @@
         .currency-option.selected { border-color: var(--button); background: rgba(0,122,255,0.1); }
         .currency-option .label { font-size: 14px; font-weight: 500; }
         .currency-option .sign { font-size: 20px; }
+
+        /* Компактная кнопка закрытия в админ-панели */
+        .admin-close-btn {
+            background: var(--secondary-bg); color: var(--text);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 6px 14px; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .admin-close-btn:hover { background: var(--border); }
     </style>
 </head>
 <body>
@@ -404,7 +413,7 @@
     <div id="adminFullscreen" class="admin-fullscreen">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2>🛡 Админ-панель</h2>
-            <button class="btn btn-danger" id="closeAdminFullscreen" style="flex:none; padding:10px 16px;">Закрыть</button>
+            <button class="admin-close-btn" id="closeAdminFullscreen">✕ Закрыть</button>
         </div>
         <div class="tabs" id="adminTabs">
             <button class="tab active" data-atab="users">Пользователи</button>
@@ -976,7 +985,6 @@
         }
 
         function parseCurrencyInput(value) {
-            // Вводимая сумма в текущей валюте, пересчитываем в рубли
             const rate = getRate();
             return parseFloat(value) * rate;
         }
@@ -1640,6 +1648,7 @@
             document.getElementById('admin-users').style.display = 'block';
         }
 
+        // Компактная кнопка закрытия
         document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
         document.getElementById('userAvatar').addEventListener('click',()=>{ if(isAdmin()) openAdminFullscreen(); });
 
