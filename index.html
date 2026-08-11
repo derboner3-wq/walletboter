@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кошелёк PRO</title>
+    <title>Кошелёк PRO (CloudStorage)</title>
     <style>
-        /* Все стили из предыдущих версий (я их сократил для экономии места, но они есть) */
+        /* Базовые стили (сокращены для экономии места, но функционал полный) */
         :root {
             --bg: #ffffff;
             --text: #1a1a1a;
@@ -218,6 +218,13 @@
             font-size: 18px;
             color: var(--hint);
         }
+        .admin-user-card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .admin-user-card .btn { margin: 4px; }
     </style>
 </head>
 <body>
@@ -225,7 +232,7 @@
     <div id="loadingScreen">Загрузка...</div>
 
     <div id="mainScreen" style="display:none;">
-        <!-- Шапка (как в предыдущих версиях, сокращу для краткости) -->
+        <!-- Шапка -->
         <div class="flex" style="justify-content:space-between; margin-bottom:16px;">
             <div class="flex">
                 <div id="userAvatar" style="width:44px;height:44px;border-radius:50%;background:var(--button);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;">U</div>
@@ -285,7 +292,7 @@
             <button class="nav-btn" id="adminNavBtn" style="display:none;" data-screen="admin">🛡</button>
         </div>
 
-        <!-- Вкладки (сокращены, но функционал полный) -->
+        <!-- Вкладки -->
         <div id="screen-transactions" class="screen active">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                 <span style="font-weight:600;">Операции</span>
@@ -354,7 +361,7 @@
                 <div style="margin-top:12px;">
                     <button class="btn" onclick="adminAddCoins(100)">+100🪙 всем</button>
                     <button class="btn" onclick="adminAddStars(50)">+50⭐ всем</button>
-                    <button class="btn" onclick="adminResetAll()">Сбросить всё</button>
+                    <button class="btn btn-danger" onclick="adminResetAll()">Сбросить всё</button>
                 </div>
             </div>
         </div>
@@ -370,8 +377,7 @@
 
     <script>
         // ==========================================================
-        //  ПОЛНАЯ ЛОКАЛЬНАЯ ВЕРСИЯ С TELEGRAM CloudStorage
-        //  НЕТ СЕРВЕРА, НЕТ ХОСТИНГА, ВСЁ В ОДНОМ ФАЙЛЕ
+        //  КЛИЕНТСКАЯ ВЕРСИЯ БЕЗ СЕРВЕРА (CloudStorage / localStorage)
         // ==========================================================
 
         const APP_KEY = 'kosh_pro_data';
@@ -379,9 +385,8 @@
         let currentUser = null;
         let telegramId = null;
 
-        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        // ===== ЗАГРУЗКА / СОХРАНЕНИЕ =====
         async function loadData() {
-            // Пытаемся загрузить из CloudStorage
             if (window.Telegram && window.Telegram.WebApp) {
                 const tg = window.Telegram.WebApp;
                 tg.ready();
@@ -389,7 +394,6 @@
                 if (user) {
                     telegramId = String(user.id);
                 }
-                // Загружаем данные
                 return new Promise((resolve) => {
                     tg.CloudStorage.getItem(APP_KEY, (err, value) => {
                         if (err || !value) {
@@ -404,12 +408,10 @@
                     });
                 });
             } else {
-                // Если не в Telegram – используем localStorage
                 const stored = localStorage.getItem(APP_KEY);
                 if (stored) {
                     try { return JSON.parse(stored); } catch {}
                 }
-                // Генерируем временный ID
                 telegramId = 'guest_' + Date.now();
                 return null;
             }
@@ -428,14 +430,13 @@
             }
         }
 
-        // ===== АВТОЛОГИН =====
+        // ===== АВТОВХОД =====
         async function autoLogin() {
             const stored = await loadData();
             if (stored && stored[telegramId]) {
                 data = stored;
                 currentUser = data[telegramId];
             } else {
-                // Создаём нового пользователя
                 const today = new Date().toISOString().split('T')[0];
                 currentUser = {
                     username: 'User_' + telegramId,
@@ -469,18 +470,33 @@
                 currentUser.lastVisit = today;
                 await saveData(data);
             }
-            // Отображаем UI
+            // Показываем UI
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'block';
             renderAll();
             updateUI();
             updateTimer();
             if (currentUser.subLevel !== 'free') renderExtra();
-            // Админ-кнопка показывается только после ввода пароля
+            // Если есть реферальный параметр в URL
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+            if (ref && ref !== telegramId && !currentUser.referrer) {
+                // Бонус новому пользователю
+                currentUser.coins += 50;
+                currentUser.stars += 50;
+                currentUser.referrer = ref;
+                await saveData(data);
+                updateUI();
+                alert('🎉 Вы пришли по реферальной ссылке! +50🪙 и +50⭐');
+                // Удаляем ref из URL
+                const url = new URL(window.location);
+                url.searchParams.delete('ref');
+                window.history.replaceState({}, '', url);
+            }
         }
 
         // ===== АДМИН-ПАНЕЛЬ (по паролю) =====
-        const ADMIN_PASSWORD = 'admin'; // можно сменить
+        const ADMIN_PASSWORD = 'admin';
 
         document.getElementById('adminLoginBtn').addEventListener('click', () => {
             const pass = document.getElementById('adminPasswordInput').value;
@@ -587,18 +603,646 @@
             }
         };
 
-        // ===== ОСТАЛЬНЫЕ ФУНКЦИИ (полностью идентичны предыдущей локальной версии) =====
-        // Я их вставлю кратко, чтобы не раздувать ответ, но они есть.
-        // Если нужно – дам полный код отдельно.
+        // ===== ОБНОВЛЕНИЕ UI =====
+        function updateUI() {
+            if (!currentUser) return;
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userAvatar').textContent = currentUser.username[0].toUpperCase();
+            document.getElementById('userIdDisplay').textContent = telegramId;
+            document.getElementById('streakDisplay').textContent = '🔥 ' + currentUser.streak;
+            document.getElementById('streakDisplay2').textContent = currentUser.streak;
+            document.getElementById('coinsDisplay').textContent = '🪙 ' + currentUser.coins;
+            document.getElementById('starsDisplay').textContent = '⭐ ' + currentUser.stars;
+            document.getElementById('balanceDisplay').textContent = currentUser.balance.toLocaleString() + ' ₽';
 
-        // Здесь идут renderAll(), updateUI(), updateTimer(), renderExtra(),
-        // renderPiggy(), renderChallenges(), renderShop(), renderAchievements(),
-        // renderDebts(), renderRegular(), renderCustomCategories(),
-        // openAddModal(), getExpenseCategories(), getIncomeCategories(),
-        // openSettings(), syncUser() (но в этой версии синхронизация не нужна, данные уже в CloudStorage).
+            const subInfo = document.getElementById('subInfo');
+            if (currentUser.subLevel === 'free') subInfo.textContent = '❌ Нет подписки';
+            else if (currentUser.subLevel === 'trial') subInfo.textContent = '🟢 Пробный Platinum (3 дня)';
+            else if (currentUser.subLevel === 'pro') subInfo.textContent = '⭐ PRO';
+            else if (currentUser.subLevel === 'pro_forever') subInfo.textContent = '⭐ PRO навсегда';
+            else if (currentUser.subLevel === 'platinum') subInfo.textContent = '💎 Platinum';
+            else if (currentUser.subLevel === 'platinum_forever') subInfo.textContent = '💎 Platinum навсегда';
 
-        // Запуск
-        autoLogin();
+            const limit = currentUser.dailyLimit || 0;
+            const today = new Date().toISOString().split('T')[0];
+            const todayExp = (currentUser.transactions || []).filter(t => t.type === 'expense' && t.date === today).reduce((s, t) => s + t.amount, 0);
+            document.getElementById('limitText').textContent = limit ? `Дневной лимит: ${limit} ₽` : 'Лимит: не задан';
+            document.getElementById('limitStatus').style.display = (limit && todayExp > limit) ? 'inline' : 'none';
+
+            const refLink = window.location.origin + window.location.pathname + '?ref=' + currentUser.refCode;
+            document.getElementById('referralLinkDisplay').innerHTML = 'Ваша ссылка:<br><span style="font-size:12px;">' + refLink + '</span>';
+        }
+
+        // ===== ОТРИСОВКА ТРАНЗАКЦИЙ =====
+        function renderTxList(id, list) {
+            const ul = document.getElementById(id);
+            if (!ul) return;
+            ul.innerHTML = list.length ? '' : '<li class="empty-state">Нет записей</li>';
+            list.forEach(t => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${t.emoji} ${t.category}</span><span style="color:${t.type==='income'?'#34c759':'#ff3b30'};">${t.type==='income'?'+':'-'}${t.amount} ₽</span>`;
+                ul.appendChild(li);
+            });
+        }
+
+        function renderAll() {
+            const tx = currentUser.transactions || [];
+            renderTxList('transactionList', tx.slice(0, 5));
+            renderTxList('allTransactionList', tx);
+            if (currentUser.subLevel !== 'free') {
+                drawChart();
+                updateCatStats();
+                updateAdvStats();
+            }
+        }
+
+        // ===== ГРАФИКИ =====
+        function drawChart() {
+            const canvas = document.getElementById('expenseChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const tx = (currentUser.transactions || []).filter(t => t.type === 'expense');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!tx.length) {
+                ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--hint');
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Нет расходов', canvas.width/2, canvas.height/2);
+                return;
+            }
+            const totals = {};
+            tx.forEach(t => {
+                if (!totals[t.category]) totals[t.category] = { emoji: t.emoji, total: 0 };
+                totals[t.category].total += t.amount;
+            });
+            const total = Object.values(totals).reduce((s, c) => s + c.total, 0);
+            const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FF8C00','#A9A9A9'];
+            let start = -Math.PI/2, ci = 0, cx = canvas.width/2, cy = canvas.height/2, r = Math.min(cx, cy) - 10;
+            Object.values(totals).forEach(cat => {
+                const angle = (cat.total / total) * 2 * Math.PI;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, start, start + angle);
+                ctx.closePath();
+                ctx.fillStyle = colors[ci++ % colors.length];
+                ctx.fill();
+                start += angle;
+            });
+        }
+
+        function updateCatStats() {
+            const c = document.getElementById('categoryStats');
+            if (!c) return;
+            const tx = (currentUser.transactions || []).filter(t => t.type === 'expense');
+            if (!tx.length) { c.innerHTML = ''; return; }
+            const totals = {};
+            tx.forEach(t => {
+                if (!totals[t.category]) totals[t.category] = { emoji: t.emoji, total: 0 };
+                totals[t.category].total += t.amount;
+            });
+            const total = Object.values(totals).reduce((s, c) => s + c.total, 0);
+            c.innerHTML = Object.entries(totals).map(([cat, d]) =>
+                `<div><div>${d.emoji}</div><div>${Math.round((d.total/total)*100)}%</div></div>`
+            ).join('');
+        }
+
+        function updateAdvStats() {
+            const tx = (currentUser.transactions || []).filter(t => t.type === 'expense');
+            if (!tx.length) {
+                document.getElementById('avgDaily').textContent = '0 ₽';
+                document.getElementById('topCategory').textContent = '-';
+                return;
+            }
+            const days = Math.max(1, Math.ceil((Date.now() - new Date(tx[tx.length-1].date).getTime()) / 86400000));
+            const avg = tx.reduce((s, t) => s + t.amount, 0) / days;
+            document.getElementById('avgDaily').textContent = Math.round(avg) + ' ₽';
+            const cats = {};
+            tx.forEach(t => cats[t.category] = (cats[t.category] || 0) + t.amount);
+            const top = Object.entries(cats).sort((a,b) => b[1] - a[1])[0];
+            document.getElementById('topCategory').textContent = top ? `${top[0]} (${top[1]} ₽)` : '-';
+        }
+
+        // ===== ТАЙМЕР ПОДПИСКИ =====
+        let timerInterval = null;
+        function updateTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            const timerEl = document.getElementById('subTimer');
+            if (!currentUser.subExpiry) {
+                timerEl.textContent = '';
+                return;
+            }
+            const tick = () => {
+                const rem = new Date(currentUser.subExpiry).getTime() - Date.now();
+                if (rem <= 0) {
+                    currentUser.subLevel = 'free';
+                    currentUser.subExpiry = null;
+                    saveData(data);
+                    timerEl.textContent = 'Подписка истекла';
+                    clearInterval(timerInterval);
+                    updateUI();
+                    return;
+                }
+                const d = Math.floor(rem/86400000);
+                const h = Math.floor((rem%86400000)/3600000);
+                const m = Math.floor((rem%3600000)/60000);
+                const s = Math.floor((rem%60000)/1000);
+                timerEl.textContent = `Осталось: ${d}д ${h}ч ${m}м ${s}с`;
+            };
+            tick();
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        // ===== РЕНДЕР ДОПОЛНИТЕЛЬНЫХ ВКЛАДОК =====
+        function renderExtra() {
+            renderPiggy();
+            renderChallenges();
+            renderShop();
+            if (currentUser.subLevel === 'platinum' || currentUser.subLevel === 'platinum_forever' || currentUser.subLevel === 'trial') {
+                renderAchievements();
+                renderDebts();
+                renderRegular();
+                renderCustomCategories();
+            }
+            const isPlat = (currentUser.subLevel === 'platinum' || currentUser.subLevel === 'platinum_forever' || currentUser.subLevel === 'trial');
+            document.querySelectorAll('.platinum-only').forEach(el => {
+                el.style.display = isPlat ? '' : 'none';
+            });
+        }
+
+        // ===== КОПИЛКИ =====
+        function renderPiggy() {
+            const c = document.getElementById('piggyList');
+            const piggies = currentUser.piggyBanks || [];
+            c.innerHTML = piggies.length ? '' : '<div class="empty-state">Нет копилок</div>';
+            piggies.forEach((p, i) => {
+                const pct = Math.min(100, Math.round((p.saved / p.target) * 100));
+                c.innerHTML += `<div class="card"><div style="display:flex;justify-content:space-between;"><b>${p.name}</b><div><button class="btn" onclick="editPiggy(${i})">✏️</button><button class="btn btn-danger" onclick="delPiggy(${i})">🗑️</button></div></div><div>${p.saved}/${p.target} ₽ (${pct}%)</div><div style="height:8px;background:var(--border);border-radius:4px;"><div style="width:${pct}%;height:100%;background:#34c759;border-radius:4px;"></div></div><div style="display:flex;gap:8px;margin-top:8px;"><input type="number" id="pa_${i}" placeholder="Сумма" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);"><button class="btn btn-primary" onclick="addPig(${i})">+</button></div></div>`;
+            });
+        }
+        window.editPiggy = function(i) {
+            const n = prompt('Название:', currentUser.piggyBanks[i].name);
+            if (n) {
+                currentUser.piggyBanks[i].name = n;
+                saveData(data);
+                renderPiggy();
+            }
+        };
+        window.delPiggy = function(i) {
+            if (confirm('Удалить?')) {
+                currentUser.piggyBanks.splice(i,1);
+                saveData(data);
+                renderPiggy();
+            }
+        };
+        window.addPig = function(i) {
+            const inp = document.getElementById('pa_'+i);
+            const a = parseFloat(inp.value);
+            if (!a || a <= 0) return;
+            if (currentUser.balance < a) return alert('Недостаточно средств');
+            currentUser.piggyBanks[i].saved += a;
+            currentUser.balance -= a;
+            if (!currentUser.transactions) currentUser.transactions = [];
+            currentUser.transactions.unshift({ type:'expense', category:'🐷 Копилка', emoji:'🐷', amount:a, date:new Date().toISOString().split('T')[0] });
+            saveData(data);
+            renderAll();
+            renderPiggy();
+            updateUI();
+            inp.value = '';
+        };
+        document.getElementById('addPiggyBtn').addEventListener('click', () => openModal('piggyModal'));
+
+        // ===== ЧЕЛЛЕНДЖИ =====
+        function renderChallenges() {
+            const c = document.getElementById('challengesList');
+            const chals = currentUser.challenges || [];
+            c.innerHTML = chals.length ? '' : '<div class="empty-state">Нет челленджей</div>';
+            chals.forEach((ch, i) => {
+                const left = ch.days - ch.progress;
+                c.innerHTML += `<div class="card"><b>${ch.name}</b> — награда ${ch.reward}🪙<br>День ${ch.progress}/${ch.days} ${left>0?'('+left+' осталось)':'✅ Завершён!'}<div style="height:6px;background:var(--border);border-radius:3px;margin:6px 0;"><div style="width:${(ch.progress/ch.days)*100}%;height:100%;background:gold;border-radius:3px;"></div></div>${left>0?`<button class="btn btn-primary" onclick="progChal(${i})">Отметить день</button>`:''}${!left&&!ch.completed?`<button class="btn btn-gold" onclick="claimChal(${i})">Получить награду</button>`:''}</div>`;
+            });
+        }
+        window.progChal = function(i) {
+            if (currentUser.challenges[i].progress < currentUser.challenges[i].days) {
+                currentUser.challenges[i].progress++;
+                saveData(data);
+                renderChallenges();
+            }
+        };
+        window.claimChal = function(i) {
+            if (!currentUser.challenges[i].completed) {
+                currentUser.challenges[i].completed = true;
+                currentUser.coins += currentUser.challenges[i].reward;
+                saveData(data);
+                renderChallenges();
+                updateUI();
+                alert(`+${currentUser.challenges[i].reward}🪙`);
+            }
+        };
+        document.getElementById('addChallengeBtn').addEventListener('click', () => openModal('challengeModal'));
+
+        // ===== МАГАЗИН =====
+        const shopItems = [
+            { id: 'pro', name: '⭐ PRO (30 дней)', desc: 'Аналитика + PRO-категории', price: 500, action: 'pro', duration: 30 },
+            { id: 'platinum', name: '💎 Platinum (30 дней)', desc: 'Все функции', price: 1000, action: 'platinum', duration: 30 },
+            { id: 'pro_forever', name: '⭐ PRO навсегда', desc: 'Без ограничений', price: 1500, action: 'pro_forever', duration: 36500 },
+            { id: 'platinum_forever', name: '💎 Platinum навсегда', desc: 'Все функции навсегда', price: 2500, action: 'platinum_forever', duration: 36500 },
+            { id: 'stars_100', name: '⭐ 100 звёзд', desc: 'Дополнительная валюта', price: 200, action: 'stars', amount: 100 },
+        ];
+
+        function renderShop() {
+            const c = document.getElementById('shopList');
+            c.innerHTML = shopItems.map(it =>
+                `<div class="card" style="display:flex;justify-content:space-between;align-items:center;"><div><b>${it.name}</b><br><span style="font-size:12px;">${it.desc}</span></div><button class="btn btn-primary" onclick="buyShop('${it.id}')">${it.price} 🪙</button></div>`
+            ).join('');
+        }
+
+        window.buyShop = function(id) {
+            const item = shopItems.find(i => i.id === id);
+            if (!item) return;
+            if (currentUser.coins < item.price) return alert('Недостаточно монет');
+            if (!confirm(`Купить "${item.name}"?`)) return;
+
+            currentUser.coins -= item.price;
+            if (item.action === 'stars') {
+                currentUser.stars = (currentUser.stars || 0) + item.amount;
+            } else {
+                const duration = item.duration || 30;
+                currentUser.subLevel = item.action;
+                const now = Date.now();
+                currentUser.subExpiry = now + duration * 24 * 60 * 60 * 1000;
+                if (item.action === 'pro_forever' || item.action === 'platinum_forever') {
+                    currentUser.subExpiry = now + 100 * 365 * 24 * 60 * 60 * 1000;
+                }
+            }
+            saveData(data);
+            updateUI();
+            renderShop();
+            if (currentUser.subLevel !== 'free') renderExtra();
+            alert('Покупка совершена!');
+        };
+
+        // ===== ТРОФЕИ =====
+        function renderAchievements() {
+            const c = document.getElementById('achievementsList');
+            const ach = currentUser.achievements || [];
+            c.innerHTML = ach.length ? ach.map(a =>
+                `<div class="card">${a.icon||'🏆'} ${a.name} (${new Date(a.date).toLocaleDateString()})</div>`
+            ).join('') : '<div class="empty-state">Нет трофеев</div>';
+        }
+
+        // ===== ДОЛГИ =====
+        function renderDebts() {
+            const c = document.getElementById('debtsList');
+            const debts = currentUser.debts || [];
+            c.innerHTML = debts.length ? debts.map((d,i) =>
+                `<div class="card" style="display:flex;justify-content:space-between;"><div>${d.person} ${d.type==='owed'?'должен мне':'я должен'} ${d.amount} ₽</div><button class="btn btn-danger" onclick="delDebt(${i})">✕</button></div>`
+            ).join('') : '<div class="empty-state">Нет долгов</div>';
+        }
+        window.delDebt = function(i) {
+            currentUser.debts.splice(i,1);
+            saveData(data);
+            renderDebts();
+        };
+        document.getElementById('addDebtBtn').addEventListener('click', () => openModal('debtModal'));
+
+        // ===== РЕГУЛЯРНЫЕ ПЛАТЕЖИ =====
+        function renderRegular() {
+            const c = document.getElementById('regularPaymentsList');
+            const regs = currentUser.regularPayments || [];
+            c.innerHTML = regs.length ? regs.map((p,i) =>
+                `<div class="card" style="display:flex;justify-content:space-between;"><div>${p.name} ${p.amount} ₽ (${p.period==='weekly'?'еженедельно':'ежемесячно'})</div><button class="btn btn-danger" onclick="delReg(${i})">✕</button></div>`
+            ).join('') : '';
+        }
+        window.delReg = function(i) {
+            currentUser.regularPayments.splice(i,1);
+            saveData(data);
+            renderRegular();
+        };
+        document.getElementById('addRegularBtn').addEventListener('click', () => openModal('regularModal'));
+
+        // ===== СВОИ КАТЕГОРИИ =====
+        function renderCustomCategories() {
+            const c = document.getElementById('customCategoriesList');
+            const cats = currentUser.customCategories || { expense: [], income: [] };
+            let html = '<div style="font-weight:600;">Расходы</div>';
+            cats.expense.forEach((cat, i) => {
+                html += `<div class="card" style="display:flex;justify-content:space-between;"><span>${cat.emoji} ${cat.name}</span><button class="btn btn-danger" onclick="delCat('expense',${i})">✕</button></div>`;
+            });
+            html += '<div style="font-weight:600;margin-top:12px;">Доходы</div>';
+            cats.income.forEach((cat, i) => {
+                html += `<div class="card" style="display:flex;justify-content:space-between;"><span>${cat.emoji} ${cat.name}</span><button class="btn btn-danger" onclick="delCat('income',${i})">✕</button></div>`;
+            });
+            c.innerHTML = html || '<div class="empty-state">Нет своих категорий</div>';
+        }
+        window.delCat = function(type, i) {
+            currentUser.customCategories[type].splice(i,1);
+            saveData(data);
+            renderCustomCategories();
+        };
+        document.getElementById('addCategoryBtn').addEventListener('click', () => openModal('categoryModal'));
+
+        // ===== МОДАЛКИ =====
+        function openModal(type) {
+            const overlay = document.getElementById('modal-overlay');
+            const body = document.getElementById('modal-body');
+            overlay.style.display = 'flex';
+            let html = '';
+            if (type === 'piggyModal') {
+                html = `
+                    <div style="font-weight:600;margin-bottom:12px;">🐷 Новая копилка</div>
+                    <input type="text" id="piggyNameInput" class="input-field" placeholder="Название">
+                    <input type="number" id="piggyTargetInput" class="input-field" placeholder="Цель (₽)">
+                    <button class="btn btn-primary" id="savePiggyBtn2" style="width:100%;">Создать</button>
+                `;
+            } else if (type === 'challengeModal') {
+                html = `
+                    <div style="font-weight:600;margin-bottom:12px;">🎯 Новый челлендж</div>
+                    <input type="text" id="chalNameInput" class="input-field" placeholder="Название">
+                    <input type="number" id="chalDaysInput" class="input-field" placeholder="Дней">
+                    <input type="number" id="chalRewardInput" class="input-field" placeholder="Награда (монет)" value="50">
+                    <button class="btn btn-primary" id="saveChalBtn" style="width:100%;">Создать</button>
+                `;
+            } else if (type === 'debtModal') {
+                html = `
+                    <div style="font-weight:600;margin-bottom:12px;">💸 Добавить долг</div>
+                    <input type="text" id="debtPersonInput" class="input-field" placeholder="Кому/От кого">
+                    <input type="number" id="debtAmountInput" class="input-field" placeholder="Сумма">
+                    <select id="debtTypeInput" class="input-field">
+                        <option value="owed">Мне должны</option>
+                        <option value="paid">Я должен</option>
+                    </select>
+                    <button class="btn btn-primary" id="saveDebtBtn2" style="width:100%;">Добавить</button>
+                `;
+            } else if (type === 'regularModal') {
+                html = `
+                    <div style="font-weight:600;margin-bottom:12px;">📅 Регулярный платёж</div>
+                    <input type="text" id="regNameInput" class="input-field" placeholder="Название">
+                    <input type="number" id="regAmountInput" class="input-field" placeholder="Сумма">
+                    <select id="regPeriodInput" class="input-field">
+                        <option value="weekly">Раз в неделю</option>
+                        <option value="monthly">Раз в месяц</option>
+                    </select>
+                    <button class="btn btn-primary" id="saveRegBtn" style="width:100%;">Добавить</button>
+                `;
+            } else if (type === 'categoryModal') {
+                html = `
+                    <div style="font-weight:600;margin-bottom:12px;">📁 Новая категория</div>
+                    <input type="text" id="catNameInput" class="input-field" placeholder="Название">
+                    <input type="text" id="catEmojiInput" class="input-field" placeholder="Эмодзи (например, 🎨)">
+                    <select id="catTypeInput" class="input-field">
+                        <option value="expense">Расход</option>
+                        <option value="income">Доход</option>
+                    </select>
+                    <button class="btn btn-primary" id="saveCatBtn" style="width:100%;">Добавить</button>
+                `;
+            }
+            body.innerHTML = html;
+
+            if (type === 'piggyModal') {
+                document.getElementById('savePiggyBtn2').addEventListener('click', () => {
+                    const name = document.getElementById('piggyNameInput').value;
+                    const target = parseFloat(document.getElementById('piggyTargetInput').value);
+                    if (!name || !target) return alert('Заполните поля');
+                    if (!currentUser.piggyBanks) currentUser.piggyBanks = [];
+                    currentUser.piggyBanks.push({ name, target, saved: 0, emoji: '🐷' });
+                    saveData(data);
+                    renderPiggy();
+                    closeModal();
+                });
+            } else if (type === 'challengeModal') {
+                document.getElementById('saveChalBtn').addEventListener('click', () => {
+                    const name = document.getElementById('chalNameInput').value;
+                    const days = parseInt(document.getElementById('chalDaysInput').value);
+                    const reward = parseInt(document.getElementById('chalRewardInput').value) || 50;
+                    if (!name || !days) return alert('Заполните поля');
+                    if (!currentUser.challenges) currentUser.challenges = [];
+                    currentUser.challenges.push({ name, days, progress: 0, reward, completed: false });
+                    saveData(data);
+                    renderChallenges();
+                    closeModal();
+                });
+            } else if (type === 'debtModal') {
+                document.getElementById('saveDebtBtn2').addEventListener('click', () => {
+                    const person = document.getElementById('debtPersonInput').value;
+                    const amount = parseFloat(document.getElementById('debtAmountInput').value);
+                    const type = document.getElementById('debtTypeInput').value;
+                    if (!person || !amount) return alert('Заполните поля');
+                    if (!currentUser.debts) currentUser.debts = [];
+                    currentUser.debts.push({ person, amount, type });
+                    saveData(data);
+                    renderDebts();
+                    closeModal();
+                });
+            } else if (type === 'regularModal') {
+                document.getElementById('saveRegBtn').addEventListener('click', () => {
+                    const name = document.getElementById('regNameInput').value;
+                    const amount = parseFloat(document.getElementById('regAmountInput').value);
+                    const period = document.getElementById('regPeriodInput').value;
+                    if (!name || !amount) return alert('Заполните поля');
+                    if (!currentUser.regularPayments) currentUser.regularPayments = [];
+                    currentUser.regularPayments.push({ name, amount, period });
+                    saveData(data);
+                    renderRegular();
+                    closeModal();
+                });
+            } else if (type === 'categoryModal') {
+                document.getElementById('saveCatBtn').addEventListener('click', () => {
+                    const name = document.getElementById('catNameInput').value;
+                    const emoji = document.getElementById('catEmojiInput').value || '📌';
+                    const type = document.getElementById('catTypeInput').value;
+                    if (!name) return alert('Введите название');
+                    if (!currentUser.customCategories) currentUser.customCategories = { expense: [], income: [] };
+                    currentUser.customCategories[type].push({ name, emoji });
+                    saveData(data);
+                    renderCustomCategories();
+                    closeModal();
+                });
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+        document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+        // ===== НАВИГАЦИЯ =====
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const screen = btn.dataset.screen;
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('screen-' + screen).classList.add('active');
+                if (screen === 'analytics' && currentUser.subLevel !== 'free') {
+                    drawChart();
+                    updateCatStats();
+                    updateAdvStats();
+                }
+                if (screen === 'shop') renderShop();
+                if (screen === 'more') renderExtra();
+                if (screen === 'admin') {
+                    document.getElementById('adminContent').style.display = 'none';
+                    document.getElementById('adminPasswordInput').value = '';
+                    document.getElementById('adminError').textContent = '';
+                }
+            });
+        });
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                document.getElementById(tabName).classList.remove('hidden');
+                if (tabName === 'tab-piggy') renderPiggy();
+                if (tabName === 'tab-challenges') renderChallenges();
+                if (tabName === 'tab-achievements') renderAchievements();
+                if (tabName === 'tab-debts') renderDebts();
+                if (tabName === 'tab-tools') renderRegular();
+                if (tabName === 'tab-categories') renderCustomCategories();
+            });
+        });
+
+        // ===== ОСНОВНЫЕ ОБРАБОТЧИКИ =====
+        document.getElementById('openExpenseBtn').addEventListener('click', () => openAddModal('expense'));
+        document.getElementById('openIncomeBtn').addEventListener('click', () => openAddModal('income'));
+        document.getElementById('openSettingsBtn').addEventListener('click', openSettings);
+        document.getElementById('inviteBtn').addEventListener('click', () => {
+            const link = window.location.origin + window.location.pathname + '?ref=' + currentUser.refCode;
+            navigator.clipboard.writeText(link).then(() => alert('Ссылка скопирована!')).catch(() => alert('Скопируйте вручную: ' + link));
+        });
+        document.getElementById('viewAllBtn').addEventListener('click', () => {
+            const modal = document.getElementById('modal-overlay');
+            const body = document.getElementById('modal-body');
+            body.innerHTML = '<div style="font-weight:600;margin-bottom:12px;">Все операции</div><ul class="transaction-list" id="allTransactionList"></ul>';
+            renderTxList('allTransactionList', currentUser.transactions || []);
+            modal.style.display = 'flex';
+        });
+        document.getElementById('closeAdminBtn').addEventListener('click', () => {
+            document.querySelector('.nav-btn[data-screen="transactions"]').click();
+        });
+        document.getElementById('resetDataBtn').addEventListener('click', () => {
+            if (confirm('Сбросить все финансовые данные?')) {
+                currentUser.transactions = [];
+                currentUser.balance = 0;
+                saveData(data);
+                renderAll();
+                updateUI();
+                alert('Сброшено');
+            }
+        });
+
+        // ===== МОДАЛКА ДОБАВЛЕНИЯ ТРАНЗАКЦИИ =====
+        function openAddModal(type) {
+            const body = document.getElementById('modal-body');
+            const cats = type === 'expense' ? getExpenseCategories() : getIncomeCategories();
+            let html = `<div style="font-weight:600;margin-bottom:12px;">${type === 'expense' ? 'Расход' : 'Доход'}</div>
+                <input type="number" id="amountInput" class="input-field" placeholder="Сумма">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0;">`;
+            cats.forEach(cat => {
+                html += `<div class="category-item" data-cat='${JSON.stringify(cat)}'>
+                    ${cat.emoji}<br><span style="font-size:12px;">${cat.name}</span>
+                </div>`;
+            });
+            html += `</div>
+                <button class="btn btn-primary" id="submitTxBtn" style="width:100%;">Добавить</button>`;
+            body.innerHTML = html;
+
+            let selectedCategory = null;
+            document.querySelectorAll('.category-item').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.category-item').forEach(e => e.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedCategory = JSON.parse(this.dataset.cat);
+                });
+            });
+
+            document.getElementById('submitTxBtn').addEventListener('click', () => {
+                const amount = parseFloat(document.getElementById('amountInput').value);
+                if (!amount || amount <= 0) return alert('Введите сумму');
+                if (!selectedCategory) return alert('Выберите категорию');
+                if (!currentUser.transactions) currentUser.transactions = [];
+                currentUser.transactions.unshift({
+                    type: type,
+                    category: selectedCategory.name,
+                    emoji: selectedCategory.emoji,
+                    amount: amount,
+                    date: new Date().toISOString().split('T')[0]
+                });
+                currentUser.balance += type === 'income' ? amount : -amount;
+                saveData(data);
+                renderAll();
+                updateUI();
+                closeModal();
+            });
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        function getExpenseCategories() {
+            let cats = [
+                {emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},
+                {emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}
+            ];
+            if (currentUser.subLevel === 'pro' || currentUser.subLevel === 'pro_forever' ||
+                currentUser.subLevel === 'platinum' || currentUser.subLevel === 'platinum_forever' ||
+                currentUser.subLevel === 'trial') {
+                cats = cats.concat([
+                    {emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},
+                    {emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}
+                ]);
+            }
+            if (currentUser.subLevel === 'platinum' || currentUser.subLevel === 'platinum_forever' || currentUser.subLevel === 'trial') {
+                cats = cats.concat([
+                    {emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}
+                ]);
+            }
+            const custom = currentUser.customCategories || { expense: [] };
+            cats = cats.concat(custom.expense);
+            return cats;
+        }
+
+        function getIncomeCategories() {
+            const inc = [
+                {emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},
+                {emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}
+            ];
+            const custom = currentUser.customCategories || { income: [] };
+            return inc.concat(custom.income);
+        }
+
+        // ===== НАСТРОЙКИ =====
+        function openSettings() {
+            const body = document.getElementById('modal-body');
+            const limit = currentUser.dailyLimit || 0;
+            const isDark = document.body.classList.contains('dark');
+            body.innerHTML = `
+                <div style="font-weight:600;margin-bottom:12px;">⚙️ Настройки</div>
+                <label>Дневной лимит расходов</label>
+                <input type="number" id="dailyLimitInput" class="input-field" value="${limit}">
+                <div style="display:flex;justify-content:space-between;margin:12px 0;">
+                    <span>🌙 Тёмная тема</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="themeToggle" ${isDark ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <button class="btn btn-primary" id="saveSettingsBtn" style="width:100%;">Сохранить</button>
+            `;
+            document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+                const newLimit = parseFloat(document.getElementById('dailyLimitInput').value) || 0;
+                currentUser.dailyLimit = newLimit;
+                const dark = document.getElementById('themeToggle').checked;
+                document.body.classList.toggle('dark', dark);
+                saveData(data);
+                updateUI();
+                closeModal();
+            });
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        // ===== ЗАПУСК =====
+        window.onload = autoLogin;
     </script>
 </body>
 </html>
