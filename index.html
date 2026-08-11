@@ -39,6 +39,11 @@
             font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 4px;
             margin-left: auto; margin-right: 10px; cursor: pointer;
         }
+        .stars-display {
+            background: #ffd700; color: black; padding: 4px 10px; border-radius: 12px;
+            font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 4px;
+            margin-right: 6px; cursor: pointer;
+        }
         .streak-display {
             background: #ff6b6b; color: white; padding: 4px 8px; border-radius: 12px;
             font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 4px;
@@ -227,6 +232,40 @@
             margin-top: 16px;
         }
         .referral-block .btn { width: 100%; margin-top: 8px; }
+
+        /* Daily reward */
+        .daily-reward-card {
+            background: var(--secondary-bg); border-radius: 12px; padding: 16px;
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .daily-reward-card .day-info { display: flex; align-items: center; gap: 12px; }
+        .daily-reward-card .day-number { font-size: 24px; font-weight: bold; }
+        .daily-reward-card .reward-amount { font-size: 18px; color: var(--hint); }
+        .daily-reward-card .claim-btn { padding: 8px 20px; }
+        .daily-reward-card .claimed { color: #34c759; font-weight: bold; }
+        .streak-achievement { font-size: 13px; color: var(--hint); margin-top: 4px; }
+
+        /* premium tab */
+        .premium-block {
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .premium-item {
+            background: var(--secondary-bg); border-radius: 12px; padding: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .premium-item .info { display: flex; flex-direction: column; }
+        .premium-item .info .name { font-weight: 600; }
+        .premium-item .info .desc { font-size: 13px; color: var(--hint); }
+        .premium-item .price { display: flex; gap: 8px; align-items: center; }
+        .premium-item .price .coin-price { background: gold; color: black; padding: 4px 8px; border-radius: 8px; font-weight: bold; }
+        .premium-item .price .star-price { background: #ffd700; color: black; padding: 4px 8px; border-radius: 8px; font-weight: bold; }
+        .exchange-block {
+            background: var(--secondary-bg); border-radius: 12px; padding: 16px; margin-top: 12px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+        }
+        .exchange-block .info { font-size: 14px; }
+        .exchange-block .btn { flex: 0 0 auto; }
     </style>
 </head>
 <body>
@@ -241,6 +280,7 @@
                 <span class="level-badge" id="levelBadge"></span>
             </div>
             <div class="streak-display" id="streakDisplay">🔥 0</div>
+            <div class="stars-display" id="starsDisplay">⭐ 0</div>
             <div class="coins-display" id="coinsDisplay">🪙 0</div>
             <div style="font-size:24px; cursor:pointer;" id="openSettings">⚙️</div>
         </div>
@@ -252,6 +292,17 @@
                 <span id="limitStatus" style="display:none;">⚠️ Превышен</span>
             </div>
         </div>
+        <!-- Daily reward card -->
+        <div class="daily-reward-card" id="dailyRewardCard">
+            <div class="day-info">
+                <span class="day-number" id="rewardDayDisplay">День 1</span>
+                <span class="reward-amount" id="rewardAmountDisplay">⭐ +5</span>
+            </div>
+            <button class="btn btn-primary claim-btn" id="claimRewardBtn">Забрать</button>
+            <span class="claimed" id="claimedStatus" style="display:none;">✅ Забрано</span>
+        </div>
+        <div id="streakAchievementInfo" class="streak-achievement"></div>
+
         <div class="timer-box" id="timerBox"><span id="timerLabel"></span>: <span id="timerValue"></span></div>
         <div class="level-box" id="levelBox">🌱 Новичок</div>
         <div class="actions">
@@ -259,12 +310,9 @@
             <button class="btn" id="openIncomeModal">➕ Доход</button>
         </div>
         <button class="btn btn-danger" id="resetDataBtn">🗑 Сбросить финансы</button>
-        <div style="margin:12px 0;" id="subscribeBlock">
+        <!-- Пробная версия остаётся -->
+        <div style="margin:12px 0;" id="trialBlock">
             <button class="trial-btn" id="trialBtn">🎁 Пробный Platinum на 3 дня</button>
-            <button class="buy-btn buy-pro" id="buyProBtn">⭐ PRO — 99 ₽</button>
-            <button class="buy-btn buy-platinum" id="buyPlatinumBtn">💎 Platinum — 199 ₽</button>
-            <button class="forever-btn" id="buyForeverProBtn">⭐ PRO навсегда — 299 ₽</button>
-            <button class="forever-btn" id="buyForeverPlatinumBtn">💎 Platinum навсегда — 499 ₽</button>
         </div>
         <div class="section-title-row">
             <div class="section-title">Операции</div>
@@ -281,6 +329,15 @@
         <div style="margin-top:8px; background:var(--secondary-bg); border-radius:12px; padding:12px;">
             <div>Средний расход в день: <span id="avgDaily">0 ₽</span></div>
             <div>Топ категория: <span id="topCategory">-</span></div>
+        </div>
+    </div>
+
+    <div id="screen-premium" class="screen">
+        <div class="section-title">⭐ Подписки и премиум</div>
+        <div class="premium-block" id="premiumList"></div>
+        <div class="exchange-block">
+            <div class="info">Обменять 100 ⭐ на 50 🪙</div>
+            <button class="btn btn-primary" id="exchangeStarsBtn">Обменять</button>
         </div>
     </div>
 
@@ -327,6 +384,7 @@
     <div class="bottom-nav">
         <button class="nav-btn active" data-screen="main">🏠</button>
         <button class="nav-btn" data-screen="analytics">📊</button>
+        <button class="nav-btn" data-screen="premium">⭐</button>
         <button class="nav-btn" data-screen="shop">🛒</button>
         <button class="nav-btn" data-screen="more">📦</button>
         <button class="nav-btn" id="adminNavBtn" style="display:none;" data-screen="admin">🛡</button>
@@ -406,18 +464,21 @@
         const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
         document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
 
-        // Ключи для CloudStorage (храним личные данные пользователя локально)
+        // Ключи для CloudStorage
         const KEY_BAL = 'bal', KEY_TX = 'tx', KEY_LIM = 'lim', KEY_DARK = 'dark';
         const KEY_SUB_LVL = 'sub_lvl', KEY_SUB_EXP = 'sub_exp', KEY_TRIAL = 'trial';
         const KEY_PIG = 'pig', KEY_ACH = 'ach', KEY_CHAL = 'chal', KEY_DEBT = 'debt', KEY_REG = 'reg';
         const KEY_COINS = 'coins', KEY_TICKETS = 'tickets', KEY_SHOP = 'shop';
         const KEY_CUSTOM_CATS = 'custom_cats';
-        // Дополнительные ключи для регистрации, стрика, рефералов
         const KEY_REGISTERED = 'registered';
         const KEY_LAST_VISIT = 'last_visit';
         const KEY_STREAK = 'streak';
         const KEY_REFERRER = 'referrer';
         const KEY_REGISTERED_AT = 'registered_at';
+        // Новые ключи
+        const KEY_STARS = 'stars';
+        const KEY_REWARD_DAY = 'reward_day';
+        const KEY_LAST_REWARD = 'last_reward';
 
         // Глобальные переменные
         let balance = 0, transactions = [], dailyLimit = 0, isDark = false;
@@ -427,13 +488,11 @@
         let coins = 0, tickets = [], shopItems = [];
         let customCategories = { expense: [], income: [] };
         let activeTab = 'tab-piggy', currentChatTicketId = null;
-
-        // Новые глобальные переменные
-        let registered = false;
-        let lastVisit = null;
-        let streak = 0;
-        let referrer = null;
-        let registeredAt = null;
+        let registered = false, lastVisit = null, streak = 0, referrer = null, registeredAt = null;
+        // Новые переменные
+        let stars = 0;
+        let rewardDay = 1;      // текущий день ленты (1-30)
+        let lastRewardDate = null; // дата последнего получения награды
 
         const baseExpenseCats = [{emoji:'🍕',name:'Еда'},{emoji:'🚗',name:'Транспорт'},{emoji:'🏠',name:'Жильё'},{emoji:'🎉',name:'Развлечения'}];
         const proExpenseCats = [{emoji:'💊',name:'Здоровье'},{emoji:'📚',name:'Образование'},{emoji:'🎁',name:'Подарки'},{emoji:'👕',name:'Одежда'}];
@@ -512,6 +571,7 @@
                     first_name: name,
                     balance: balance,
                     coins: coins,
+                    stars: stars,
                     sub: subLevel,
                     sub_expiry: subExpiry ? new Date(subExpiry).toISOString() : null,
                     trial_used: trialUsed,
@@ -519,7 +579,9 @@
                     last_visit: lastVisit,
                     streak: streak,
                     referrer: referrer,
-                    registered_at: registeredAt
+                    registered_at: registeredAt,
+                    reward_day: rewardDay,
+                    last_reward: lastRewardDate
                 });
             } catch(e) { console.warn('Sync failed:', e); }
         }
@@ -564,7 +626,6 @@
         async function savePlat() { await Promise.all([cSet(KEY_PIG,JSON.stringify(piggyBanks)),cSet(KEY_ACH,JSON.stringify(achievements)),cSet(KEY_CHAL,JSON.stringify(challenges)),cSet(KEY_DEBT,JSON.stringify(debts)),cSet(KEY_REG,JSON.stringify(regularPayments)),cSet(KEY_COINS,coins)]); }
         async function saveTickets() { await cSet(KEY_TICKETS, JSON.stringify(tickets)); }
         async function saveShop() { await cSet(KEY_SHOP, JSON.stringify(shopItems)); }
-        // Сохраняем регистрационные данные локально (резерв)
         async function saveRegistration() {
             await Promise.all([
                 cSet(KEY_REGISTERED, registered),
@@ -574,17 +635,26 @@
                 cSet(KEY_REGISTERED_AT, registeredAt || '')
             ]);
         }
+        async function saveStars() {
+            await Promise.all([
+                cSet(KEY_STARS, stars),
+                cSet(KEY_REWARD_DAY, rewardDay),
+                cSet(KEY_LAST_REWARD, lastRewardDate || '')
+            ]);
+        }
 
         // ===================== ЗАГРУЗКА =====================
         async function loadAll() {
             // Загружаем из CloudStorage (локально)
             const [b,tx,lim,dark,lvl,exp,trial,pig,ach,chal,debt,reg,c,tic,shop,
-                   regFlag,lastVis,streakVal,ref,regAt] = await Promise.all([
+                   regFlag,lastVis,streakVal,ref,regAt,
+                   starsVal,rewardDayVal,lastRewardVal] = await Promise.all([
                 cGet(KEY_BAL),cGet(KEY_TX),cGet(KEY_LIM),cGet(KEY_DARK),
                 cGet(KEY_SUB_LVL),cGet(KEY_SUB_EXP),cGet(KEY_TRIAL),
                 cGet(KEY_PIG),cGet(KEY_ACH),cGet(KEY_CHAL),cGet(KEY_DEBT),cGet(KEY_REG),
                 cGet(KEY_COINS),cGet(KEY_TICKETS),cGet(KEY_SHOP),
-                cGet(KEY_REGISTERED),cGet(KEY_LAST_VISIT),cGet(KEY_STREAK),cGet(KEY_REFERRER),cGet(KEY_REGISTERED_AT)
+                cGet(KEY_REGISTERED),cGet(KEY_LAST_VISIT),cGet(KEY_STREAK),cGet(KEY_REFERRER),cGet(KEY_REGISTERED_AT),
+                cGet(KEY_STARS),cGet(KEY_REWARD_DAY),cGet(KEY_LAST_REWARD)
             ]);
             balance = b?+b:0; transactions = tx?JSON.parse(tx):[]; dailyLimit = lim?+lim:0; isDark = dark==='true';
             if (lvl&&exp) { const e=+exp; if(Date.now()<e){subLevel=lvl;subExpiry=e;} else {subLevel='free';subExpiry=null;} }
@@ -596,12 +666,15 @@
             shopItems = shop?JSON.parse(shop):defaultShop();
             await loadCustomCategories();
 
-            // Загружаем регистрационные данные из локального хранилища (резерв)
             registered = regFlag === 'true';
             lastVisit = lastVis || null;
             streak = +streakVal || 0;
             referrer = ref || null;
             registeredAt = regAt || null;
+
+            stars = starsVal ? +starsVal : 0;
+            rewardDay = rewardDayVal ? +rewardDayVal : 1;
+            lastRewardDate = lastRewardVal || null;
 
             // Получаем данные с сервера
             const uid = tg.initDataUnsafe.user.id;
@@ -611,6 +684,7 @@
                 if (serverUser) {
                     balance = serverUser.balance ?? balance;
                     coins = serverUser.coins ?? coins;
+                    stars = serverUser.stars ?? stars;
                     if (serverUser.sub && serverUser.sub !== 'free') {
                         const exp = serverUser.sub_expiry ? new Date(serverUser.sub_expiry).getTime() : null;
                         if (exp && exp > Date.now()) {
@@ -623,25 +697,27 @@
                     } else {
                         subLevel = 'free'; subExpiry = null; trialUsed = false;
                     }
-                    // Обновляем регистрационные данные с сервера (если они там есть)
                     if (serverUser.registered !== undefined) registered = serverUser.registered;
                     if (serverUser.last_visit) lastVisit = serverUser.last_visit;
                     if (serverUser.streak !== undefined) streak = serverUser.streak;
                     if (serverUser.referrer) referrer = serverUser.referrer;
                     if (serverUser.registered_at) registeredAt = serverUser.registered_at;
+                    if (serverUser.reward_day) rewardDay = serverUser.reward_day;
+                    if (serverUser.last_reward) lastRewardDate = serverUser.last_reward;
                 }
             } catch(e) {}
 
-            // Обработка регистрации (если ещё не зарегистрирован)
+            // Обработка регистрации
             if (!registered) {
                 await handleRegistration();
             } else {
-                // Обновляем стрик
                 await updateStreak();
+                await checkDailyReward(); // проверяем, можно ли забрать награду
+                await checkStreakAchievements();
             }
 
             // Сохраняем локально и синхронизируем с сервером
-            await saveFin(); await saveSub(); await savePlat(); await saveTickets(); await saveRegistration();
+            await saveFin(); await saveSub(); await savePlat(); await saveTickets(); await saveRegistration(); await saveStars();
             await syncUserToServer();
 
             // Отображаем UI
@@ -649,59 +725,168 @@
             applyTheme(); updateUI(); renderAll();
             if (subLevel!=='free') updateTimer();
             if (subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') renderExtra();
-            updateCoinsDisplay(); updateUserLevel(); updateStreakDisplay(); checkRegularPayments();
+            updateCoinsDisplay(); updateStarsDisplay(); updateUserLevel(); updateStreakDisplay(); checkRegularPayments();
             updateReferralLink();
+            updateDailyRewardUI();
+            updateStreakAchievementInfo();
         }
 
         // ----- Обработка регистрации и стрика -----
         async function handleRegistration() {
             registered = true;
             registeredAt = new Date().toISOString();
-            // Проверяем реферальный параметр
             const startParam = tg.initDataUnsafe.start_param;
             if (startParam && startParam !== String(tg.initDataUnsafe.user.id)) {
-                // Начисляем бонус рефереру (100 монет)
                 try {
                     await apiFetch('admin_add_coins', { uid: startParam, amount: 100 });
-                    // Можно также уведомить реферера (но через сервер)
                 } catch(e) { console.warn('Referral bonus error', e); }
-                // Начисляем бонус новому пользователю (50 монет)
                 coins += 50;
                 updateCoinsDisplay();
-                // Сохраняем referrer
                 referrer = startParam;
                 tg.showAlert('🎉 Вы зарегистрировались по реферальной ссылке! Получено 50 монет.');
             } else {
-                // Обычная регистрация без реферала
                 coins += 50;
                 updateCoinsDisplay();
                 tg.showAlert('🎉 Добро пожаловать! Вы получили 50 монет за регистрацию.');
             }
-            // Устанавливаем стрик = 1
+            // Начальный стрик = 1
             streak = 1;
             lastVisit = new Date().toISOString().split('T')[0];
-            await saveRegistration();
+            // Начальная награда дня
+            rewardDay = 1;
+            lastRewardDate = null;
+            await saveRegistration(); await saveStars();
             await syncUserToServer();
+            updateDailyRewardUI();
         }
 
         async function updateStreak() {
             const today = new Date().toISOString().split('T')[0];
-            if (lastVisit === today) return; // уже сегодня заходили
+            if (lastVisit === today) return;
             if (lastVisit) {
                 const diff = Math.floor((Date.now() - new Date(lastVisit).getTime()) / 86400000);
                 if (diff >= 2) {
-                    streak = 0; // сброс
+                    streak = 0;
                 } else if (diff === 1) {
                     streak += 1;
                 }
             } else {
-                // первый заход (но registered уже true)
                 streak = 1;
             }
             lastVisit = today;
             await saveRegistration();
             await syncUserToServer();
             updateStreakDisplay();
+        }
+
+        // ----- Daily Reward -----
+        async function checkDailyReward() {
+            const today = new Date().toISOString().split('T')[0];
+            if (lastRewardDate === today) return; // уже забрали сегодня
+            if (lastRewardDate) {
+                const diff = Math.floor((Date.now() - new Date(lastRewardDate).getTime()) / 86400000);
+                if (diff >= 2) {
+                    // сброс ленты
+                    rewardDay = 1;
+                    lastRewardDate = null;
+                    await saveStars();
+                    await syncUserToServer();
+                }
+            }
+            // Если не забирали сегодня, показываем возможность
+            updateDailyRewardUI();
+        }
+
+        async function claimDailyReward() {
+            const today = new Date().toISOString().split('T')[0];
+            if (lastRewardDate === today) {
+                tg.showAlert('Вы уже забрали награду сегодня!');
+                return;
+            }
+            // Проверяем, не прошло ли 2 дня
+            if (lastRewardDate) {
+                const diff = Math.floor((Date.now() - new Date(lastRewardDate).getTime()) / 86400000);
+                if (diff >= 2) {
+                    rewardDay = 1;
+                    lastRewardDate = null;
+                }
+            }
+            // Начисляем награду: чем больше день, тем больше звезд
+            const reward = Math.min(rewardDay * 3 + 2, 50); // например, день 1: 5, день 10: 32, день 30: 50
+            stars += reward;
+            await saveStars();
+            await syncUserToServer();
+            lastRewardDate = today;
+            rewardDay += 1;
+            if (rewardDay > 30) rewardDay = 30; // максимум 30 дней
+            await saveStars();
+            await syncUserToServer();
+            updateStarsDisplay();
+            updateDailyRewardUI();
+            tg.showAlert(`⭐ Получено ${reward} звёзд!`);
+            // Проверяем достижения за стрик (уже есть)
+            await checkStreakAchievements();
+        }
+
+        function getRewardForDay(day) {
+            return Math.min(day * 3 + 2, 50);
+        }
+
+        function updateDailyRewardUI() {
+            const today = new Date().toISOString().split('T')[0];
+            const claimed = (lastRewardDate === today);
+            const card = document.getElementById('dailyRewardCard');
+            const dayDisplay = document.getElementById('rewardDayDisplay');
+            const amountDisplay = document.getElementById('rewardAmountDisplay');
+            const claimBtn = document.getElementById('claimRewardBtn');
+            const claimedStatus = document.getElementById('claimedStatus');
+
+            dayDisplay.textContent = `День ${Math.min(rewardDay, 30)}`;
+            const reward = getRewardForDay(Math.min(rewardDay, 30));
+            amountDisplay.textContent = `⭐ +${reward}`;
+            if (claimed) {
+                claimBtn.style.display = 'none';
+                claimedStatus.style.display = 'inline';
+            } else {
+                claimBtn.style.display = 'inline';
+                claimedStatus.style.display = 'none';
+            }
+        }
+
+        // ----- Достижения за стрик -----
+        async function checkStreakAchievements() {
+            const streakAchievements = [
+                { days: 10, name: '10 дней в приложении', icon: '📅' },
+                { days: 20, name: '20 дней в приложении', icon: '📆' },
+                { days: 30, name: '30 дней в приложении', icon: '🗓️' },
+                { days: 50, name: '50 дней в приложении', icon: '🏅' },
+                { days: 100, name: '100 дней в приложении', icon: '👑' }
+            ];
+            for (let a of streakAchievements) {
+                if (streak >= a.days && !achievements.find(ach => ach.id === 'streak_' + a.days)) {
+                    achievements.push({
+                        id: 'streak_' + a.days,
+                        name: a.name,
+                        icon: a.icon,
+                        date: Date.now()
+                    });
+                    await savePlat();
+                    await syncUserToServer();
+                    tg.showAlert(`🏆 Новое достижение: ${a.name}!`);
+                }
+            }
+            updateStreakAchievementInfo();
+        }
+
+        function updateStreakAchievementInfo() {
+            const container = document.getElementById('streakAchievementInfo');
+            if (!container) return;
+            const next = [10,20,30,50,100].find(d => d > streak);
+            if (next) {
+                container.textContent = `Следующее достижение за ${next} дней стрика (осталось ${next - streak})`;
+            } else {
+                container.textContent = 'Все достижения за стрик получены! 🎉';
+            }
         }
 
         function updateStreakDisplay() {
@@ -716,16 +901,17 @@
             const container = document.getElementById('referralLinkDisplay');
             if (!container) return;
             const uid = tg.initDataUnsafe.user.id;
-            // Ссылка на бота (замените на имя вашего бота)
-            const botName = 'YourBot'; // поменяйте на реальное имя бота
+            const botName = 'YourBot';
             const link = `https://t.me/${botName}?startapp=${uid}`;
             container.innerHTML = `Ваша реферальная ссылка:<br><span style="font-size:12px;">${link}</span>`;
         }
 
         // ===================== UI ОБНОВЛЕНИЯ =====================
         function updateCoinsDisplay() { document.getElementById('coinsDisplay').textContent = `🪙 ${coins}`; const e=document.getElementById('coinsBalance'); if(e)e.textContent=coins; }
+        function updateStarsDisplay() { document.getElementById('starsDisplay').textContent = `⭐ ${stars}`; }
         function addCoins(n) { coins+=n; updateCoinsDisplay(); savePlat(); syncUserToServer(); }
         function spendCoins(n) { if(coins<n){tg.showAlert('Недостаточно монет');return false;} coins-=n; updateCoinsDisplay(); savePlat(); syncUserToServer(); return true; }
+        function addStars(n) { stars+=n; updateStarsDisplay(); saveStars(); syncUserToServer(); }
 
         function updateUserLevel() {
             const level = getUserLevel();
@@ -761,7 +947,7 @@
         }
 
         function updateUI() {
-            const badge=document.getElementById('levelBadge'), sub=document.getElementById('subscribeBlock'), tbtn=document.getElementById('trialBtn');
+            const badge=document.getElementById('levelBadge'), sub=document.getElementById('trialBlock');
             badge.className='level-badge';
             if(subLevel==='pro'){badge.classList.add('pro');badge.textContent='PRO';}
             else if(subLevel==='pro_forever'){badge.classList.add('forever');badge.textContent='PRO ∞';}
@@ -770,8 +956,13 @@
             else if(subLevel==='trial'){badge.classList.add('trial');badge.textContent='ПРОБНЫЙ';}
             else badge.style.display='none';
             document.getElementById('screen-analytics').style.display = (subLevel !== 'free') ? '' : 'none';
-            sub.style.display=subLevel==='free'?'block':'none';
-            if(subLevel==='free') tbtn.style.display=trialUsed?'none':'block';
+            // Показываем пробную кнопку только если free и trial не использован
+            const trialBtn = document.getElementById('trialBtn');
+            if (subLevel==='free') {
+                trialBtn.style.display = trialUsed ? 'none' : 'block';
+            } else {
+                trialBtn.style.display = 'none';
+            }
             const isPlat=(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial');
             document.querySelectorAll('.platinum-only').forEach(el=>el.style.display=isPlat?'':'none');
             const act=document.querySelector(`.tab[data-tab="${activeTab}"]`);
@@ -779,6 +970,8 @@
             document.getElementById('subscriptionInfo').innerHTML=subLevel==='free'?'❌ Нет подписки':subLevel==='trial'?'🟢 Пробный Platinum (3 дня)':subLevel==='pro'?'⭐ PRO активно':subLevel==='pro_forever'?'⭐ PRO навсегда':subLevel==='platinum'?'💎 Platinum активно':'💎 Platinum навсегда';
             updateStreakDisplay();
             updateReferralLink();
+            updateStarsDisplay();
+            updateDailyRewardUI();
         }
 
         function renderAll() {
@@ -791,6 +984,7 @@
             renderTxList('allTransactionList',transactions);
             if(subLevel!=='free'){drawChart();updateCatStats();updateAdvStats();}
             if(subLevel==='pro'||subLevel==='pro_forever'||subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial') renderExtra();
+            renderPremium();
         }
 
         function renderTxList(id,list) {
@@ -928,6 +1122,63 @@
                 await syncUserToServer();
             });
         };
+
+        // ----- PREMIUM (Подписки) -----
+        function renderPremium() {
+            const container = document.getElementById('premiumList');
+            const items = [
+                { id: 'sub_pro', name: 'PRO на 30 дней', desc: 'Аналитика и PRO-категории', coinPrice: 500, starPrice: 0, action: 'pro' },
+                { id: 'sub_platinum', name: 'Platinum на 30 дней', desc: 'Все функции', coinPrice: 1000, starPrice: 0, action: 'platinum' },
+                { id: 'sub_pro_forever', name: 'PRO навсегда', desc: 'PRO без ограничений', coinPrice: 1500, starPrice: 0, action: 'pro_forever' },
+                { id: 'sub_platinum_forever', name: 'Platinum навсегда', desc: 'Все функции навсегда', coinPrice: 2500, starPrice: 0, action: 'platinum_forever' }
+            ];
+            container.innerHTML = items.map(p => `
+                <div class="premium-item">
+                    <div class="info">
+                        <span class="name">${p.name}</span>
+                        <span class="desc">${p.desc}</span>
+                    </div>
+                    <div class="price">
+                        ${p.coinPrice ? `<span class="coin-price">🪙 ${p.coinPrice}</span>` : ''}
+                        ${p.starPrice ? `<span class="star-price">⭐ ${p.starPrice}</span>` : ''}
+                        <button class="btn btn-primary" onclick="buyPremium('${p.action}')">Купить</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.buyPremium = async function(action) {
+            let price = 0;
+            if (action === 'pro') price = 500;
+            else if (action === 'platinum') price = 1000;
+            else if (action === 'pro_forever') price = 1500;
+            else if (action === 'platinum_forever') price = 2500;
+            if (coins < price) { tg.showAlert('Недостаточно монет'); return; }
+            tg.showConfirm(`Купить подписку за ${price} 🪙?`, async (ok) => {
+                if (!ok) return;
+                if (!spendCoins(price)) return;
+                let dur;
+                if (action === 'pro') dur = 30*24*60*60*1000;
+                else if (action === 'platinum') dur = 30*24*60*60*1000;
+                else if (action === 'pro_forever') dur = 100*365*24*60*60*1000;
+                else if (action === 'platinum_forever') dur = 100*365*24*60*60*1000;
+                await setSub(action, dur);
+                tg.showAlert('Подписка активирована!');
+            });
+        };
+
+        // Обмен звёзд на монеты
+        document.getElementById('exchangeStarsBtn').addEventListener('click', async () => {
+            if (stars < 100) { tg.showAlert('Недостаточно звёзд (нужно 100)'); return; }
+            tg.showConfirm(`Обменять 100 ⭐ на 50 🪙?`, async (ok) => {
+                if (!ok) return;
+                stars -= 100;
+                coins += 50;
+                await saveStars(); await savePlat(); await syncUserToServer();
+                updateStarsDisplay(); updateCoinsDisplay();
+                tg.showAlert('Обмен выполнен! +50 монет');
+            });
+        });
 
         // ----- ТРОФЕИ -----
         function renderAchievements() {
@@ -1125,7 +1376,7 @@
             }
         }, 3000);
 
-        // ----- АДМИН-ПАНЕЛЬ -----
+        // ----- АДМИН-ПАНЕЛЬ (улучшена) -----
         async function loadAllUsers() {
             const container = document.getElementById('allUsersList');
             container.innerHTML = '<p>Загрузка...</p>';
@@ -1136,15 +1387,22 @@
                     container.innerHTML = '<p style="color:var(--hint);">Нет пользователей</p>';
                     return;
                 }
-                container.innerHTML = '<div class="section-title">Все пользователи</div>';
+                // Сортировка по дате регистрации (новые сверху)
+                entries.sort((a,b) => {
+                    const da = a[1].registered_at ? new Date(a[1].registered_at).getTime() : 0;
+                    const db = b[1].registered_at ? new Date(b[1].registered_at).getTime() : 0;
+                    return db - da;
+                });
+                container.innerHTML = '<div class="section-title">Все пользователи (' + entries.length + ')</div>';
                 entries.forEach(([uid, u]) => {
                     const regDate = u.registered_at ? new Date(u.registered_at).toLocaleDateString() : '—';
                     const ref = u.referrer || '—';
                     const strk = u.streak !== undefined ? u.streak : '—';
+                    const starsVal = u.stars || 0;
                     container.innerHTML += `<div class="admin-user-card">
                         <div>
                             <div>${u.first_name} (ID: ${uid})</div>
-                            <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0}</div>
+                            <div style="font-size:12px;">Подписка: ${u.sub||'free'} | Баланс: ${u.balance||0} ₽ | Монеты: ${u.coins||0} | ⭐${starsVal}</div>
                             <div style="font-size:11px; color:var(--hint);">Регистрация: ${regDate} | Стрик: ${strk} дн. | Реферер: ${ref}</div>
                         </div>
                         <div style="display:flex;gap:4px;flex-wrap:wrap;">
@@ -1154,6 +1412,7 @@
                             <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${uid}','platinum_forever')">Plat ∞</button>
                             <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${uid}','free')">Сброс</button>
                             <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${uid}',500)">+500🪙</button>
+                            <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${uid}',200)">+200⭐</button>
                         </div>
                     </div>`;
                 });
@@ -1161,6 +1420,19 @@
                 container.innerHTML = '<p style="color:red;">Ошибка загрузки пользователей: ' + e.message + '</p>';
             }
         }
+
+        // Добавляем админскую функцию для звёзд
+        window.adminAddStars = async function(uid, amount) {
+            try {
+                await apiFetch('admin_add_stars', { uid, amount });
+                if (String(uid) === String(tg.initDataUnsafe.user.id)) {
+                    stars += amount;
+                    updateStarsDisplay();
+                    await saveStars(); await syncUserToServer();
+                }
+                await loadAllUsers();
+            } catch(e) { tg.showAlert('Ошибка: ' + e.message); }
+        };
 
         async function searchUserInChannel(userId) {
             const container = document.getElementById('searchResult');
@@ -1172,11 +1444,12 @@
                     const regDate = user.registered_at ? new Date(user.registered_at).toLocaleDateString() : '—';
                     const ref = user.referrer || '—';
                     const strk = user.streak !== undefined ? user.streak : '—';
+                    const starsVal = user.stars || 0;
                     container.innerHTML = `
                         <div class="admin-user-card">
                             <div>
                                 <div>${user.first_name} (ID: ${userId})</div>
-                                <div style="font-size:12px;">Подписка: ${user.sub||'free'} | Баланс: ${user.balance||0} ₽ | Монеты: ${user.coins||0}</div>
+                                <div style="font-size:12px;">Подписка: ${user.sub||'free'} | Баланс: ${user.balance||0} ₽ | Монеты: ${user.coins||0} | ⭐${starsVal}</div>
                                 <div style="font-size:11px; color:var(--hint);">Регистрация: ${regDate} | Стрик: ${strk} дн. | Реферер: ${ref}</div>
                             </div>
                             <div style="display:flex;gap:4px;flex-wrap:wrap;">
@@ -1186,6 +1459,7 @@
                                 <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="adminSetSub('${userId}','platinum_forever')">Plat ∞</button>
                                 <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="adminSetSub('${userId}','free')">Сброс</button>
                                 <button class="btn btn-gold" style="padding:6px 10px;font-size:12px;" onclick="adminAddCoins('${userId}',500)">+500🪙</button>
+                                <button class="btn btn-primary" style="padding:6px 10px;font-size:12px; background:gold;" onclick="adminAddStars('${userId}',200)">+200⭐</button>
                             </div>
                         </div>
                     `;
@@ -1246,10 +1520,12 @@
                 const total = entries.length;
                 const bal = entries.reduce((s, [_, u]) => s + (u.balance||0), 0);
                 const co = entries.reduce((s, [_, u]) => s + (u.coins||0), 0);
+                const st = entries.reduce((s, [_, u]) => s + (u.stars||0), 0);
                 document.getElementById('adminStatsData').innerHTML = `
                     <div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">Пользователей</div></div>
                     <div class="stat-item"><div class="stat-value">${bal} ₽</div><div class="stat-label">Общий баланс</div></div>
                     <div class="stat-item"><div class="stat-value">${co} 🪙</div><div class="stat-label">Монет выпущено</div></div>
+                    <div class="stat-item"><div class="stat-value">${st} ⭐</div><div class="stat-label">Звёзд выпущено</div></div>
                 `;
             } catch(e) {
                 document.getElementById('adminStatsData').innerHTML = '<p style="color:red;">Ошибка загрузки статистики</p>';
@@ -1269,6 +1545,7 @@
                 btn.classList.add('active');
                 if (screen === 'analytics' && subLevel !== 'free') { drawChart(); updateCatStats(); updateAdvStats(); }
                 if (screen === 'shop') renderShop();
+                if (screen === 'premium') renderPremium();
                 if (screen === 'more') renderExtra();
             });
         });
@@ -1365,32 +1642,12 @@
             renderAll();
         });
 
-        // Подписки
+        // Пробная подписка
         document.getElementById('trialBtn').addEventListener('click', async () => {
             if(trialUsed) return tg.showAlert('Уже использован');
             await setSub('trial', 3*24*60*60*1000);
             await syncUserToServer();
             tg.showAlert('✅ Пробный Platinum на 3 дня!');
-        });
-        document.getElementById('buyProBtn').addEventListener('click', async () => {
-            await setSub('pro', 30*24*60*60*1000);
-            await syncUserToServer();
-            tg.showAlert('✅ PRO на 30 дней!');
-        });
-        document.getElementById('buyPlatinumBtn').addEventListener('click', async () => {
-            await setSub('platinum', 30*24*60*60*1000);
-            await syncUserToServer();
-            tg.showAlert('✅ Platinum на 30 дней!');
-        });
-        document.getElementById('buyForeverProBtn').addEventListener('click', async () => {
-            await setSub('pro_forever', 100*365*24*60*60*1000);
-            await syncUserToServer();
-            tg.showAlert('✅ PRO навсегда!');
-        });
-        document.getElementById('buyForeverPlatinumBtn').addEventListener('click', async () => {
-            await setSub('platinum_forever', 100*365*24*60*60*1000);
-            await syncUserToServer();
-            tg.showAlert('✅ Platinum навсегда!');
         });
 
         // Инструменты
@@ -1428,7 +1685,7 @@
                 ]
             }, async (id)=>{
                 if(id==='fin'){ balance=0; transactions=[]; dailyLimit=0; await saveFin(); await syncUserToServer(); renderAll(); tg.showAlert('Финансы сброшены'); }
-                else if(id==='all'){ balance=0; transactions=[]; dailyLimit=0; subLevel='free'; subExpiry=null; trialUsed=false; piggyBanks=[]; achievements=[]; challenges=[]; debts=[]; regularPayments=[]; coins=0; customCategories={expense:[],income:[]}; await saveCustomCategories(); await Promise.all([saveFin(), saveSub(), savePlat()]); await syncUserToServer(); updateUI(); renderAll(); tg.showAlert('Всё сброшено'); }
+                else if(id==='all'){ balance=0; transactions=[]; dailyLimit=0; subLevel='free'; subExpiry=null; trialUsed=false; piggyBanks=[]; achievements=[]; challenges=[]; debts=[]; regularPayments=[]; coins=0; stars=0; rewardDay=1; lastRewardDate=null; customCategories={expense:[],income:[]}; await saveCustomCategories(); await Promise.all([saveFin(), saveSub(), savePlat(), saveStars()]); await syncUserToServer(); updateUI(); renderAll(); tg.showAlert('Всё сброшено'); }
             });
         });
 
@@ -1450,9 +1707,8 @@
         // Реферальная ссылка
         document.getElementById('inviteFriendBtn').addEventListener('click', ()=>{
             const uid = tg.initDataUnsafe.user.id;
-            const botName = 'YourBot'; // замените на имя вашего бота
+            const botName = 'YourBot';
             const link = `https://t.me/${botName}?startapp=${uid}`;
-            // Копируем в буфер обмена (телеграм позволяет через showPopup)
             tg.showPopup({
                 title: 'Пригласить друга',
                 message: `Отправьте эту ссылку другу:\n${link}`,
@@ -1469,6 +1725,9 @@
             });
         });
 
+        // Ежедневная награда
+        document.getElementById('claimRewardBtn').addEventListener('click', claimDailyReward);
+
         // ===== ЗАПУСК =====
         document.getElementById('userAvatar').textContent=(tg.initDataUnsafe?.user?.first_name||'Г')[0].toUpperCase();
         document.getElementById('userName').textContent=tg.initDataUnsafe?.user?.first_name||'Гость';
@@ -1476,4 +1735,3 @@
     </script>
 </body>
 </html>
-                                                                                                by hypercore
