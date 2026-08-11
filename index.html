@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Кошелёк PRO</title>
     <style>
+        /* ===== СТИЛИ (полный набор) ===== */
         :root {
             --bg: #ffffff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff;
             --button-text: #ffffff; --secondary-bg: #f2f2f7; --border: #e5e5ea; --safe-top: 60px;
@@ -293,6 +294,7 @@
     </style>
 </head>
 <body>
+    <!-- ====== HTML-РАЗМЕТКА (полная) ====== -->
     <div id="screen-main" class="screen active">
         <div class="header">
             <div class="user-info">
@@ -451,6 +453,7 @@
         </div>
     </div>
 
+    <!-- Модалки -->
     <div class="modal" id="addModal"> <div class="modal-content"> <div class="modal-title" id="modalTitle">Расход</div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="amountInput" placeholder="0" inputmode="numeric"></div> <div class="form-group"><div class="form-label">Категория</div><div class="category-grid" id="categoryGrid"></div></div> <button class="submit-btn" id="submitTransaction">Добавить</button> <button class="cancel-btn" id="closeModal">Отмена</button> </div> </div>
     <div class="modal" id="allTransactionsModal"> <div class="modal-content"> <div class="modal-title">Все операции</div> <ul class="transaction-list" id="allTransactionList" style="max-height: 60vh; overflow-y: auto;"></ul> <button class="cancel-btn" id="closeAllModal">Закрыть</button> </div> </div>
     <div class="modal" id="settingsModal"> <div class="modal-content"> <div class="modal-title">Настройки</div> <div class="form-group"><div class="form-label">Дневной лимит расходов</div><input type="number" class="amount-input" id="dailyLimitInput" placeholder="0" style="font-size:18px;"></div> <div class="theme-toggle"><span>🌙 Тёмная тема</span><label class="toggle-switch"><input type="checkbox" id="themeToggle"><span class="slider"></span></label></div> <div id="subscriptionInfo" style="margin-top:12px; padding:12px; background:var(--secondary-bg); border-radius:12px;"></div> <button class="submit-btn" id="saveSettings">Сохранить</button> <button class="cancel-btn" id="closeSettings">Отмена</button> </div> </div>
@@ -459,62 +462,41 @@
     <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">1 донат (от 99₽) = 199 монет</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <div id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></div> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-
-    <div class="modal" id="currencyModal">
-        <div class="modal-content">
-            <div class="modal-title">Выберите валюту</div>
-            <div class="currency-selector" id="currencySelector"></div>
-            <button class="cancel-btn" id="closeCurrencyModal">Закрыть</button>
-        </div>
-    </div>
-
-    <div class="modal" id="myTicketsModal">
-        <div class="modal-content">
-            <div class="modal-title">Мои тикеты</div>
-            <div id="myTicketsList"></div>
-            <div class="ticket-create-area">
-                <textarea id="newTicketText" placeholder="Опишите вашу проблему..."></textarea>
-                <button class="btn btn-primary" id="createTicketBtn" style="width:100%;">➕ Отправить новый тикет</button>
-            </div>
-            <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button>
-        </div>
-    </div>
-
+    <div class="modal" id="currencyModal"> <div class="modal-content"> <div class="modal-title">Выберите валюту</div> <div class="currency-selector" id="currencySelector"></div> <button class="cancel-btn" id="closeCurrencyModal">Закрыть</button> </div> </div>
+    <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <div class="ticket-create-area"> <textarea id="newTicketText" placeholder="Опишите вашу проблему..."></textarea> <button class="btn btn-primary" id="createTicketBtn" style="width:100%;">➕ Отправить новый тикет</button> </div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
     <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
     <div class="modal" id="adminShopItemModal"> <div class="modal-content"> <div class="modal-title" id="adminShopItemTitle">Добавить товар</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="shopItemName" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Описание</div><input type="text" class="amount-input" id="shopItemDesc" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Цена (монет)</div><input type="number" class="amount-input" id="shopItemPrice" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Действие</div><select id="shopItemAction" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="pro">Выдать PRO</option><option value="platinum">Выдать Platinum</option><option value="pro_forever">PRO навсегда</option><option value="platinum_forever">Platinum навсегда</option><option value="achievement">Трофей (нужен icon)</option><option value="theme">Тема</option></select></div> <div class="form-group"><div class="form-label">Иконка (emoji, только для трофеев)</div><input type="text" class="amount-input" id="shopItemIcon" style="font-size:18px;" placeholder="🥉"></div> <button class="submit-btn" id="saveShopItemBtn">Сохранить</button> <button class="cancel-btn" id="closeAdminShopItemModal">Отмена</button> </div> </div>
     <div class="modal" id="customCategoryModal"> <div class="modal-content"> <div class="modal-title" id="customCatModalTitle">Новая категория</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="customCatName" placeholder="Например, Хобби" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Эмодзи</div><input type="text" class="amount-input" id="customCatEmoji" placeholder="🎨" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="customCatType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="expense">Расход</option><option value="income">Доход</option></select></div> <button class="submit-btn" id="saveCustomCatBtn">Сохранить</button> <button class="cancel-btn" id="closeCustomCatModal">Отмена</button> </div> </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // ===================== КОНФИГУРАЦИЯ =====================
+        // ============================================================
+        // ===================== ПОЛНЫЙ СКРИПТ =========================
+        // ============================================================
+
+        // ---------- КОНФИГ ----------
         const API_URL = 'http://localhost:3000';
-        const ADMIN_USERNAMES = ['ok00112']; // ваши админы
-        const DA_TOKEN = 'ваш_токен_донат_алертс'; // замените на реальный
+        const ADMIN_USERNAMES = ['ok00112'];
+        const DA_TOKEN = 'ваш_токен_донат_алертс'; // замените
         const DA_LINK = 'https://dalink.to/hypercore';
 
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        const safeTop = Math.max(tg.safeAreaInset?.top || 24, 50);
-        document.documentElement.style.setProperty('--safe-top', safeTop + 'px');
+        document.documentElement.style.setProperty('--safe-top', Math.max(tg.safeAreaInset?.top || 24, 50) + 'px');
 
-        // Ключи CloudStorage
+        // ---------- КЛЮЧИ CLOUDSTORAGE ----------
         const KEY_BAL = 'bal', KEY_TX = 'tx', KEY_LIM = 'lim', KEY_DARK = 'dark';
         const KEY_SUB_LVL = 'sub_lvl', KEY_SUB_EXP = 'sub_exp', KEY_TRIAL = 'trial';
         const KEY_PIG = 'pig', KEY_ACH = 'ach', KEY_CHAL = 'chal', KEY_DEBT = 'debt', KEY_REG = 'reg';
         const KEY_COINS = 'coins', KEY_TICKETS = 'tickets', KEY_SHOP = 'shop';
         const KEY_CUSTOM_CATS = 'custom_cats';
-        const KEY_REGISTERED = 'registered';
-        const KEY_LAST_VISIT = 'last_visit';
-        const KEY_STREAK = 'streak';
-        const KEY_REFERRER = 'referrer';
-        const KEY_REGISTERED_AT = 'registered_at';
-        const KEY_STARS = 'stars';
-        const KEY_REWARD_DAY = 'reward_day';
-        const KEY_LAST_REWARD = 'last_reward';
+        const KEY_REGISTERED = 'registered', KEY_LAST_VISIT = 'last_visit', KEY_STREAK = 'streak';
+        const KEY_REFERRER = 'referrer', KEY_REGISTERED_AT = 'registered_at';
+        const KEY_STARS = 'stars', KEY_REWARD_DAY = 'reward_day', KEY_LAST_REWARD = 'last_reward';
         const KEY_CURRENCY = 'currency';
 
-        // Глобальные переменные
+        // ---------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ----------
         let balance = 0, transactions = [], dailyLimit = 0, isDark = false;
         let subLevel = 'free', subExpiry = null, trialUsed = false;
         let currentType = 'expense', selectedCategory = null, timerInterval = null;
@@ -533,7 +515,7 @@
         const platinumExpenseCats = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
         const incomeCats = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
 
-        // ----- CloudStorage -----
+        // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
         function cGet(key) { return new Promise(r => tg.CloudStorage.getItem(key, (e,v) => r(e?null:v))); }
         function cSet(key, val) { return new Promise(r => tg.CloudStorage.setItem(key, String(val), (e,ok) => r(ok))); }
 
@@ -579,7 +561,7 @@
         }
         async function saveCustomCategories() { await cSet(KEY_CUSTOM_CATS, JSON.stringify(customCategories)); }
 
-        // ----- API (с обработкой ошибок) -----
+        // ---------- API (с обработкой ошибок) ----------
         async function apiFetch(action, data = null) {
             try {
                 const url = new URL(API_URL);
@@ -608,20 +590,15 @@
                 const data = {
                     id: uid,
                     first_name: name,
-                    balance: balance,
-                    coins: coins,
-                    stars: stars,
+                    balance, coins, stars,
                     sub: subLevel,
                     sub_expiry: subExpiry ? new Date(subExpiry).toISOString() : null,
                     trial_used: trialUsed,
-                    registered: registered,
-                    last_visit: lastVisit,
-                    streak: streak,
-                    referrer: referrer,
-                    registered_at: registeredAt,
+                    registered, last_visit: lastVisit, streak,
+                    referrer, registered_at: registeredAt,
                     reward_day: rewardDay,
                     last_reward: lastRewardDate,
-                    currency: currency
+                    currency
                 };
                 await apiFetch('update_user', data);
             }, 2000);
@@ -632,7 +609,7 @@
             return result || {};
         }
 
-        // Админские функции
+        // ---------- АДМИНСКИЕ ФУНКЦИИ (доступны из onclick) ----------
         window.adminSetSub = async function(uid, lvl) {
             const result = await apiFetch('admin_set_sub', { uid, lvl });
             if (result && result.success && String(uid) === String(tg.initDataUnsafe.user.id)) {
@@ -668,7 +645,7 @@
             await loadAllUsers();
         };
 
-        // ----- Сохранение (с debounce) -----
+        // ---------- СОХРАНЕНИЕ (debounce) ----------
         let saveTimeout = null;
         function debounceSave(fn) {
             if (saveTimeout) clearTimeout(saveTimeout);
@@ -701,7 +678,7 @@
         }
         async function saveCurrency() { await cSet(KEY_CURRENCY, currency); }
 
-        // ===== ЗАГРУЗКА =====
+        // ---------- ЗАГРУЗКА ----------
         async function loadAll() {
             const [b,tx,lim,dark,lvl,exp,trial,pig,ach,chal,debt,reg,c,tic,shop,
                    regFlag,lastVis,streakVal,ref,regAt,
@@ -734,7 +711,7 @@
             lastRewardDate = lastRewardVal || null;
             currency = curr || 'RUB';
 
-            // Серверные данные
+            // Серверные данные (если доступны)
             const uid = tg.initDataUnsafe.user.id;
             const allUsers = await getAllUsers();
             const serverUser = allUsers[uid];
@@ -786,7 +763,7 @@
             updateCurrencyUI();
         }
 
-        // ----- Регистрация и стрик -----
+        // ---------- РЕГИСТРАЦИЯ И СТРИК ----------
         async function handleRegistration() {
             registered = true;
             registeredAt = new Date().toISOString();
@@ -834,7 +811,7 @@
             updateStreakDisplay();
         }
 
-        // ----- Daily Reward -----
+        // ---------- ЕЖЕДНЕВНАЯ НАГРАДА ----------
         function getDailyRewardAmount(day, streakDays) {
             let reward = 1;
             if (streakDays >= 3) reward += 1;
@@ -909,7 +886,7 @@
             }
         }
 
-        // ----- Достижения за стрик -----
+        // ---------- ДОСТИЖЕНИЯ ЗА СТРИК ----------
         async function checkStreakAchievements() {
             const streakAchievements = [
                 { days: 10, name: '10 дней в приложении', icon: '📅' },
@@ -959,7 +936,7 @@
             container.innerHTML = `Ваша реферальная ссылка:<br><span style="font-size:12px;">${link}</span>`;
         }
 
-        // ===== ВАЛЮТА =====
+        // ---------- ВАЛЮТА ----------
         function updateCurrencyUI() {
             document.getElementById('currencyBtn').textContent = CURRENCY_SIGNS[currency] || '₽';
         }
@@ -974,7 +951,7 @@
             return parseFloat(value) * rate;
         }
 
-        // ===== UI ОБНОВЛЕНИЯ =====
+        // ---------- UI ОБНОВЛЕНИЯ ----------
         function updateCoinsDisplay() { document.getElementById('coinsDisplay').textContent = `🪙 ${coins}`; const e=document.getElementById('coinsBalance'); if(e)e.textContent=coins; }
         function updateStarsDisplay() { document.getElementById('starsDisplay').textContent = `⭐ ${stars}`; }
         function addCoins(n) { coins+=n; updateCoinsDisplay(); savePlat(); syncUserToServer(); }
@@ -1042,6 +1019,7 @@
             updateCurrencyUI();
         }
 
+        // ---------- ОТРИСОВКА ГЛАВНОЙ ----------
         function renderAll() {
             document.getElementById('balanceDisplay').textContent = formatCurrency(balance);
             const today=new Date().toISOString().split('T')[0];
@@ -1101,6 +1079,7 @@
             document.getElementById('topCategory').textContent=top?`${top[0]} (${formatCurrency(top[1])})`:'-';
         }
 
+        // ---------- РЕНДЕР ВСЕХ ДОП. РАЗДЕЛОВ ----------
         function renderExtra() {
             renderPiggy(); renderChallenges(); renderShop();
             if(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial'){ renderAchievements(); renderDebts(); renderRegular(); renderCustomCategoriesList(); }
@@ -1108,7 +1087,7 @@
             const act=document.getElementById(activeTab); if(act)act.style.display='block';
         }
 
-        // ----- КОПИЛКИ -----
+        // ---- Копилки ----
         function renderPiggy() {
             const c=document.getElementById('piggyList');
             c.innerHTML=piggyBanks.length?'':'<p style="color:var(--hint);">Нет копилок</p>';
@@ -1154,7 +1133,7 @@
             document.getElementById('piggyModal').classList.remove('active');
         });
 
-        // ----- ЧЕЛЛЕНДЖИ -----
+        // ---- Челленджи ----
         function renderChallenges() {
             const c=document.getElementById('challengesList');
             c.innerHTML=challenges.length?'':'<p style="color:var(--hint);">Нет челленджей</p>';
@@ -1182,7 +1161,7 @@
             document.getElementById('challengeModal').classList.remove('active');
         });
 
-        // ----- МАГАЗИН -----
+        // ---- Магазин ----
         function renderShop() {
             document.getElementById('shopList').innerHTML=shopItems.map(it=>`<div class="shop-item"><div><div>${it.icon?it.icon+' ':''}${it.name}</div><div style="font-size:12px;">${it.desc}</div></div><button class="btn btn-primary" onclick="buy('${it.id}')">🪙 ${it.price}</button></div>`).join('');
         }
@@ -1202,7 +1181,7 @@
             });
         };
 
-        // ----- PREMIUM (Подписки) -----
+        // ---- Premium (подписки) ----
         function renderPremium() {
             const container = document.getElementById('premiumList');
             const items = [
@@ -1245,7 +1224,6 @@
             });
         };
 
-        // Обмен звёзд на монеты
         document.getElementById('exchangeStarsBtn').addEventListener('click', async () => {
             if (stars < 100) { tg.showAlert('Недостаточно звёзд (нужно 100)'); return; }
             tg.showConfirm(`Обменять 100 ⭐ на 50 🪙?`, async (ok) => {
@@ -1258,12 +1236,12 @@
             });
         });
 
-        // ----- ТРОФЕИ -----
+        // ---- Трофеи ----
         function renderAchievements() {
             document.getElementById('achievementsList').innerHTML=achievements.map(a=>`<div class="achievement-card"><div class="achievement-icon">${a.icon||'🏆'}</div><div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${new Date(a.date).toLocaleDateString()}</div></div></div>`).join('')||'<p style="color:var(--hint);">Нет трофеев</p>';
         }
 
-        // ----- ДОЛГИ -----
+        // ---- Долги ----
         function renderDebts() {
             document.getElementById('debtsList').innerHTML=debts.map((d,i)=>`<div class="debt-card"><div><div>${d.person}</div><div class="debt-amount ${d.type==='owed'?'debt-owed':'debt-paid'}">${d.type==='owed'?'+':'-'}${formatCurrency(d.amount)}</div></div><button class="btn btn-danger" onclick="delDebt(${i})">✕</button></div>`).join('')||'<p style="color:var(--hint);">Нет долгов</p>';
         }
@@ -1281,7 +1259,7 @@
             document.getElementById('debtModal').classList.remove('active');
         });
 
-        // ----- РЕГУЛЯРНЫЕ ПЛАТЕЖИ -----
+        // ---- Регулярные платежи ----
         function renderRegular() {
             document.getElementById('regularPaymentsList').innerHTML=regularPayments.length?regularPayments.map((p,i)=>`<div style="background:var(--secondary-bg);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;"><div><div>${p.name}</div><div style="font-size:13px;">${formatCurrency(p.amount)} · ${p.period==='weekly'?'Раз в неделю':'Раз в месяц'}</div></div><button class="btn btn-danger" onclick="delReg(${i})">✕</button></div>`).join(''):'';
         }
@@ -1313,7 +1291,7 @@
             });
         }
 
-        // ----- СВОИ КАТЕГОРИИ -----
+        // ---- Свои категории ----
         function renderCustomCategoriesList() {
             const container = document.getElementById('customCategoriesList');
             let html = '<div class="section-title">Расходы</div>';
@@ -1354,7 +1332,7 @@
             document.getElementById('customCategoryModal').classList.remove('active');
         });
 
-        // ----- ТИКЕТЫ -----
+        // ---- Тикеты ----
         function renderMyTickets() {
             const list = document.getElementById('myTicketsList');
             const myTickets = tickets.filter(t => t.user_id === tg.initDataUnsafe.user.id);
@@ -1456,7 +1434,7 @@
             }
         }, 3000);
 
-        // ----- АДМИН-ПАНЕЛЬ -----
+        // ---------- АДМИН-ПАНЕЛЬ ----------
         async function loadAllUsers() {
             const container = document.getElementById('allUsersList');
             container.innerHTML = '<p>Загрузка...</p>';
@@ -1633,7 +1611,7 @@
             `;
         }
 
-        // ----- ОБЩИЕ ОБРАБОТЧИКИ -----
+        // ---------- ОБЩИЕ ОБРАБОТЧИКИ ----------
         function isAdmin() { const u=tg.initDataUnsafe.user.username; return u&&ADMIN_USERNAMES.includes(u.toLowerCase()); }
 
         document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -1691,6 +1669,7 @@
             document.getElementById('searchResult').innerHTML = '';
         });
 
+        // ---------- ДОБАВЛЕНИЕ РАСХОДА/ДОХОДА ----------
         document.getElementById('openExpenseModal').addEventListener('click', ()=>openAdd('expense'));
         document.getElementById('openIncomeModal').addEventListener('click', ()=>openAdd('income'));
         document.getElementById('closeModal').addEventListener('click', ()=>document.getElementById('addModal').classList.remove('active'));
@@ -1731,6 +1710,7 @@
         });
         document.getElementById('closeAllModal').addEventListener('click', ()=>document.getElementById('allTransactionsModal').classList.remove('active'));
 
+        // ---------- НАСТРОЙКИ ----------
         document.getElementById('openSettings').addEventListener('click', ()=>{
             document.getElementById('dailyLimitInput').value=dailyLimit||'';
             document.getElementById('settingsModal').classList.add('active');
@@ -1753,7 +1733,7 @@
             tg.showAlert('✅ Пробный Platinum на 3 дня!');
         });
 
-        // Инструменты
+        // ---------- ИНСТРУМЕНТЫ ----------
         document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
             let csv='Тип,Категория,Сумма,Дата\n';
             transactions.forEach(t=>csv+=`${t.type},${t.category},${t.amount},${t.date}\n`);
@@ -1777,6 +1757,7 @@
             tg.showAlert(`🔮 Прогноз: ~-${formatCurrency(avg*30)} в месяц`);
         });
 
+        // ---------- СБРОС (только операции) ----------
         document.getElementById('resetDataBtn').addEventListener('click', ()=>{
             tg.showConfirm('Очистить все операции и обнулить баланс? Подписка, монеты и звёзды останутся.', async (ok) => {
                 if (!ok) return;
@@ -1791,7 +1772,7 @@
             });
         });
 
-        // Монеты (донат)
+        // ---------- ДОНАТ (монеты) ----------
         document.getElementById('coinsDisplay').addEventListener('click', openCoins);
         document.getElementById('closeCoinsModal').addEventListener('click', ()=>document.getElementById('coinsModal').classList.remove('active'));
         document.getElementById('startDonateBtn').addEventListener('click', ()=>{
@@ -1855,6 +1836,7 @@
             document.getElementById('coinsModal').classList.add('active');
         }
 
+        // ---------- ПРИГЛАШЕНИЕ ДРУГА ----------
         document.getElementById('inviteFriendBtn').addEventListener('click', ()=>{
             const uid = tg.initDataUnsafe.user.id;
             const botName = 'YourBot';
@@ -1875,9 +1857,10 @@
             });
         });
 
+        // ---------- ЕЖЕДНЕВНАЯ НАГРАДА (кнопка) ----------
         document.getElementById('claimRewardBtn').addEventListener('click', claimDailyReward);
 
-        // ===== ВАЛЮТА =====
+        // ---------- ВАЛЮТА (модалка) ----------
         document.getElementById('currencyBtn').addEventListener('click', ()=>{
             const modal = document.getElementById('currencyModal');
             const container = document.getElementById('currencySelector');
@@ -1905,7 +1888,7 @@
             document.getElementById('currencyModal').classList.remove('active');
         });
 
-        // ===== ЗАПУСК =====
+        // ---------- ЗАПУСК ----------
         document.getElementById('userAvatar').textContent=(tg.initDataUnsafe?.user?.first_name||'Г')[0].toUpperCase();
         document.getElementById('userName').textContent=tg.initDataUnsafe?.user?.first_name||'Гость';
         loadAll();
