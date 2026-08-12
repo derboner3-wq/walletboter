@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Кошелёк PRO</title>
     <style>
+        /* ===== СТИЛИ (полный набор) ===== */
         :root {
             --bg: #ffffff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff;
             --button-text: #ffffff; --secondary-bg: #f2f2f7; --border: #e5e5ea; --safe-top: 60px;
@@ -524,7 +525,8 @@
         <div id="admin-donations" class="admin-section" style="display:none;">
             <div style="margin-bottom:12px;">
                 <div class="section-title">📋 Последние донаты</div>
-                <iframe src="https://www.donationalerts.com/widget/lastdonations?alert_type=1,4,6,8,7,10,9,11,12,13,14,15,16,17,19,20,27,28,29,30,31,32,33,34,35,36&limit=50" class="donation-widget" id="donationWidget"></iframe>
+                <!-- НОВАЯ ССЫЛКА С ТОКЕНОМ -->
+                <iframe src="https://www.donationalerts.com/widget/lastdonations?alert_type=1,32,12&limit=25&token=GRzHJdwmlYfklYJoiFJP" class="donation-widget" id="donationWidget"></iframe>
             </div>
         </div>
         <div id="admin-stats" class="admin-section" style="display:none;">
@@ -559,6 +561,8 @@
             // ---------- КОНФИГ ----------
             const ADMIN_USERNAMES = ['ok00112'];
             const DA_LINK = 'https://www.donationalerts.com/r/hypercore';
+            // НОВЫЙ ТОКЕН
+            const DA_TOKEN = 'GRzHJdwmlYfklYJoiFJP';
 
             const tg = window.Telegram.WebApp;
             tg.ready();
@@ -576,7 +580,7 @@
             const KEY_STARS = 'stars', KEY_REWARD_DAY = 'reward_day', KEY_LAST_REWARD = 'last_reward';
             const KEY_CURRENCY = 'currency';
             const KEY_ALL_USERS = 'all_users';
-            const KEY_MY_PRIZES = 'my_prizes'; // массив полученных призов
+            const KEY_MY_PRIZES = 'my_prizes';
 
             // ---------- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ----------
             let balance = 0, transactions = [], dailyLimit = 0, isDark = false;
@@ -588,7 +592,7 @@
             let activeTab = 'tab-piggy', currentChatTicketId = null;
             let registered = false, lastVisit = null, streak = 0, referrer = null, registeredAt = null;
             let stars = 0, rewardDay = 1, lastRewardDate = null, currency = 'RUB';
-            let myPrizes = []; // { id, type, subType, days, label, activated, expires }
+            let myPrizes = [];
 
             const CURRENCY_RATES = { RUB: 1, USD: 90, BYN: 30, UAH: 2.5, KZT: 0.2 };
             const CURRENCY_SIGNS = { RUB: '₽', USD: '$', BYN: 'Br', UAH: '₴', KZT: '₸' };
@@ -792,7 +796,6 @@
                 updateCurrencyUI();
                 renderCases();
                 renderMyPrizes();
-                // Обновляем состояние пробной подписки
                 updateTrialButton();
             }
 
@@ -1022,10 +1025,6 @@
                 updateUI(); renderAll(); updateTimer();
                 if (subLevel === 'pro' || subLevel === 'pro_forever' || subLevel === 'platinum' || subLevel === 'platinum_forever' || subLevel === 'trial') renderExtra();
                 await updateUserInGlobalList({ sub: lvl, sub_expiry: subExpiry });
-                // Если это активация приза, отметим его как активированный
-                if (fromPrize) {
-                    // найти приз и отметить
-                }
             }
 
             function fmtTime(ms) { if(ms<=0)return'Истекла'; const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000); return `${d?d+'д ':''}${h||d?h+'ч ':''}${m}м ${s}с`; }
@@ -1049,7 +1048,6 @@
             function updateTrialButton() {
                 const btn = document.getElementById('trialBtn');
                 if (!btn) return;
-                // Если подписка уже была использована (trialUsed === true) или есть активная подписка (не free)
                 if (trialUsed || subLevel !== 'free') {
                     btn.style.display = 'none';
                 } else {
@@ -1067,7 +1065,6 @@
                 else if(subLevel==='trial'){badge.classList.add('trial');badge.textContent='ПРОБНЫЙ';}
                 else badge.style.display='none';
                 document.getElementById('screen-analytics').style.display = (subLevel !== 'free') ? '' : 'none';
-                // Пробная кнопка обновляется отдельно
                 updateTrialButton();
                 const isPlat=(subLevel==='platinum'||subLevel==='platinum_forever'||subLevel==='trial');
                 document.querySelectorAll('.platinum-only').forEach(el=>el.style.display=isPlat?'':'none');
@@ -1300,7 +1297,7 @@
                 });
             });
 
-            // ---- КЕЙСЫ С ПРОКРУТКОЙ (ускоренной) ----
+            // ---- КЕЙСЫ С ПРОКРУТКОЙ ----
             function renderCases() {
                 const container = document.getElementById('casesList');
                 container.innerHTML = CASE_TYPES.map(c => `
@@ -1344,7 +1341,6 @@
                         }
                     }
 
-                    // Показываем анимацию прокрутки
                     showCaseSpin(caseData, selected);
                 });
             };
@@ -1353,12 +1349,10 @@
                 const modal = document.getElementById('caseResultModal');
                 const content = document.getElementById('caseResultContent');
 
-                // Создаём контейнер для прокрутки
                 const spinContainer = document.createElement('div');
                 spinContainer.className = 'case-spin-container';
                 spinContainer.id = 'spinContainer';
 
-                // Собираем все возможные награды для отображения (с эмодзи)
                 const allRewards = caseData.rewards.map(r => {
                     let emoji = '';
                     let label = r.label;
@@ -1371,14 +1365,12 @@
                     return { emoji, label };
                 });
 
-                // Создаём элементы для прокрутки (повторяем массив для заполнения)
                 let spinItems = [];
                 for (let i = 0; i < 16; i++) {
                     const item = allRewards[i % allRewards.length];
                     spinItems.push(item);
                 }
 
-                // Строим HTML
                 let spinHTML = spinItems.map((item, idx) => `
                     <div class="case-spin-item" id="spin-item-${idx}">
                         <span class="spin-emoji">${item.emoji}</span>
@@ -1396,14 +1388,12 @@
 
                 modal.classList.add('active');
 
-                // Запускаем анимацию
                 let currentIndex = 0;
                 const totalItems = spinItems.length;
-                let speed = 60; // начальная скорость (мс) - уменьшена
+                let speed = 60;
                 let rounds = 0;
-                const maxRounds = 3 + Math.floor(Math.random() * 2); // 3-4 оборота (было 5-7)
+                const maxRounds = 3 + Math.floor(Math.random() * 2);
 
-                // Определяем индекс, на котором должна остановиться (выигрыш)
                 let targetIndex = 0;
                 for (let i = 0; i < totalItems; i++) {
                     if (spinItems[i].label === selectedReward.label) {
@@ -1443,14 +1433,12 @@
                                     <div style="font-size:14px; color:var(--hint); margin-top:8px;">Кейс: ${caseData.name}</div>
                                 </div>
                             `;
-                            // Применяем награду
                             applyCaseReward(selectedReward);
                             closeBtn.style.display = 'block';
                         }, 400);
                         return;
                     }
 
-                    // Плавное замедление (ускоренное)
                     if (step > totalSteps - 10) {
                         speed = 60 + (step - (totalSteps - 10)) * 15;
                     } else if (step > totalSteps - 20) {
@@ -1471,7 +1459,6 @@
             }
 
             function applyCaseReward(reward) {
-                // Если это подписка, добавляем в "Мои призы"
                 if (reward.type === 'sub') {
                     const prize = {
                         id: 'prize_' + Date.now(),
@@ -1487,7 +1474,6 @@
                     renderMyPrizes();
                     tg.showAlert('🎉 Подписка добавлена в "Мои призы"! Активируйте её в разделе кейсов.');
                 } else {
-                    // Монеты или звёзды применяются сразу
                     switch (reward.type) {
                         case 'coins':
                             addCoins(reward.amount);
@@ -1550,7 +1536,6 @@
                     tg.showAlert('Срок действия этого приза истёк!');
                     return;
                 }
-                // Активируем подписку
                 const dur = prize.days * 24 * 60 * 60 * 1000;
                 setSub(prize.subType, dur, true);
                 prize.activated = true;
@@ -2114,11 +2099,62 @@
             // ---------- ДОНАТ (монеты) ----------
             document.getElementById('coinsDisplay').addEventListener('click', openCoins);
             document.getElementById('closeCoinsModal').addEventListener('click', ()=>document.getElementById('coinsModal').classList.remove('active'));
+
             document.getElementById('startDonateBtn').addEventListener('click', ()=>{
+                const uid = tg.initDataUnsafe.user.id;
                 tg.openLink(DA_LINK);
                 const statusDiv = document.getElementById('donateStatus');
-                statusDiv.innerHTML = '🔗 Открыта страница донатов. После оплаты монеты появятся вручную (админ или кейсы).';
+                statusDiv.innerHTML = '⏳ Ожидаем оплату...';
+                startCheck(uid);
             });
+
+            // Функция проверки донатов через API DonationAlerts с новым токеном
+            function startCheck(uid) {
+                let attempts = 0;
+                const max = 30;
+                const statusDiv = document.getElementById('donateStatus');
+                if (window._donateInterval) clearInterval(window._donateInterval);
+                window._donateInterval = setInterval(async () => {
+                    attempts++;
+                    const ok = await checkDonation(uid);
+                    if (ok) {
+                        clearInterval(window._donateInterval);
+                        addCoins(199);
+                        document.getElementById('coinsBalance').textContent = coins;
+                        statusDiv.innerHTML = '✅ 199 монет зачислено! Спасибо за поддержку!';
+                        tg.showAlert('199 монет получено!');
+                    } else if (attempts >= max) {
+                        clearInterval(window._donateInterval);
+                        statusDiv.innerHTML = '❌ Оплата не найдена. Проверьте, что вы отправили донат от 99 ₽ с указанием ID в сообщении.';
+                    }
+                }, 10000);
+            }
+
+            async function checkDonation(uid) {
+                try {
+                    const r = await fetch('https://www.donationalerts.com/api/v1/alerts/donations', {
+                        headers: { 'Authorization': `Bearer ${DA_TOKEN}` }
+                    });
+                    const d = await r.json();
+                    const donations = d.data || [];
+                    const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+                    const found = donations.some(x => {
+                        const dt = new Date(x.created_at).getTime();
+                        return dt > fiveMinAgo && x.amount >= 99 && x.message && x.message.includes(String(uid));
+                    });
+                    if (found) {
+                        const donor = donations.find(x => x.message && x.message.includes(String(uid)));
+                        if (donor) {
+                            document.getElementById('donateStatus').innerHTML = `✅ Найден донат от ${donor.donor_name || 'Аноним'} (${donor.amount} ${donor.currency || 'RUB'}) — зачислено 199 🪙`;
+                        }
+                        return true;
+                    }
+                    return false;
+                } catch(e) {
+                    console.warn('Donation check error:', e);
+                    return false;
+                }
+            }
 
             function openCoins() {
                 document.getElementById('coinsBalance').textContent = coins;
