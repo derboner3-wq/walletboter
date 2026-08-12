@@ -297,6 +297,41 @@
         }
         .case-result .reward { font-size: 24px; font-weight: bold; margin-top: 10px; }
         .case-result .reward-icon { font-size: 48px; display: block; margin-bottom: 10px; }
+
+        /* Анимация прокрутки кейса */
+        .case-spin-container {
+            background: var(--secondary-bg);
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .case-spin-item {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 2px solid var(--border);
+            transition: all 0.1s;
+            min-width: 80px;
+            text-align: center;
+            color: var(--text);
+        }
+        .case-spin-item.active {
+            border-color: gold;
+            background: rgba(255, 215, 0, 0.2);
+            transform: scale(1.05);
+        }
+        .case-spin-item .spin-emoji { font-size: 24px; display: block; }
+        .case-spin-item .spin-label { font-size: 13px; }
     </style>
 </head>
 <body>
@@ -485,7 +520,7 @@
     <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">Пополняйте монеты через донат или открывайте кейсы!</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <div id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></div> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="caseResultModal"> <div class="modal-content"> <div class="modal-title">🎰 Результат кейса</div> <div id="caseResultContent"></div> <button class="cancel-btn" id="closeCaseResultModal">Закрыть</button> </div> </div>
+    <div class="modal" id="caseResultModal"> <div class="modal-content"> <div class="modal-title">🎰 Открытие кейса</div> <div id="caseResultContent"></div> <button class="cancel-btn" id="closeCaseResultModal">Закрыть</button> </div> </div>
     <div class="modal" id="currencyModal"> <div class="modal-content"> <div class="modal-title">Выберите валюту</div> <div class="currency-selector" id="currencySelector"></div> <button class="cancel-btn" id="closeCurrencyModal">Закрыть</button> </div> </div>
     <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <div class="ticket-create-area"> <textarea id="newTicketText" placeholder="Опишите вашу проблему..."></textarea> <button class="btn btn-primary" id="createTicketBtn" style="width:100%;">➕ Отправить новый тикет</button> </div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
     <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
@@ -502,7 +537,7 @@
 
             // ---------- КОНФИГ ----------
             const ADMIN_USERNAMES = ['ok00112'];
-            const DA_LINK = 'https://www.donationalerts.com/r/hypercore'; // ваша ссылка для донатов
+            const DA_LINK = 'https://www.donationalerts.com/r/hypercore';
 
             const tg = window.Telegram.WebApp;
             tg.ready();
@@ -540,7 +575,7 @@
             const platinumExpenseCats = [{emoji:'💻',name:'Техника'},{emoji:'🐱',name:'Питомцы'}];
             const incomeCats = [{emoji:'💼',name:'Зарплата'},{emoji:'💸',name:'Подработка'},{emoji:'🎁',name:'Подарок'},{emoji:'📈',name:'Инвестиции'}];
 
-            // ---------- НАСТРОЙКИ КЕЙСОВ ----------
+            // ---------- НАСТРОЙКИ КЕЙСОВ (без вечных подписок) ----------
             const CASE_TYPES = [
                 {
                     id: 'case_common',
@@ -552,8 +587,8 @@
                         { type: 'coins', amount: 10, weight: 30, label: '10 🪙' },
                         { type: 'coins', amount: 25, weight: 20, label: '25 🪙' },
                         { type: 'stars', amount: 15, weight: 25, label: '15 ⭐' },
-                        { type: 'sub', subType: 'pro', days: 10, weight: 15, label: 'PRO 10 дн.' },
-                        { type: 'sub', subType: 'platinum', days: 10, weight: 10, label: 'Platinum 10 дн.' }
+                        { type: 'sub', subType: 'pro', days: 10, label: 'PRO 10 дн.' },
+                        { type: 'sub', subType: 'platinum', days: 10, label: 'Platinum 10 дн.' }
                     ]
                 },
                 {
@@ -566,10 +601,10 @@
                         { type: 'coins', amount: 30, weight: 20, label: '30 🪙' },
                         { type: 'coins', amount: 60, weight: 15, label: '60 🪙' },
                         { type: 'stars', amount: 40, weight: 20, label: '40 ⭐' },
-                        { type: 'sub', subType: 'pro', days: 30, weight: 25, label: 'PRO 30 дн.' },
-                        { type: 'sub', subType: 'platinum', days: 30, weight: 15, label: 'Platinum 30 дн.' },
-                        { type: 'sub', subType: 'pro_forever', days: 0, weight: 3, label: 'PRO навсегда!' },
-                        { type: 'sub', subType: 'platinum_forever', days: 0, weight: 2, label: 'Platinum навсегда!' }
+                        { type: 'sub', subType: 'pro', days: 30, label: 'PRO 30 дн.' },
+                        { type: 'sub', subType: 'platinum', days: 30, label: 'Platinum 30 дн.' },
+                        { type: 'sub', subType: 'pro', days: 180, label: 'PRO 6 мес.' },
+                        { type: 'sub', subType: 'platinum', days: 180, label: 'Platinum 6 мес.' }
                     ]
                 },
                 {
@@ -582,10 +617,12 @@
                         { type: 'coins', amount: 100, weight: 15, label: '100 🪙' },
                         { type: 'coins', amount: 200, weight: 10, label: '200 🪙' },
                         { type: 'stars', amount: 80, weight: 15, label: '80 ⭐' },
-                        { type: 'sub', subType: 'pro', days: 30, weight: 20, label: 'PRO 30 дн.' },
-                        { type: 'sub', subType: 'platinum', days: 30, weight: 20, label: 'Platinum 30 дн.' },
-                        { type: 'sub', subType: 'pro_forever', days: 0, weight: 12, label: 'PRO навсегда!' },
-                        { type: 'sub', subType: 'platinum_forever', days: 0, weight: 8, label: 'Platinum навсегда!' }
+                        { type: 'sub', subType: 'pro', days: 30, weight: 15, label: 'PRO 30 дн.' },
+                        { type: 'sub', subType: 'platinum', days: 30, weight: 15, label: 'Platinum 30 дн.' },
+                        { type: 'sub', subType: 'pro', days: 180, weight: 12, label: 'PRO 6 мес.' },
+                        { type: 'sub', subType: 'platinum', days: 180, weight: 10, label: 'Platinum 6 мес.' },
+                        { type: 'sub', subType: 'pro', days: 365, weight: 5, label: 'PRO 12 мес.' },
+                        { type: 'sub', subType: 'platinum', days: 365, weight: 3, label: 'Platinum 12 мес.' }
                     ]
                 }
             ];
@@ -1220,7 +1257,7 @@
                 });
             });
 
-            // ---- КЕЙСЫ ----
+            // ---- КЕЙСЫ С ПРОКРУТКОЙ ----
             function renderCases() {
                 const container = document.getElementById('casesList');
                 container.innerHTML = CASE_TYPES.map(c => `
@@ -1252,7 +1289,7 @@
 
                     if (!spendCoins(caseData.price)) return;
 
-                    // Выбор награды с учётом весов
+                    // Выбор награды
                     const totalWeight = caseData.rewards.reduce((sum, r) => sum + r.weight, 0);
                     let random = Math.random() * totalWeight;
                     let selected = caseData.rewards[0];
@@ -1264,55 +1301,160 @@
                         }
                     }
 
-                    // Применение награды
-                    let resultText = '';
-                    let resultIcon = '🎉';
-                    switch (selected.type) {
-                        case 'coins':
-                            addCoins(selected.amount);
-                            resultText = `+${selected.amount} 🪙`;
-                            resultIcon = '🪙';
-                            break;
-                        case 'stars':
-                            stars += selected.amount;
-                            await saveStars();
-                            updateStarsDisplay();
-                            resultText = `+${selected.amount} ⭐`;
-                            resultIcon = '⭐';
-                            break;
-                        case 'sub': {
-                            let dur;
-                            if (selected.days === 0) {
-                                dur = 100*365*24*60*60*1000; // навсегда
-                            } else {
-                                dur = selected.days * 24*60*60*1000;
-                            }
-                            await setSub(selected.subType, dur);
-                            resultText = selected.label;
-                            resultIcon = '👑';
-                            break;
-                        }
-                        default:
-                            resultText = 'Ничего не найдено';
-                    }
-
-                    // Показываем результат
-                    const modal = document.getElementById('caseResultModal');
-                    const content = document.getElementById('caseResultContent');
-                    content.innerHTML = `
-                        <div class="case-result">
-                            <span class="reward-icon">${resultIcon}</span>
-                            <div>Вы выиграли:</div>
-                            <div class="reward">${resultText}</div>
-                            <div style="font-size:14px; color:var(--hint); margin-top:8px;">Кейс: ${caseData.name}</div>
-                        </div>
-                    `;
-                    modal.classList.add('active');
-
-                    // Обновляем UI
-                    renderAll();
+                    // Показываем анимацию прокрутки
+                    showCaseSpin(caseData, selected);
                 });
             };
+
+            function showCaseSpin(caseData, selectedReward) {
+                const modal = document.getElementById('caseResultModal');
+                const content = document.getElementById('caseResultContent');
+
+                // Создаём контейнер для прокрутки
+                const spinContainer = document.createElement('div');
+                spinContainer.className = 'case-spin-container';
+                spinContainer.id = 'spinContainer';
+
+                // Собираем все возможные награды для отображения (с эмодзи)
+                const allRewards = caseData.rewards.map(r => {
+                    let emoji = '';
+                    let label = r.label;
+                    if (r.type === 'coins') emoji = '🪙';
+                    else if (r.type === 'stars') emoji = '⭐';
+                    else if (r.type === 'sub') {
+                        if (r.subType === 'pro') emoji = '⭐';
+                        else if (r.subType === 'platinum') emoji = '💎';
+                    }
+                    return { emoji, label };
+                });
+
+                // Создаём элементы для прокрутки (повторяем массив для заполнения)
+                let spinItems = [];
+                for (let i = 0; i < 20; i++) {
+                    const item = allRewards[i % allRewards.length];
+                    spinItems.push(item);
+                }
+
+                // Строим HTML
+                let spinHTML = spinItems.map((item, idx) => `
+                    <div class="case-spin-item" id="spin-item-${idx}">
+                        <span class="spin-emoji">${item.emoji}</span>
+                        <span class="spin-label">${item.label}</span>
+                    </div>
+                `).join('');
+
+                spinContainer.innerHTML = spinHTML;
+
+                // Очищаем контент и добавляем спин
+                content.innerHTML = '';
+                content.appendChild(spinContainer);
+
+                // Кнопка закрытия пока скрыта
+                const closeBtn = document.getElementById('closeCaseResultModal');
+                closeBtn.style.display = 'none';
+
+                modal.classList.add('active');
+
+                // Запускаем анимацию
+                let currentIndex = 0;
+                const totalItems = spinItems.length;
+                let speed = 80; // начальная скорость (мс)
+                let rounds = 0;
+                const maxRounds = 5 + Math.floor(Math.random() * 3); // 5-7 полных оборотов
+
+                // Определяем индекс, на котором должна остановиться (выигрыш)
+                // Находим позицию выигрышной награды в spinItems (берём случайное вхождение)
+                let targetIndex = 0;
+                for (let i = 0; i < totalItems; i++) {
+                    if (spinItems[i].label === selectedReward.label) {
+                        targetIndex = i;
+                        break;
+                    }
+                }
+                // Чтобы остановка была не всегда на первом вхождении, сдвигаем
+                const offset = Math.floor(Math.random() * 3);
+                targetIndex = (targetIndex + offset) % totalItems;
+
+                // Общее количество шагов
+                const totalSteps = maxRounds * totalItems + targetIndex;
+
+                let step = 0;
+
+                function highlightItem(index) {
+                    document.querySelectorAll('.case-spin-item').forEach(el => el.classList.remove('active'));
+                    const el = document.getElementById('spin-item-' + index);
+                    if (el) el.classList.add('active');
+                }
+
+                function spinStep() {
+                    if (step >= totalSteps) {
+                        // Остановка
+                        highlightItem(targetIndex);
+                        // Показываем результат
+                        setTimeout(() => {
+                            const rewardText = selectedReward.label;
+                            let icon = '';
+                            if (selectedReward.type === 'coins') icon = '🪙';
+                            else if (selectedReward.type === 'stars') icon = '⭐';
+                            else if (selectedReward.type === 'sub') {
+                                if (selectedReward.subType === 'pro') icon = '⭐';
+                                else if (selectedReward.subType === 'platinum') icon = '💎';
+                            }
+                            content.innerHTML = `
+                                <div class="case-result">
+                                    <span class="reward-icon">${icon || '🎉'}</span>
+                                    <div>Вы выиграли:</div>
+                                    <div class="reward">${rewardText}</div>
+                                    <div style="font-size:14px; color:var(--hint); margin-top:8px;">Кейс: ${caseData.name}</div>
+                                </div>
+                            `;
+                            // Применяем награду
+                            applyCaseReward(selectedReward);
+                            closeBtn.style.display = 'block';
+                        }, 500);
+                        return;
+                    }
+
+                    // Плавное замедление
+                    if (step > totalSteps - 15) {
+                        speed = 80 + (step - (totalSteps - 15)) * 20;
+                    } else if (step > totalSteps - 30) {
+                        speed = 60 + (step - (totalSteps - 30)) * 4;
+                    } else {
+                        speed = 60 + Math.random() * 30;
+                    }
+
+                    currentIndex = (currentIndex + 1) % totalItems;
+                    highlightItem(currentIndex);
+                    step++;
+
+                    setTimeout(spinStep, speed);
+                }
+
+                // Старт
+                highlightItem(0);
+                setTimeout(spinStep, 300);
+            }
+
+            function applyCaseReward(reward) {
+                switch (reward.type) {
+                    case 'coins':
+                        addCoins(reward.amount);
+                        break;
+                    case 'stars':
+                        stars += reward.amount;
+                        saveStars();
+                        updateStarsDisplay();
+                        break;
+                    case 'sub': {
+                        let dur = reward.days * 24 * 60 * 60 * 1000;
+                        if (reward.days === 0) dur = 100 * 365 * 24 * 60 * 60 * 1000; // на всякий случай
+                        setSub(reward.subType, dur);
+                        break;
+                    }
+                }
+                renderAll();
+            }
 
             document.getElementById('closeCaseResultModal').addEventListener('click', () => {
                 document.getElementById('caseResultModal').classList.remove('active');
@@ -1728,10 +1870,9 @@
                 document.querySelector('#adminTabs .tab[data-atab="users"]').classList.add('active');
                 document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
                 document.getElementById('admin-users').style.display = 'block';
-                // Обновляем виджет донатов
                 const widget = document.getElementById('donationWidget');
                 if (widget) {
-                    widget.src = widget.src; // перезагрузка iframe
+                    widget.src = widget.src;
                 }
             }
 
