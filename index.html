@@ -538,15 +538,22 @@
         </div>
         <div id="admin-donations" class="admin-section" style="display:none;">
             <!-- ВИДЖЕТ ДОНАТОВ (IFRAME) -->
-            <div style="margin-bottom:16px;">
-                <div class="section-title">📋 Виджет донатов</div>
-                <iframe 
-                    src="https://www.donationalerts.com/widget/lastdonations?alert_type=1,32,12&limit=25&token=GRzHJdwmlYfklYJoiFJP" 
-                    class="donation-widget" 
-                    id="donationWidget"
-                    allowtransparency="true"
-                    loading="lazy"
-                ></iframe>
+           <div id="admin-donations" class="admin-section" style="display:none;">
+    <!-- Кнопка для открытия виджета в новой вкладке -->
+    <div style="margin-bottom:16px;">
+        <div class="section-title">📋 Виджет донатов</div>
+        <button class="btn btn-primary" onclick="window.open('https://www.donationalerts.com/widget/lastdonations?alert_type=1,32,12&limit=25&token=GRzHJdwmlYfklYJoiFJP', '_blank')" style="width:100%;">
+            🔗 Открыть виджет донатов
+        </button>
+        <p style="font-size:13px; color:var(--hint); margin-top:6px;">Нажмите, чтобы открыть виджет в новой вкладке</p>
+    </div>
+    <!-- API-список донатов -->
+    <div style="margin-top:16px;">
+        <div class="section-title">📋 Список донатов (API)</div>
+        <button class="btn btn-primary" id="refreshDonationsBtn" style="width:auto; flex:none; margin-bottom:12px;">🔄 Обновить донаты</button>
+        <div id="donationsList" style="margin-top:12px;"></div>
+    </div>
+</div>
             </div>
             <!-- API-список донатов (для информации) -->
             <div style="margin-top:16px;">
