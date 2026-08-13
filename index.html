@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Кошелёк PRO</title>
     <style>
-        /* ===== СТИЛИ (полный набор) ===== */
         :root {
             --bg: #ffffff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff;
             --button-text: #ffffff; --secondary-bg: #f2f2f7; --border: #e5e5ea; --safe-top: 60px;
@@ -358,6 +357,15 @@
         .status-active { color: #34c759; }
         .status-expired { color: #ff3b30; }
         .status-available { color: var(--button); }
+
+        /* Виджет донатов */
+        .donation-widget {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 12px;
+            background: var(--secondary-bg);
+        }
     </style>
 </head>
 <body>
@@ -529,8 +537,22 @@
             <div id="adminTicketsList"></div>
         </div>
         <div id="admin-donations" class="admin-section" style="display:none;">
-            <button class="btn btn-primary" id="refreshDonationsBtn" style="width:auto; flex:none;">🔄 Обновить донаты</button>
-            <div id="donationsList" style="margin-top:12px;"></div>
+            <!-- ВИДЖЕТ ДОНАТОВ (IFRAME) -->
+            <div style="margin-bottom:16px;">
+                <div class="section-title">📋 Виджет донатов</div>
+                <iframe 
+                    src="https://www.donationalerts.com/widget/lastdonations?alert_type=1,32,12&limit=25&token=GRzHJdwmlYfklYJoiFJP" 
+                    class="donation-widget" 
+                    id="donationWidget"
+                    allowtransparency="true"
+                ></iframe>
+            </div>
+            <!-- API-список донатов -->
+            <div style="margin-top:16px;">
+                <div class="section-title">📋 Список донатов (API)</div>
+                <button class="btn btn-primary" id="refreshDonationsBtn" style="width:auto; flex:none; margin-bottom:12px;">🔄 Обновить донаты</button>
+                <div id="donationsList" style="margin-top:12px;"></div>
+            </div>
         </div>
         <div id="admin-stats" class="admin-section" style="display:none;">
             <div id="adminStatsData"></div>
@@ -547,7 +569,7 @@
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">Пополняйте монеты через донат или открывайте кейсы!</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <div id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></div> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
     <div class="modal" id="caseResultModal"> <div class="modal-content"> <div class="modal-title">🎰 Открытие кейса</div> <div id="caseResultContent"></div>
-        <!-- КНОПКА ЗАКРЫТИЯ ВСЕГДА ВИДИМА И РАБОТАЕТ -->
+        <!-- КНОПКА ЗАКРЫТИЯ ВСЕГДА ВИДИМА -->
         <button class="cancel-btn" id="closeCaseResultModal" onclick="document.getElementById('caseResultModal').classList.remove('active')">Закрыть</button>
     </div>
     <div class="modal" id="currencyModal"> <div class="modal-content"> <div class="modal-title">Выберите валюту</div> <div class="currency-selector" id="currencySelector"></div> <button class="cancel-btn" id="closeCurrencyModal">Закрыть</button> </div> </div>
@@ -1302,7 +1324,7 @@
                 });
             });
 
-            // ---- КЕЙСЫ С ПРОКРУТКОЙ (ускоренной) ----
+            // ---- КЕЙСЫ С ПРОКРУТКОЙ ----
             function renderCases() {
                 const container = document.getElementById('casesList');
                 container.innerHTML = CASE_TYPES.map(c => `
@@ -1334,7 +1356,6 @@
 
                     if (!spendCoins(caseData.price)) return;
 
-                    // Выбор награды
                     const totalWeight = caseData.rewards.reduce((sum, r) => sum + r.weight, 0);
                     let random = Math.random() * totalWeight;
                     let selected = caseData.rewards[0];
@@ -1353,8 +1374,6 @@
             function showCaseSpin(caseData, selectedReward) {
                 const modal = document.getElementById('caseResultModal');
                 const content = document.getElementById('caseResultContent');
-
-                // Кнопка закрытия всегда видна, её не трогаем
 
                 const spinContainer = document.createElement('div');
                 spinContainer.className = 'case-spin-container';
@@ -1438,7 +1457,6 @@
                                 </div>
                             `;
                             applyCaseReward(selectedReward);
-                            // Кнопка закрытия уже видна
                         }, 400);
                         return;
                     }
@@ -1911,7 +1929,7 @@
                 const t=tickets.find(x=>x.id===tid); if(t){t.status='closed'; await saveTickets(); renderAdminTickets();}
             };
 
-            // ---------- ЗАГРУЗКА ДОНАТОВ ЧЕРЕЗ API ----------
+            // ---------- ЗАГРУЗКА ДОНАТОВ (API) ----------
             async function loadDonations() {
                 const container = document.getElementById('donationsList');
                 container.innerHTML = '<p>Загрузка...</p>';
@@ -1985,6 +2003,7 @@
                 document.querySelector('#adminTabs .tab[data-atab="users"]').classList.add('active');
                 document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
                 document.getElementById('admin-users').style.display = 'block';
+                // Виджет и API донатов загружаются при открытии вкладки
             }
 
             document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
@@ -1999,7 +2018,9 @@
                     document.getElementById('admin-' + section).style.display='block';
                     if (section === 'stats') renderAdminStats();
                     if (section === 'donations') {
+                        // Загружаем API-список донатов
                         loadDonations();
+                        // Виджет iframe загружается автоматически
                     }
                 });
             });
