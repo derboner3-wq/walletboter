@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Кошелёк PRO</title>
     <style>
-        /* ===== СТИЛИ (полный набор) ===== */
         :root {
             --bg: #ffffff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff;
             --button-text: #ffffff; --secondary-bg: #f2f2f7; --border: #e5e5ea; --safe-top: 60px;
@@ -1983,7 +1982,6 @@
                 document.querySelector('#adminTabs .tab[data-atab="users"]').classList.add('active');
                 document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
                 document.getElementById('admin-users').style.display = 'block';
-                // Загружаем донаты при открытии вкладки "Донаты" позже
             }
 
             document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
@@ -2235,6 +2233,12 @@
             });
             document.getElementById('closeCurrencyModal').addEventListener('click', ()=>{
                 document.getElementById('currencyModal').classList.remove('active');
+            });
+
+            // ---------- ИСПРАВЛЕННАЯ КНОПКА ЗАКРЫТИЯ КЕЙСА ----------
+            // Уже есть в HTML: onclick закрывает модалку. Дополнительно привяжем на случай, если не сработает.
+            document.getElementById('closeCaseResultModal').addEventListener('click', function() {
+                document.getElementById('caseResultModal').classList.remove('active');
             });
 
             // ---------- ЗАПУСК ----------
