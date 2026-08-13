@@ -289,6 +289,15 @@
         .donation-item .msg { font-size: 13px; color: var(--hint); }
         .donation-item .date { font-size: 11px; color: var(--hint); }
 
+        /* Виджет донатов (iframe) */
+        .donation-widget {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 12px;
+            background: var(--secondary-bg);
+        }
+
         .case-item {
             background: var(--secondary-bg); border-radius: 12px; padding: 16px;
             margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
@@ -528,9 +537,20 @@
             <div id="adminTicketsList"></div>
         </div>
         <div id="admin-donations" class="admin-section" style="display:none;">
-            <!-- ТОЛЬКО API-СПИСОК ДОНАТОВ (без iframe) -->
+            <!-- ВИДЖЕТ ДОНАТОВ (IFRAME) -->
             <div style="margin-bottom:16px;">
-                <div class="section-title">📋 Последние донаты</div>
+                <div class="section-title">📋 Виджет донатов</div>
+                <iframe 
+                    src="https://www.donationalerts.com/widget/lastdonations?alert_type=1,32,12&limit=25&token=GRzHJdwmlYfklYJoiFJP" 
+                    class="donation-widget" 
+                    id="donationWidget"
+                    allowtransparency="true"
+                    loading="lazy"
+                ></iframe>
+            </div>
+            <!-- API-список донатов (для информации) -->
+            <div style="margin-top:16px;">
+                <div class="section-title">📋 Список донатов (API)</div>
                 <button class="btn btn-primary" id="refreshDonationsBtn" style="width:auto; flex:none; margin-bottom:12px;">🔄 Обновить донаты</button>
                 <div id="donationsList" style="margin-top:12px;"></div>
             </div>
@@ -1910,7 +1930,7 @@
                 const t=tickets.find(x=>x.id===tid); if(t){t.status='closed'; await saveTickets(); renderAdminTickets();}
             };
 
-            // ---------- ЗАГРУЗКА ДОНАТОВ (ТОЛЬКО API) ----------
+            // ---------- ЗАГРУЗКА ДОНАТОВ (API) ----------
             async function loadDonations() {
                 const container = document.getElementById('donationsList');
                 container.innerHTML = '<p>Загрузка...</p>';
@@ -1936,7 +1956,7 @@
                         </div>
                     `).join('');
                 } catch(e) {
-                    container.innerHTML = `<p style="color:red;">⚠️ Ошибка загрузки донатов: ${e.message}. Проверьте токен API.</p>`;
+                    container.innerHTML = `<p style="color:red;">⚠️ Ошибка загрузки донатов: ${e.message}</p>`;
                 }
             }
 
@@ -1987,6 +2007,11 @@
                 document.querySelector('#adminTabs .tab[data-atab="users"]').classList.add('active');
                 document.querySelectorAll('#adminFullscreen .admin-section').forEach(s => s.style.display = 'none');
                 document.getElementById('admin-users').style.display = 'block';
+                // Обновляем виджет (перезагрузка iframe при открытии)
+                const widget = document.getElementById('donationWidget');
+                if (widget) {
+                    widget.src = widget.src; // перезагрузка iframe
+                }
             }
 
             document.getElementById('closeAdminFullscreen').addEventListener('click', ()=> document.getElementById('adminFullscreen').classList.remove('active'));
@@ -2002,6 +2027,11 @@
                     if (section === 'stats') renderAdminStats();
                     if (section === 'donations') {
                         loadDonations();
+                        // Перезагружаем виджет
+                        const widget = document.getElementById('donationWidget');
+                        if (widget) {
+                            widget.src = widget.src;
+                        }
                     }
                 });
             });
@@ -2166,12 +2196,34 @@
                     const d = await r.json();
                     const donations = d.data || [];
                     const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+                    // Ищем донат, который содержит ID пользователя, его username (без @) или имя
                     const found = donations.some(x => {
                         const dt = new Date(x.created_at).getTime();
-                        return dt > fiveMinAgo && x.amount >= 99 && x.message && x.message.includes(String(uid));
+                        if (dt < fiveMinAgo) return false;
+                        if (x.amount < 99) return false;
+                        const msg = (x.message || '').toLowerCase();
+                        // Проверяем ID, username, имя донатора, имя пользователя Telegram
+                        const userIdStr = String(uid);
+                        const userName = (tg.initDataUnsafe.user.username || '').toLowerCase();
+                        const firstName = (tg.initDataUnsafe.user.first_name || '').toLowerCase();
+                        const donorName = (x.donor_name || '').toLowerCase();
+                        return msg.includes(userIdStr) || 
+                               (userName && msg.includes(userName)) ||
+                               (firstName && msg.includes(firstName)) ||
+                               (donorName && msg.includes(donorName));
                     });
                     if (found) {
-                        const donor = donations.find(x => x.message && x.message.includes(String(uid)));
+                        const donor = donations.find(x => {
+                            const msg = (x.message || '').toLowerCase();
+                            const userIdStr = String(uid);
+                            const userName = (tg.initDataUnsafe.user.username || '').toLowerCase();
+                            const firstName = (tg.initDataUnsafe.user.first_name || '').toLowerCase();
+                            const donorName = (x.donor_name || '').toLowerCase();
+                            return msg.includes(userIdStr) || 
+                                   (userName && msg.includes(userName)) ||
+                                   (firstName && msg.includes(firstName)) ||
+                                   (donorName && msg.includes(donorName));
+                        });
                         if (donor) {
                             document.getElementById('donateStatus').innerHTML = `✅ Найден донат от ${donor.donor_name || 'Аноним'} (${donor.amount} ${donor.currency || 'RUB'}) — зачислено 199 🪙`;
                         }
