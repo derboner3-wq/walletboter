@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Кошелёк PRO</title>
     <style>
+        /* ===== СТИЛИ (полный набор) ===== */
         :root {
             --bg: #ffffff; --text: #1a1a1a; --hint: #8e8e93; --button: #007aff;
             --button-text: #ffffff; --secondary-bg: #f2f2f7; --border: #e5e5ea; --safe-top: 60px;
@@ -545,7 +546,10 @@
     <div class="modal" id="debtModal"> <div class="modal-content"> <div class="modal-title">Добавить долг</div> <div class="form-group"><div class="form-label">Кому/От кого</div><input type="text" class="amount-input" id="debtPerson" placeholder="Имя" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="debtAmount" placeholder="1000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Тип</div><select id="debtType" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="owed">Мне должны</option><option value="paid">Я должен</option></select></div> <button class="submit-btn" id="saveDebtBtn">Добавить</button> <button class="cancel-btn" id="closeDebtModal">Отмена</button> </div> </div>
     <div class="modal" id="regularModal"> <div class="modal-content"> <div class="modal-title">Регулярный платёж</div> <div class="form-group"><div class="form-label">Название</div><input type="text" class="amount-input" id="regularName" placeholder="Аренда" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Сумма</div><input type="number" class="amount-input" id="regularAmount" placeholder="30000" style="font-size:18px;"></div> <div class="form-group"><div class="form-label">Период</div><select id="regularPeriod" style="width:100%; padding:14px; border-radius:14px; background:var(--secondary-bg); color:var(--text); border:2px solid var(--border);"><option value="weekly">Раз в неделю</option><option value="monthly">Раз в месяц</option></select></div> <button class="submit-btn" id="saveRegularBtn">Добавить</button> <button class="cancel-btn" id="closeRegularModal">Отмена</button> </div> </div>
     <div class="modal" id="coinsModal"> <div class="modal-content"> <div class="modal-title">Монеты 🪙</div> <div style="text-align:center; font-size:36px; margin-bottom:16px;" id="coinsBalance">0</div> <p style="color:var(--hint); text-align:center;">Пополняйте монеты через донат или открывайте кейсы!</p> <button class="submit-btn btn-gold" id="startDonateBtn">💸 Пополнить через донат</button> <div id="donateStatus" style="text-align:center; margin-top:8px; color:var(--hint);"></div> <button class="cancel-btn" id="closeCoinsModal">Закрыть</button> </div> </div>
-    <div class="modal" id="caseResultModal"> <div class="modal-content"> <div class="modal-title">🎰 Открытие кейса</div> <div id="caseResultContent"></div> <button class="cancel-btn" id="closeCaseResultModal">Закрыть</button> </div> </div>
+    <div class="modal" id="caseResultModal"> <div class="modal-content"> <div class="modal-title">🎰 Открытие кейса</div> <div id="caseResultContent"></div>
+        <!-- КНОПКА ЗАКРЫТИЯ ВСЕГДА ВИДИМА И РАБОТАЕТ -->
+        <button class="cancel-btn" id="closeCaseResultModal" onclick="document.getElementById('caseResultModal').classList.remove('active')">Закрыть</button>
+    </div>
     <div class="modal" id="currencyModal"> <div class="modal-content"> <div class="modal-title">Выберите валюту</div> <div class="currency-selector" id="currencySelector"></div> <button class="cancel-btn" id="closeCurrencyModal">Закрыть</button> </div> </div>
     <div class="modal" id="myTicketsModal"> <div class="modal-content"> <div class="modal-title">Мои тикеты</div> <div id="myTicketsList"></div> <div class="ticket-create-area"> <textarea id="newTicketText" placeholder="Опишите вашу проблему..."></textarea> <button class="btn btn-primary" id="createTicketBtn" style="width:100%;">➕ Отправить новый тикет</button> </div> <button class="cancel-btn" id="closeMyTicketsModal">Закрыть</button> </div> </div>
     <div class="modal" id="chatModal"> <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;"> <div class="modal-title">Чат поддержки</div> <div class="chat-messages" id="chatMessages"></div> <div class="chat-input-row"> <input type="text" id="chatInput" placeholder="Сообщение..."> <input type="file" accept="image/*" id="chatPhotoInput"> <label for="chatPhotoInput">📷</label> <button class="btn btn-primary" id="sendChatBtn" style="flex:0;">➤</button> </div> <button class="cancel-btn" id="closeChatModal">Закрыть</button> </div> </div>
@@ -1298,7 +1302,7 @@
                 });
             });
 
-            // ---- КЕЙСЫ С ПРОКРУТКОЙ ----
+            // ---- КЕЙСЫ С ПРОКРУТКОЙ (ускоренной) ----
             function renderCases() {
                 const container = document.getElementById('casesList');
                 container.innerHTML = CASE_TYPES.map(c => `
@@ -1350,6 +1354,8 @@
                 const modal = document.getElementById('caseResultModal');
                 const content = document.getElementById('caseResultContent');
 
+                // Кнопка закрытия всегда видна, её не трогаем
+
                 const spinContainer = document.createElement('div');
                 spinContainer.className = 'case-spin-container';
                 spinContainer.id = 'spinContainer';
@@ -1383,9 +1389,6 @@
 
                 content.innerHTML = '';
                 content.appendChild(spinContainer);
-
-                const closeBtn = document.getElementById('closeCaseResultModal');
-                closeBtn.style.display = 'none';
 
                 modal.classList.add('active');
 
@@ -1435,7 +1438,7 @@
                                 </div>
                             `;
                             applyCaseReward(selectedReward);
-                            closeBtn.style.display = 'block';
+                            // Кнопка закрытия уже видна
                         }, 400);
                         return;
                     }
@@ -2233,12 +2236,6 @@
             });
             document.getElementById('closeCurrencyModal').addEventListener('click', ()=>{
                 document.getElementById('currencyModal').classList.remove('active');
-            });
-
-            // ---------- ИСПРАВЛЕННАЯ КНОПКА ЗАКРЫТИЯ КЕЙСА ----------
-            // Уже есть в HTML: onclick закрывает модалку. Дополнительно привяжем на случай, если не сработает.
-            document.getElementById('closeCaseResultModal').addEventListener('click', function() {
-                document.getElementById('caseResultModal').classList.remove('active');
             });
 
             // ---------- ЗАПУСК ----------
